@@ -48,6 +48,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xfSW1wb3J0cy5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/Rafael Lopes/RiderProjects/GestaoEventosParticipantes/GestaoEventosParticipantes/Components/Layout/Login.razor]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTG9naW4ucmF6b3I=
+build_metadata.AdditionalFiles.CssScope = b-1us2ztj2c7
+
 [C:/Users/Rafael Lopes/RiderProjects/GestaoEventosParticipantes/GestaoEventosParticipantes/Components/Layout/MainLayout.razor]
 build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xMYXlvdXRcTWFpbkxheW91dC5yYXpvcg==
 build_metadata.AdditionalFiles.CssScope = b-h7npkbvl6k
