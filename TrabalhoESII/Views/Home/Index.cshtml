@@ -1,8 +1,59 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Bem-vindo ao Sistema de Gestão de Eventos";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<style>
+
+    .hero-section {
+        background: linear-gradient(135deg, #6B73FF 0%, #000DFF 100%);
+        color: #fff;
+        padding: 100px 0;
+        text-align: center;
+    }
+    .hero-section h1 {
+        font-size: 3rem;
+        font-weight: 700;
+        margin-bottom: 20px;
+    }
+    .hero-section p.lead {
+        font-size: 1.5rem;
+        margin-bottom: 30px;
+    }
+    .hero-section hr {
+        border-top: 2px solid #fff;
+        width: 50%;
+        margin: 20px auto;
+    }
+
+    .hero-buttons .btn-custom {
+        background-color: #FF5733;  /
+        border: 1px solid #FF5733;
+        color: #fff;
+        padding: 12px 30px;
+        font-size: 1.1rem;
+        transition: background-color 0.3s ease, transform 0.3s ease;
+        margin: 10px;
+        border-radius: 5px;
+    }
+    .hero-buttons .btn-custom:hover {
+        background-color: #E74C3C;  
+        transform: scale(1.05);
+    }
+    .hero-buttons .btn-custom:focus, .hero-buttons .btn-custom:active {
+        outline: none;
+        box-shadow: 0 0 0 0.2rem rgba(231, 76, 60, 0.5);
+    }
+</style>
+
+<div class="hero-section">
+    <div class="container">
+        <h1 class="display-4">Bem-vindo!</h1>
+        <p class="lead">Gerencie os seus eventos e inscrições de forma simples e prática.</p>
+        <hr />
+        <p>Acesse a sua conta ou registre-se para começar a criar e participar de eventos incríveis.</p>
+        <div class="hero-buttons">
+            <a class="btn btn-custom" href="/login" role="button">Login</a>
+            <a class="btn btn-custom" href="/register" role="button">Registar</a>
+        </div>
+    </div>
 </div>

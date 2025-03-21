@@ -1,0 +1,88 @@
+﻿@{
+    ViewData["Title"] = "Gestão de Eventos";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<!-- CSS para visual agradável -->
+<style>
+    main {
+        background-color: #f8f9fa;
+        padding: 2rem;
+    }
+    .hero-header {
+        background: linear-gradient(135deg, #8505fd, #2a4798);
+        color: #fff;
+        padding: 2.5rem 1rem;
+        border-radius: 0.5rem;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
+    .summary-card {
+        border: none;
+        border-radius: 0.5rem;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    .summary-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+    }
+    .summary-card .card-body {
+        padding: 1.5rem;
+        background: linear-gradient(135deg, #8505fd, #2a4798);
+        color: white;
+    }
+</style>
+
+<main class="container-fluid">
+    <!-- Cabeçalho -->
+    <header class="hero-header">
+        <h1>Gestão de eventos</h1>
+        <p>Acompanhe os indicadores principais do seu sistema de eventos</p>
+    </header>
+
+    <!-- Cartões -->
+    <section class="mb-4">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <div class="card summary-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Eventos</h5>
+                        <p class="card-text display-4">@ViewBag.TotalEvents</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card summary-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Participantes</h5>
+                        <p class="card-text display-4">@ViewBag.TotalParticipants</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-4 mb-3">
+                <div class="card summary-card h-100">
+                    <div class="card-body">
+                        <h5 class="card-title">Categorias</h5>
+                        <p class="card-text display-4">@ViewBag.TotalCategories</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
+        const response = await fetch("/dashboard/stats");
+
+        if (response.ok) {
+            const data = await response.json();
+            document.getElementById("totalEventos").textContent = data.TotalEventos;
+            document.getElementById("totalParticipantes").textContent = data.TotalParticipantes;
+            document.getElementById("totalCategorias").textContent = data.TotalCategorias;
+        } else {
+            alert("Erro ao carregar estatísticas.");
+        }
+    });
+</script>
+
