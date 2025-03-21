@@ -1,0 +1,67 @@
+﻿<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Login</title>
+    <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container">
+    <h2 class="mt-5">Login</h2>
+    <div id="alertBox" class="alert alert-danger d-none"></div>
+
+    <form id="loginForm">
+        <div class="mb-3">
+            <label for="nomeUtilizador" class="form-label">Nome de Utilizador</label>
+            <input type="text" id="nomeUtilizador" class="form-control" required>
+        </div>
+        <div class="mb-3">
+            <label for="senha" class="form-label">Senha</label>
+            <input type="password" id="senha" class="form-control" required>
+        </div>
+        <button type="submit" id="loginBtn" class="btn btn-primary">Login</button>
+    </form>
+</div>
+
+<script>
+        document.getElementById("loginForm").addEventListener("submit", async (event) => {
+            event.preventDefault(); // Evita que o formulário recarregue a página
+
+            const nomeUtilizador = document.getElementById("nomeUtilizador").value.trim();
+            const senha = document.getElementById("senha").value.trim();
+            const alertBox = document.getElementById("alertBox");
+
+            // Validação simples
+            if (!nomeUtilizador || !senha) {
+                alertBox.textContent = "Por favor, preencha todos os campos.";
+                alertBox.classList.remove("d-none");
+                return;
+            }
+
+            try {
+                const response = await fetch("/api/auth/login", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/json" },
+                    body: JSON.stringify({ nomeUtilizador, senha })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    localStorage.setItem("jwtToken", data.token); // Salva o token JWT
+                    window.location.href = "/dashboard"; // Redireciona para a Dashboard
+                } else {
+                    alertBox.textContent = "Credenciais inválidas. Tente novamente.";
+                    alertBox.classList.remove("d-none");
+                }
+            } catch (error) {
+                alertBox.textContent = "Erro ao tentar fazer login. Tente novamente mais tarde.";
+                alertBox.classList.remove("d-none");
+            }
+        });
+    </script>
+
+</body>
+</html>
+
+

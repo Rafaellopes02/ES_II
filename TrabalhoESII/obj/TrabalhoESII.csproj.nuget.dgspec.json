@@ -1,31 +1,25 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Rafael Lopes\\Documents\\IPVC\\ES II\\TP\\ES_II\\TrabalhoESII\\TrabalhoESII.csproj": {}
+    "C:\\Users\\tigas\\Desktop\\ES_II-connectBD\\TrabalhoESII\\TrabalhoESII.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Rafael Lopes\\Documents\\IPVC\\ES II\\TP\\ES_II\\TrabalhoESII\\TrabalhoESII.csproj": {
+    "C:\\Users\\tigas\\Desktop\\ES_II-connectBD\\TrabalhoESII\\TrabalhoESII.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Rafael Lopes\\Documents\\IPVC\\ES II\\TP\\ES_II\\TrabalhoESII\\TrabalhoESII.csproj",
+        "projectUniqueName": "C:\\Users\\tigas\\Desktop\\ES_II-connectBD\\TrabalhoESII\\TrabalhoESII.csproj",
         "projectName": "TrabalhoESII",
-        "projectPath": "C:\\Users\\Rafael Lopes\\Documents\\IPVC\\ES II\\TP\\ES_II\\TrabalhoESII\\TrabalhoESII.csproj",
-        "packagesPath": "C:\\Users\\Rafael Lopes\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Rafael Lopes\\Documents\\IPVC\\ES II\\TP\\ES_II\\TrabalhoESII\\obj\\",
+        "projectPath": "C:\\Users\\tigas\\Desktop\\ES_II-connectBD\\TrabalhoESII\\TrabalhoESII.csproj",
+        "packagesPath": "C:\\Users\\tigas\\.nuget\\packages\\",
+        "outputPath": "C:\\Users\\tigas\\Desktop\\ES_II-connectBD\\TrabalhoESII\\obj\\",
         "projectStyle": "PackageReference",
-        "fallbackFolders": [
-          "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
-        ],
         "configFilePaths": [
-          "C:\\Users\\Rafael Lopes\\AppData\\Roaming\\NuGet\\NuGet.Config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
-          "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
+          "C:\\Users\\tigas\\AppData\\Roaming\\NuGet\\NuGet.Config"
         ],
         "originalTargetFrameworks": [
           "net8.0"
         ],
         "sources": {
-          "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -43,13 +37,20 @@
           "enableAudit": "true",
           "auditLevel": "low",
           "auditMode": "direct"
-        },
-        "SdkAnalysisLevel": "9.0.200"
+        }
       },
       "frameworks": {
         "net8.0": {
           "targetAlias": "net8.0",
           "dependencies": {
+            "BCrypt.Net-Next": {
+              "target": "Package",
+              "version": "[4.0.3, )"
+            },
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[8.0.14, )"
+            },
             "Microsoft.EntityFrameworkCore": {
               "target": "Package",
               "version": "[9.0.3, )"
@@ -60,9 +61,21 @@
               "target": "Package",
               "version": "[9.0.3, )"
             },
+            "Microsoft.IdentityModel.Tokens": {
+              "target": "Package",
+              "version": "[8.6.1, )"
+            },
             "Npgsql.EntityFrameworkCore.PostgreSQL": {
               "target": "Package",
               "version": "[9.0.4, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[8.0.0, )"
+            },
+            "System.IdentityModel.Tokens.Jwt": {
+              "target": "Package",
+              "version": "[8.6.1, )"
             }
           },
           "imports": [
@@ -76,24 +89,6 @@
           ],
           "assetTargetFallback": true,
           "warn": true,
-          "downloadDependencies": [
-            {
-              "name": "Microsoft.AspNetCore.App.Ref",
-              "version": "[8.0.14, 8.0.14]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Host.win-x64",
-              "version": "[8.0.14, 8.0.14]"
-            },
-            {
-              "name": "Microsoft.NETCore.App.Ref",
-              "version": "[8.0.14, 8.0.14]"
-            },
-            {
-              "name": "Microsoft.WindowsDesktop.App.Ref",
-              "version": "[8.0.14, 8.0.14]"
-            }
-          ],
           "frameworkReferences": {
             "Microsoft.AspNetCore.App": {
               "privateAssets": "none"
@@ -102,7 +97,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\8.0.407/PortableRuntimeIdentifierGraph.json"
         }
       }
     }
