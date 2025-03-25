@@ -32,12 +32,6 @@ namespace TrabalhoESII.Controllers
                 return BadRequest("Nome de utilizador já existe.");
             }
 
-            // Verificar se o TipoUtilizadorId existe na tabela tiposutilizadores
-            if (!_context.tiposutilizadores.Any(t => t.idtipoutilizador == model.IdTipoUtilizador))
-            {
-                return BadRequest("Tipo de utilizador inválido.");
-            }
-
             var user = new utilizadores
             {
                 nome = model.Nome,
