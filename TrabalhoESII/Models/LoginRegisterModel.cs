@@ -9,6 +9,6 @@
         public string Nacionalidade { get; set; }
         public string NomeUtilizador { get; set; }
         public string Senha { get; set; }
-        public int IdTipoUtilizador { get; set; } // 1 = Participante, 2 = Organizador
+        public int IdTipoUtilizador { get; set; } // 1 = Admin, 2 = UserManager, 3 = User
     }
 }
