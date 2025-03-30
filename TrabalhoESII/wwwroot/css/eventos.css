@@ -1,0 +1,83 @@
+﻿main {
+    background-color: #f8f9fa;
+    padding: 1rem;
+}
+
+.hero-header {
+    background: linear-gradient(135deg, #8505fd, #2a4798);
+    color: #fff;
+    padding: 2.5rem 1rem;
+    border-radius: 0.5rem;
+    text-align: center;
+    margin-bottom: 2rem;
+}
+
+.summary-card {
+    border: none;
+    border-radius: 0.5rem;
+    transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.summary-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+}
+
+.summary-card .card-body {
+    padding: 1.5rem;
+    background: linear-gradient(135deg, #8505fd, #2a4798);
+    color: white;
+    text-align: center;
+}
+
+.summary-card .card-title {
+    font-size: 1.25rem;
+    margin-bottom: 0.5rem;
+}
+
+.summary-card .display-4 {
+    font-size: 2.5rem;
+}
+
+/* Estilos para a listagem de eventos */
+.event-tabs {
+    margin-bottom: 1.5rem;
+}
+
+.event-tabs .nav-link {
+    color: #495057;
+}
+
+.event-tabs .nav-link.active {
+    color: #495057;
+    font-weight: 600;
+    background-color: #e9ecef;
+    border-color: #dee2e6 #dee2e6 #fff;
+}
+
+.event-card {
+    border: 1px solid #ddd;
+    border-radius: 0.5rem;
+    margin-bottom: 1rem;
+}
+
+.event-card .card-img {
+    border-radius: 0.5rem 0 0 0.5rem;
+    height: 100%;
+    object-fit: cover;
+}
+
+.badge-status {
+    font-size: 0.9rem;
+}
+
+.progress {
+    height: 20px;
+    border-radius: 10px;
+    overflow: hidden;
+}
+
+.progress-bar {
+    font-size: 0.9rem;
+    line-height: 20px;
+}

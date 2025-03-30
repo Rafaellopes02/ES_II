@@ -3724,24 +3724,31 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\tigas\\.nuget\\packages\\": {}
+    "C:\\Users\\Rafael Lopes\\.nuget\\packages\\": {},
+    "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\Users\\tigas\\OneDrive\\Documents\\GitHub\\ES_II\\TrabalhoESII\\TrabalhoESII.csproj",
+      "projectUniqueName": "C:\\Users\\Rafael Lopes\\Documents\\IPVC\\ES II\\TP\\ES_II\\TrabalhoESII\\TrabalhoESII.csproj",
       "projectName": "TrabalhoESII",
-      "projectPath": "C:\\Users\\tigas\\OneDrive\\Documents\\GitHub\\ES_II\\TrabalhoESII\\TrabalhoESII.csproj",
-      "packagesPath": "C:\\Users\\tigas\\.nuget\\packages\\",
-      "outputPath": "C:\\Users\\tigas\\OneDrive\\Documents\\GitHub\\ES_II\\TrabalhoESII\\obj\\",
+      "projectPath": "C:\\Users\\Rafael Lopes\\Documents\\IPVC\\ES II\\TP\\ES_II\\TrabalhoESII\\TrabalhoESII.csproj",
+      "packagesPath": "C:\\Users\\Rafael Lopes\\.nuget\\packages\\",
+      "outputPath": "C:\\Users\\Rafael Lopes\\Documents\\IPVC\\ES II\\TP\\ES_II\\TrabalhoESII\\obj\\",
       "projectStyle": "PackageReference",
+      "fallbackFolders": [
+        "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
+      ],
       "configFilePaths": [
-        "C:\\Users\\tigas\\AppData\\Roaming\\NuGet\\NuGet.Config"
+        "C:\\Users\\Rafael Lopes\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
+        "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
       "originalTargetFrameworks": [
         "net8.0"
       ],
       "sources": {
+        "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
         "https://api.nuget.org/v3/index.json": {}
       },
       "frameworks": {
@@ -3815,19 +3822,19 @@
         "downloadDependencies": [
           {
             "name": "Microsoft.AspNetCore.App.Ref",
-            "version": "[8.0.13, 8.0.13]"
+            "version": "[8.0.14, 8.0.14]"
           },
           {
             "name": "Microsoft.NETCore.App.Host.win-x64",
-            "version": "[8.0.13, 8.0.13]"
+            "version": "[8.0.14, 8.0.14]"
           },
           {
             "name": "Microsoft.NETCore.App.Ref",
-            "version": "[8.0.13, 8.0.13]"
+            "version": "[8.0.14, 8.0.14]"
           },
           {
             "name": "Microsoft.WindowsDesktop.App.Ref",
-            "version": "[8.0.13, 8.0.13]"
+            "version": "[8.0.14, 8.0.14]"
           }
         ],
         "frameworkReferences": {
@@ -3838,7 +3845,7 @@
             "privateAssets": "all"
           }
         },
-        "runtimeIdentifierGraphPath": "C:\\Users\\tigas\\.dotnet\\sdk\\9.0.200/PortableRuntimeIdentifierGraph.json"
+        "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\9.0.201/PortableRuntimeIdentifierGraph.json"
       }
     }
   }
