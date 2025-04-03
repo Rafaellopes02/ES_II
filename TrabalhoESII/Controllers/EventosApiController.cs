@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using TrabalhoESII.Models;
+using Microsoft.AspNetCore.Authorization;
 
 namespace TrabalhoESII.Controllers
 {
@@ -36,5 +38,40 @@ namespace TrabalhoESII.Controllers
 
             return Ok();
         }
+        [HttpGet("search")]
+        [Authorize]
+        public IActionResult SearchEventos([FromQuery] string? nome, [FromQuery] DateTime? data, [FromQuery] string? local, [FromQuery] int? idCategoria)
+        {
+            var query = _context.eventos.AsQueryable();
+
+            if (!string.IsNullOrEmpty(nome))
+                query = query.Where(e => EF.Functions.ILike(e.nome, $"%{nome}%"));
+
+            if (data.HasValue)
+                query = query.Where(e => e.data.Date == data.Value.Date);
+
+            if (!string.IsNullOrEmpty(local))
+                query = query.Where(e => EF.Functions.ILike(e.local, $"%{local}%"));
+
+            if (idCategoria.HasValue)
+                query = query.Where(e => e.idcategoria == idCategoria.Value);
+
+            var eventos = query
+                .Select(e => new
+                {
+                    e.idevento,
+                    e.nome,
+                    e.descricao,
+                    e.data,
+                    e.hora,
+                    e.local,
+                    e.capacidade
+                })
+                .ToList();
+
+            return Ok(eventos);
+        }
+
+
     }
 }
