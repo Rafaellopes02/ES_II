@@ -1,0 +1,38 @@
+# Build artifacts
+bin/
+obj/
+*.dll
+*.exe
+*.pdb
+*.cache
+
+# Rider / VS Code / Visual Studio configs
+.vscode/
+.idea/
+*.user
+*.suo
+
+# NuGet
+*.nupkg
+*.nuget.info
+*.restore.info
+
+# Outros ficheiros gerados
+*.log
+*.tmp
+*.bak
+*.old
+*.orig
+
+# Diretórios de publicação
+publish/
+out/
+
+# Test results
+TestResults/
+*.coverage
+*.coveragexml
+
+# Ficheiros temporários do sistema
+.DS_Store
+Thumbs.db
