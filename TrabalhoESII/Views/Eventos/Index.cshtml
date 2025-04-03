@@ -1,0 +1,58 @@
+﻿@{
+    ViewData["Title"] = "Gestão de Eventos";
+}
+
+<link rel="stylesheet" href="~/css/eventos.css" />
+
+<main class="container-fluid">
+    <section>
+        <div class="d-flex justify-content-between align-items-center event-tabs">
+            <ul class="nav nav-tabs">
+                <li class="nav-item">
+                    <a class="nav-link active" href="#" onclick="filterEvents('all')">Todos</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="filterEvents('upcoming')">Futuros</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" href="#" onclick="filterEvents('past')">Passados</a>
+                </li>
+            </ul>
+            <button class="btn btn-primary" data-toggle="modal" data-target="#newEventModal">+ Novo Evento</button>
+        </div>
+
+        @Html.Partial("_ModalNovoEvento")
+
+        <div id="eventList">
+            <div class="row no-gutters align-items-center">
+                <div class="col-md-6">
+                    <div class="card-body">
+                        <h5 class="card-title">${evento.nome}</h5>
+                        <p class="card-text">${evento.descricao}</p>
+                        <p class="card-text">
+                            <small class="text-muted">${formattedDate} · ${evento.hora} · ${evento.local}</small>
+                        </p>
+                        <div class="progress">
+                            <div class="progress-bar bg-info" role="progressbar" style="width: 75%;"
+                                 aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
+                                75% da capacidade
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3 text-center p-3">
+                    <span class="badge badge-success badge-status d-block mb-2">Live</span>
+                    <button class="btn btn-outline-primary" onclick="window.location.href='/events/details/${evento.idevento}'">
+                        Detalhes
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+</main>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="~/js/Eventos/eventos.js"></script>
+<script src="~/js/Eventos/eventosModal.js"></script>
+<script src="~/js/Eventos/filtrosEventos.js"></script>

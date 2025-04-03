@@ -1,0 +1,83 @@
+﻿<div class="modal fade" id="newEventModal" tabindex="-1" role="dialog" aria-labelledby="newEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+
+            <div class="modal-header">
+                <h5 class="modal-title" id="newEventModalLabel">Novo Evento</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <form id="eventForm">
+                    <div id="eventAlert" class="alert alert-danger d-none"></div>
+
+                    <div class="form-group">
+                        <label for="eventName">Nome do Evento</label>
+                        <input type="text" class="form-control" id="eventName" required placeholder="Digite o nome do evento" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventDescription">Descrição</label>
+                        <textarea class="form-control" id="eventDescription" rows="3" required placeholder="Descrição do evento"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventDate">Data</label>
+                        <input type="date" class="form-control" id="eventDate" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventTime">Hora</label>
+                        <input type="time" class="form-control" id="eventTime" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventLocation">Local</label>
+                        <input type="text" class="form-control" id="eventLocation" required placeholder="Local do evento" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventCapacity">Capacidade</label>
+                        <input type="number" class="form-control" id="eventCapacity" required placeholder="Capacidade máxima" />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="eventCategory">Categoria</label>
+                        <select class="form-control" id="eventCategory" required>
+                            <option value="">Selecione uma categoria</option>
+                            <option value="1">Tecnologia</option>
+                            <option value="2">Saúde</option>
+                            <option value="3">Educação</option>
+                        </select>
+                    </div>
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary">Registar Evento</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="container mt-4">
+    <form id="filtroEventos" class="row g-3">
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="filtroNome" placeholder="Nome do Evento">
+        </div>
+        <div class="col-md-3">
+            <input type="date" class="form-control" id="filtroData">
+        </div>
+        <div class="col-md-3">
+            <input type="text" class="form-control" id="filtroLocal" placeholder="Local">
+        </div>
+        <div class="col-md-2">
+            <input type="number" class="form-control" id="filtroCategoria" placeholder="ID Categoria">
+        </div>
+        <div class="col-md-1">
+            <button type="submit" class="btn btn-primary w-100">Filtrar</button>
+        </div>
+    </form>
+</div>
+
+
