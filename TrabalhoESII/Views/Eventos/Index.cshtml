@@ -6,53 +6,95 @@
 
 <main class="container-fluid">
     <section>
-        <div class="d-flex justify-content-between align-items-center event-tabs">
+        <div class="d-flex justify-content-between align-items-center event-tabs mb-3">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
                     <a class="nav-link active" href="#" onclick="filterEvents('all')">Todos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="filterEvents('upcoming')">Futuros</a>
+                    <a class="nav-link" href="#" onclick="filterEvents('futuros')">Futuros</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="filterEvents('past')">Passados</a>
+                    <a class="nav-link" href="#" onclick="filterEvents('passados')">Passados</a>
                 </li>
             </ul>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#newEventModal">+ Novo Evento</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newEventModal">+ Novo Evento</button>
         </div>
 
-        @Html.Partial("_ModalNovoEvento")
-
-        <div id="eventList">
-            <div class="row no-gutters align-items-center">
-                <div class="col-md-6">
-                    <div class="card-body">
-                        <h5 class="card-title">${evento.nome}</h5>
-                        <p class="card-text">${evento.descricao}</p>
-                        <p class="card-text">
-                            <small class="text-muted">${formattedDate} · ${evento.hora} · ${evento.local}</small>
-                        </p>
-                        <div class="progress">
-                            <div class="progress-bar bg-info" role="progressbar" style="width: 75%;"
-                                 aria-valuenow="75" aria-valuemin="0" aria-valuemax="100">
-                                75% da capacidade
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-3 text-center p-3">
-                    <span class="badge badge-success badge-status d-block mb-2">Live</span>
-                    <button class="btn btn-outline-primary" onclick="window.location.href='/events/details/${evento.idevento}'">
-                        Detalhes
-                    </button>
-                </div>
+        <!-- Barra de Filtros -->
+        <form id="filtroEventos" class="row g-3 mb-4">
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="searchNome" placeholder="Nome do Evento">
             </div>
+            <div class="col-md-3">
+                <input type="date" class="form-control" id="searchData">
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="searchLocal" placeholder="Local">
+            </div>
+            <div class="col-md-2">
+                <select class="form-control" id="searchCategoria">
+                    <option value="">Todas as Categorias</option>
+                </select>
+            </div>
+            <div class="col-md-1">
+                <button type="button" class="btn btn-primary w-100" id="searchBtn">Filtrar</button>
+            </div>
+        </form>
+
+        <!-- Lista de Eventos -->
+        <div id="eventList" class="mt-4">
+            <!-- Eventos inseridos via JS -->
         </div>
     </section>
 </main>
 
+<!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<!-- JS personalizados -->
 <script src="~/js/Eventos/eventos.js"></script>
 <script src="~/js/Eventos/eventosModal.js"></script>
 <script src="~/js/Eventos/filtrosEventos.js"></script>
+
+<!-- Torna a função filterEvents global caso não esteja -->
+<script>
+    // Só garante se por acaso não foi já definido nos outros scripts
+    if (typeof filterEvents !== "function") {
+        async function filterEvents(tipo) {
+            const token = localStorage.getItem("jwtToken");
+
+            if (!token) {
+                window.location.href = "/login";
+                return;
+            }
+
+            let url = "/eventos/stats";
+
+            if (tipo === "futuros") {
+                url = "/api/eventos/futuros";
+            } else if (tipo === "passados") {
+                url = "/api/eventos/passados";
+            }
+
+            try {
+                const response = await fetch(url, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    renderizarEventos(data.eventos || data);
+                } else {
+                    alert("Erro ao filtrar eventos.");
+                }
+            } catch (error) {
+                console.error("Erro ao filtrar eventos:", error);
+                alert("Erro de comunicação com o servidor.");
+            }
+        }
+
+        window.filterEvents = filterEvents;
+    }
+</script>

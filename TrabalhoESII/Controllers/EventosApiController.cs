@@ -48,7 +48,10 @@ namespace TrabalhoESII.Controllers
                 query = query.Where(e => EF.Functions.ILike(e.nome, $"%{nome}%"));
 
             if (data.HasValue)
-                query = query.Where(e => e.data.Date == data.Value.Date);
+            {
+                var dataUtc = DateTime.SpecifyKind(data.Value.Date, DateTimeKind.Utc);
+                query = query.Where(e => e.data.Date == dataUtc.Date);
+            }
 
             if (!string.IsNullOrEmpty(local))
                 query = query.Where(e => EF.Functions.ILike(e.local, $"%{local}%"));
@@ -71,7 +74,58 @@ namespace TrabalhoESII.Controllers
 
             return Ok(eventos);
         }
+        
+        [HttpGet("categorias")]
+        public IActionResult GetCategorias()
+        {
+            var categorias = _context.categorias
+                .Select(c => new { c.idcategoria, c.nome })
+                .ToList();
 
+            return Ok(categorias);
+        }
+        
+        [HttpGet("futuros")]
+        [Authorize]
+        public IActionResult GetEventosFuturos()
+        {
+            var hoje = DateTime.UtcNow.Date;
+            var eventos = _context.eventos
+                .Where(e => e.data >= hoje)
+                .Select(e => new {
+                    e.idevento,
+                    e.nome,
+                    e.descricao,
+                    e.data,
+                    e.hora,
+                    e.local,
+                    e.capacidade
+                })
+                .ToList();
 
+            return Ok(eventos);
+        }
+
+        [HttpGet("passados")]
+        [Authorize]
+        public IActionResult GetEventosPassados()
+        {
+            var hoje = DateTime.UtcNow.Date;
+            var eventos = _context.eventos
+                .Where(e => e.data < hoje)
+                .Select(e => new {
+                    e.idevento,
+                    e.nome,
+                    e.descricao,
+                    e.data,
+                    e.hora,
+                    e.local,
+                    e.capacidade
+                })
+                .ToList();
+
+            return Ok(eventos);
+        }
+        
     }
 }
