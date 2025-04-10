@@ -51,32 +51,14 @@ async function carregarEventos(token) {
 
         if (response.ok) {
             const data = await response.json();
-            renderizarEventos(data.eventos);
+
         } else {
             throw new Error("Erro ao buscar eventos.");
         }
     } catch (error) {
         console.error("Erro ao carregar eventos:", error);
     }
-}
 
-// Carrega categorias no dropdown de filtro
-async function carregarCategorias() {
-    try {
-        const response = await fetch("/api/categorias");
-        if (!response.ok) throw new Error("Erro ao buscar categorias.");
-
-        const categorias = await response.json();
-        const select = document.getElementById("searchCategoria");
-
-        categorias.forEach(c => {
-            const option = document.createElement("option");
-            option.value = c.idcategoria;
-            option.textContent = c.nome;
-            select.appendChild(option);
-        });
-    } catch (error) {
-        console.error("Erro ao carregar categorias:", error);
     }
 }
 

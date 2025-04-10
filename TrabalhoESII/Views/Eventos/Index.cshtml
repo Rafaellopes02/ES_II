@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Gestão de Eventos";
 }
 
@@ -21,10 +21,7 @@
             <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newEventModal">+ Novo Evento</button>
         </div>
 
-        <!-- Barra de Filtros -->
-        <form id="filtroEventos" class="row g-3 mb-4">
-            <div class="col-md-3">
-                <input type="text" class="form-control" id="searchNome" placeholder="Nome do Evento">
+
             </div>
             <div class="col-md-3">
                 <input type="date" class="form-control" id="searchData">
@@ -46,55 +43,14 @@
         <div id="eventList" class="mt-4">
             <!-- Eventos inseridos via JS -->
         </div>
+
+        <!-- Lista de Eventos -->
+        <div id="eventList" class="row">
+            <!-- Os eventos serão renderizados via JS -->
+        </div>
     </section>
 </main>
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
 
-<!-- JS personalizados -->
-<script src="~/js/Eventos/eventos.js"></script>
-<script src="~/js/Eventos/eventosModal.js"></script>
-<script src="~/js/Eventos/filtrosEventos.js"></script>
-
-<!-- Torna a função filterEvents global caso não esteja -->
-<script>
-    // Só garante se por acaso não foi já definido nos outros scripts
-    if (typeof filterEvents !== "function") {
-        async function filterEvents(tipo) {
-            const token = localStorage.getItem("jwtToken");
-
-            if (!token) {
-                window.location.href = "/login";
-                return;
-            }
-
-            let url = "/eventos/stats";
-
-            if (tipo === "futuros") {
-                url = "/api/eventos/futuros";
-            } else if (tipo === "passados") {
-                url = "/api/eventos/passados";
-            }
-
-            try {
-                const response = await fetch(url, {
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const data = await response.json();
-                    renderizarEventos(data.eventos || data);
-                } else {
-                    alert("Erro ao filtrar eventos.");
-                }
-            } catch (error) {
-                console.error("Erro ao filtrar eventos:", error);
-                alert("Erro de comunicação com o servidor.");
-            }
-        }
-
-        window.filterEvents = filterEvents;
-    }
-</script>
