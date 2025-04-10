@@ -29,7 +29,20 @@ namespace TrabalhoESII.Models
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             modelBuilder.Entity<organizadoreseventos>()
+                .ToTable("organizadoreseventos")
                 .HasKey(oe => new { oe.idutilizador, oe.idevento });
+
+            modelBuilder.Entity<organizadoreseventos>()
+                .HasOne(oe => oe.utilizadores)
+                .WithMany()
+                .HasForeignKey(oe => oe.idutilizador)
+                .OnDelete(DeleteBehavior.Cascade);
+
+            modelBuilder.Entity<organizadoreseventos>()
+                .HasOne(oe => oe.eventos)
+                .WithMany()
+                .HasForeignKey(oe => oe.idevento)
+                .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<utilizadoresatividades>()
                 .HasKey(ua => new { ua.idutilizador, ua.idatividade });
