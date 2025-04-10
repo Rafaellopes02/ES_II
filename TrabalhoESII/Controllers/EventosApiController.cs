@@ -66,10 +66,7 @@ namespace TrabalhoESII.Controllers
                 query = query.Where(e => EF.Functions.ILike(e.nome, $"%{nome}%"));
 
             if (data.HasValue)
-            {
-                var dataUtc = DateTime.SpecifyKind(data.Value.Date, DateTimeKind.Utc);
-                query = query.Where(e => e.data.Date == dataUtc.Date);
-            }
+                query = query.Where(e => e.data.Date == data.Value.Date);
 
             if (!string.IsNullOrEmpty(local))
                 query = query.Where(e => EF.Functions.ILike(e.local, $"%{local}%"));
@@ -92,4 +89,49 @@ namespace TrabalhoESII.Controllers
 
             return Ok(eventos);
         }
+        [HttpPut("{id}")] 
+        //[Authorize]
+        public async Task<IActionResult> EditEvento(int id, [FromBody] EventosRegisterModel evento)
+        {
+            if (!ModelState.IsValid)
+                return BadRequest("Dados inválidos.");
 
+            var eventoExistente = await _context.eventos.FindAsync(id);
+
+            if (eventoExistente == null)
+                return NotFound("Evento não encontrado.");
+
+            // Atualizar campos
+            eventoExistente.nome = evento.nome;
+            eventoExistente.descricao = evento.descricao;
+            eventoExistente.data = DateTime.SpecifyKind(evento.data, DateTimeKind.Utc);
+            eventoExistente.hora = evento.hora;
+            eventoExistente.local = evento.local;
+            eventoExistente.capacidade = evento.capacidade;
+            eventoExistente.idcategoria = evento.idCategoria;
+
+            _context.eventos.Update(eventoExistente);
+            await _context.SaveChangesAsync();
+
+            return Ok("Evento atualizado com sucesso.");
+        }
+        
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteEvento(int id)
+        {
+            var evento = await _context.eventos.FindAsync(id);
+
+            if (evento == null)
+                return NotFound("Evento não encontrado.");
+
+            // Remover possíveis relações em tabelas dependentes (como organizadores)
+            var relacoes = _context.organizadoreseventos.Where(oe => oe.idevento == id);
+            _context.organizadoreseventos.RemoveRange(relacoes);
+
+            _context.eventos.Remove(evento);
+            await _context.SaveChangesAsync();
+
+            return Ok("Evento eliminado com sucesso.");
+        }
+    }
+}
