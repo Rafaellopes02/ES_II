@@ -1,4 +1,4 @@
-﻿@{
+@{
     ViewData["Title"] = "Gestão de Eventos";
 }
 
@@ -6,41 +6,42 @@
 
 <main class="container-fluid">
     <section>
-        <div class="d-flex justify-content-between align-items-center event-tabs">
+        <div class="d-flex justify-content-between align-items-center event-tabs mb-3">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
                     <a class="nav-link active" href="#" onclick="filterEvents('all')">Todos</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="filterEvents('upcoming')">Futuros</a>
+                    <a class="nav-link" href="#" onclick="filterEvents('futuros')">Futuros</a>
                 </li>
                 <li class="nav-item">
-                    <a class="nav-link" href="#" onclick="filterEvents('past')">Passados</a>
+                    <a class="nav-link" href="#" onclick="filterEvents('passados')">Passados</a>
                 </li>
             </ul>
-            <button class="btn btn-primary" data-toggle="modal" data-target="#newEventModal">+ Novo Evento</button>
+            <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#newEventModal">+ Novo Evento</button>
         </div>
 
-        <!-- Modal Novo Evento -->
-        @Html.Partial("_ModalNovoEvento")
 
-        <!-- Filtros -->
-        <div class="row my-3">
-            <div class="col-md-2">
-                <input type="text" id="searchNome" class="form-control" placeholder="Nome do Evento" />
+            </div>
+            <div class="col-md-3">
+                <input type="date" class="form-control" id="searchData">
+            </div>
+            <div class="col-md-3">
+                <input type="text" class="form-control" id="searchLocal" placeholder="Local">
             </div>
             <div class="col-md-2">
-                <input type="date" id="searchData" class="form-control" />
+                <select class="form-control" id="searchCategoria">
+                    <option value="">Todas as Categorias</option>
+                </select>
             </div>
-            <div class="col-md-2">
-                <input type="text" id="searchLocal" class="form-control" placeholder="Local" />
+            <div class="col-md-1">
+                <button type="button" class="btn btn-primary w-100" id="searchBtn">Filtrar</button>
             </div>
-            <div class="col-md-2">
-                <input type="text" id="searchCategoria" class="form-control" placeholder="ID Categoria" />
-            </div>
-            <div class="col-md-2">
-                <button id="searchBtn" class="btn btn-outline-secondary w-100">Pesquisar</button>
-            </div>
+        </form>
+
+        <!-- Lista de Eventos -->
+        <div id="eventList" class="mt-4">
+            <!-- Eventos inseridos via JS -->
         </div>
 
         <!-- Lista de Eventos -->
@@ -52,10 +53,4 @@
 
 <!-- Scripts -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 
-@section Scripts {
-    <script src="~/js/Eventos/eventos.js"></script>
-    <script src="~/js/Eventos/eventosModal.js"></script>
-    <script src="~/js/Eventos/filtrosEventos.js"></script>
-}

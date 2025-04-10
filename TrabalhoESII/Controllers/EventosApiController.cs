@@ -66,7 +66,10 @@ namespace TrabalhoESII.Controllers
                 query = query.Where(e => EF.Functions.ILike(e.nome, $"%{nome}%"));
 
             if (data.HasValue)
-                query = query.Where(e => e.data.Date == data.Value.Date);
+            {
+                var dataUtc = DateTime.SpecifyKind(data.Value.Date, DateTimeKind.Utc);
+                query = query.Where(e => e.data.Date == dataUtc.Date);
+            }
 
             if (!string.IsNullOrEmpty(local))
                 query = query.Where(e => EF.Functions.ILike(e.local, $"%{local}%"));
@@ -89,5 +92,4 @@ namespace TrabalhoESII.Controllers
 
             return Ok(eventos);
         }
-    }
-}
+
