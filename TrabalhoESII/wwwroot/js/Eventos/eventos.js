@@ -1,7 +1,6 @@
 ﻿document.addEventListener("DOMContentLoaded", async () => {
     const token = localStorage.getItem("jwtToken");
 
-    // Se não houver token, redireciona para o login
     if (!token) {
         window.location.href = "/login";
         return;
@@ -17,12 +16,11 @@
         if (response.ok) {
             const data = await response.json();
             const eventList = document.getElementById("eventList");
-            eventList.innerHTML = ''; // Limpa conteúdo anterior
+            eventList.innerHTML = '';
 
             data.eventos.forEach(evento => {
                 const formattedDate = new Date(evento.data).toLocaleDateString('pt-PT');
 
-                // Criação do card do evento
                 const card = document.createElement("div");
                 card.className = "card mb-3 p-3 event-card";
 
@@ -57,35 +55,38 @@
         console.error("Erro ao carregar eventos:", error);
         alert("Erro de comunicação com o servidor.");
     }
-});
-document.getElementById("searchBtn").addEventListener("click", async () => {
-    const nome = document.getElementById("searchNome").value;
-    const data = document.getElementById("searchData").value;
-    const local = document.getElementById("searchLocal").value;
-    const idCategoria = document.getElementById("searchCategoria").value;
 
-    const params = new URLSearchParams();
-    if (nome) params.append("nome", nome);
-    if (data) params.append("data", data);
-    if (local) params.append("local", local);
-    if (idCategoria) params.append("idCategoria", idCategoria);
+    // Lógica para o botão de pesquisa
+    const botaoPesquisa = document.getElementById("searchBtn");
+    if (botaoPesquisa) {
+        botaoPesquisa.addEventListener("click", async () => {
+            const nome = document.getElementById("searchNome").value;
+            const data = document.getElementById("searchData").value;
+            const local = document.getElementById("searchLocal").value;
+            const idCategoria = document.getElementById("searchCategoria").value;
 
-    const token = localStorage.getItem("jwtToken");
+            const params = new URLSearchParams();
+            if (nome) params.append("nome", nome);
+            if (data) params.append("data", data);
+            if (local) params.append("local", local);
+            if (idCategoria) params.append("idCategoria", idCategoria);
 
-    try {
-        const response = await fetch(`/api/eventos/search?${params.toString()}`, {
-            headers: { "Authorization": `Bearer ${token}` }
+            try {
+                const response = await fetch(`/api/eventos/search?${params.toString()}`, {
+                    headers: { "Authorization": `Bearer ${token}` }
+                });
+
+                if (response.ok) {
+                    const eventos = await response.json();
+                    renderizarEventos(eventos);
+                } else {
+                    alert("Erro ao pesquisar eventos.");
+                }
+            } catch (err) {
+                console.error("Erro:", err);
+                alert("Erro de ligação ao servidor.");
+            }
         });
-
-        if (response.ok) {
-            const eventos = await response.json();
-            renderizarEventos(eventos);
-        } else {
-            alert("Erro ao pesquisar eventos.");
-        }
-    } catch (err) {
-        console.error("Erro:", err);
-        alert("Erro de ligação ao servidor.");
     }
 });
 
@@ -114,4 +115,3 @@ function renderizarEventos(eventos) {
         eventList.appendChild(card);
     });
 }
-
