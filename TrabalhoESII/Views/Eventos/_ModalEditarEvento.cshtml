@@ -1,0 +1,65 @@
+﻿<div class="modal fade" id="EditEventModal" tabindex="-1" role="dialog" aria-labelledby="EditEventModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <form id="editEventForm">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="EditEventModalLabel">Editar Evento</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+
+                <input type="hidden" id="editEventId" />
+                <div class="modal-body">
+                    <div id="editEventAlert" class="alert alert-danger d-none"></div>
+
+                    <div class="form-group">
+                        <label for="editEventName">Nome do Evento</label>
+                        <input type="text" class="form-control" id="editEventName" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEventDescription">Descrição</label>
+                        <textarea class="form-control" id="editEventDescription" rows="3" required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEventDate">Data</label>
+                        <input type="date" class="form-control" id="editEventDate" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEventTime">Hora</label>
+                        <input type="time" class="form-control" id="editEventTime" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEventLocation">Local</label>
+                        <input type="text" class="form-control" id="editEventLocation" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEventCapacity">Capacidade</label>
+                        <input type="number" class="form-control" id="editEventCapacity" min="1" required />
+                    </div>
+
+                    <div class="form-group">
+                        <label for="editEventCategory">Categoria</label>
+                        <select class="form-control" id="editEventCategory" required>
+                            <option value="">Selecionar...</option>
+                            <option value="1">Tecnologia</option>
+                            <option value="2">Saúde</option>
+                            <option value="3">Educação</option>
+                            <option value="4">Entretenimento</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-dismiss="modal">Fechar</button>
+                    <button type="submit" class="btn btn-primary" id="editEventSubmitButton">Guardar</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
