@@ -39,26 +39,41 @@
     font-size: 2.5rem;
 }
 
-/* Estilos para a listagem de eventos */
-.event-tabs {
-    margin-bottom: 1.5rem;
-}
-
+/* Abas de eventos */
 .event-tabs .nav-link {
-    color: #495057;
+    background-color: #fafafa;
+    color: #333;
+    border: 1px solid #ccc;
+    margin-right: 4px;
+    transition: all 0.2s ease;
+    transform: scale(1); /* estado normal */
 }
 
+.event-tabs .nav-link:hover {
+    background-color: #e0e0e0;
+    color: #000;
+}
+
+/* ESTILO QUANDO ATIVO */
 .event-tabs .nav-link.active {
-    color: #495057;
-    font-weight: 600;
-    background-color: #e9ecef;
-    border-color: #dee2e6 #dee2e6 #fff;
+    background-color: #e0e0e0;
+    color: #313131;
+    border-color: #bbb;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.2);
+    transform: scale(1.05); /* aumenta de tamanho */
+    z-index: 1;
 }
 
+
+
+
+
+/* Cartão de evento */
 .event-card {
     border: 1px solid #ddd;
     border-radius: 0.5rem;
     margin-bottom: 1rem;
+    background-color: #fefefe;
 }
 
 .event-card .card-img {

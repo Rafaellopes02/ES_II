@@ -27,27 +27,39 @@ namespace TrabalhoESII.Controllers
         [HttpPost("Register")]
         public IActionResult Register([FromBody] LoginRegisterModel model)
         {
-            if (_context.utilizadores.Any(u => u.nomeutilizador == model.NomeUtilizador))
+            if (_context.utilizadores
+                .Any(u => u.email.ToLower() == model.Email.ToLower()))
             {
-                return BadRequest("Nome de utilizador já existe.");
+                return BadRequest("Email já está em uso.");
             }
 
-            var user = new utilizadores
             {
-                nome = model.Nome,
-                nomeutilizador = model.NomeUtilizador,
-                senha = BCrypt.Net.BCrypt.HashPassword(model.Senha), // Encriptar senha
-                email = model.Email,
-                nacionalidade = model.Nacionalidade,
-                idade = model.Idade,
-                telefone = model.Telefone,
-                idtipoutilizador = model.IdTipoUtilizador
-            };
+                if (_context.utilizadores
+                    .Any(u => u.nomeutilizador.ToLower() == model.NomeUtilizador.ToLower()))
+                {
+                    return BadRequest("Nome de utilizador já está em uso.");
+                }
 
-            _context.utilizadores.Add(user);
-            _context.SaveChanges();
 
-            return Ok("Utilizador registado com sucesso!");
+
+
+                var user = new utilizadores
+                {
+                    nome = model.Nome,
+                    nomeutilizador = model.NomeUtilizador,
+                    senha = BCrypt.Net.BCrypt.HashPassword(model.Senha), // Encriptar senha
+                    email = model.Email,
+                    nacionalidade = model.Nacionalidade,
+                    idade = model.Idade,
+                    telefone = model.Telefone,
+                    idtipoutilizador = model.IdTipoUtilizador
+                };
+
+                _context.utilizadores.Add(user);
+                _context.SaveChanges();
+
+                return Ok("Utilizador registado com sucesso!");
+            }
         }
 
         /// <summary>

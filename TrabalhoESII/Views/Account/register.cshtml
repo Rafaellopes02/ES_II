@@ -8,58 +8,63 @@
     <div class="row justify-content-center">
         <div class="col-md-8">
             <h2 class="text-center mb-4">Criar Conta</h2>
+            
+            <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+            
+            <div class="position-relative">
+                <div id="alert" class="alert alert-danger d-none position-absolute w-100"  style="position: absolute; top: -60px; z-index: 10; border-radius: 10px;">></div>
 
-            <div id="alert" class="alert alert-danger d-none"></div>
+                <form id="registerForm">
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label for="nome" class="form-label">Nome</label>
+                            <input type="text" class="form-control" id="nome">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="nomeUtilizador" class="form-label">Nome de Utilizador</label>
+                            <input type="text" class="form-control" id="nomeUtilizador">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="email" class="form-label">Email</label>
+                            <input type="email" class="form-control" id="email">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="nacionalidade" class="form-label">Nacionalidade</label>
+                            <select class="form-control" id="nacionalidade">
+                                <option value="">Selecione...</option>
+                                <!-- Os países vão ser adicionados aqui via JS -->
+                            </select>
+                        </div>
 
-            <form id="registerForm">
-                <div class="row">
-                    <div class="col-md-6 mb-3">
-                        <label for="nome" class="form-label">Nome</label>
-                        <input type="text" class="form-control" id="nome">
+                        <div class="col-md-6 mb-3">
+                            <label for="idade" class="form-label">Idade</label>
+                            <input type="number" class="form-control" id="idade">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="telefone" class="form-label">Telefone</label>
+                            <input type="text" class="form-control" id="telefone">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="senha" class="form-label">Senha</label>
+                            <input type="password" class="form-control" id="senha">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label for="idTipoUtilizador" class="form-label">Tipo de Utilizador</label>
+                            <select class="form-control" id="idTipoUtilizador">
+                                <option value="">Selecione...</option>
+                                <option value="1">Administrador</option>
+                                <option value="2">UserManager</option>
+                                <option value="3">Utilizador</option>
+                            </select>
+                        </div>
                     </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="nomeUtilizador" class="form-label">Nome de Utilizador</label>
-                        <input type="text" class="form-control" id="nomeUtilizador">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="email" class="form-label">Email</label>
-                        <input type="email" class="form-control" id="email">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="nacionalidade" class="form-label">Nacionalidade</label>
-                        <select class="form-control" id="nacionalidade" >
-                            <option value="">Selecione...</option>
-                            <!-- Os países vão ser adicionados aqui via JS -->
-                        </select>
-                    </div>
-
-                    <div class="col-md-6 mb-3">
-                        <label for="idade" class="form-label">Idade</label>
-                        <input type="number" class="form-control" id="idade">
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="telefone" class="form-label">Telefone</label>
-                        <input type="text" class="form-control" id="telefone" >
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="senha" class="form-label">Senha</label>
-                        <input type="password" class="form-control" id="senha" >
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <label for="idTipoUtilizador" class="form-label">Tipo de Utilizador</label>
-                        <select class="form-control" id="idTipoUtilizador" >
-                            <option value="">Selecione...</option>
-                            <option value="1">Admistrador</option>
-                            <option value="2">UserManager</option>
-                            <option value="3">Utilizador</option>
-                        </select>
-                    </div>
-                </div>
-                <button type="submit" class="btn btn-primary w-100">Registar</button>
-            </form>
+                    <button type="submit" class="btn btn-primary w-100">Registar</button>
+                </form>
+            </div>
         </div>
     </div>
 </div>
+
 
 <script>
     document.getElementById("registerForm").addEventListener("submit", async function (event) {
@@ -80,26 +85,22 @@
 
         // Validação
         if (!nome || !nomeUtilizador || !email || !nacionalidade || !idade || !telefone || !senha || !idTipoUtilizador) {
-            alertBox.textContent = "Por favor, preencha todos os campos obrigatórios.";
-            alertBox.classList.remove("d-none");
+            mostrarAlerta("Por favor, preencha todos os campos obrigatórios.");
             return;
         }
 
         if (!email.includes("@@") || !email.includes(".")) {
-            alertBox.textContent = "Email inválido.";
-            alertBox.classList.remove("d-none");
+            ostrarAlerta("Email inválido");
             return;
         }
 
         if (senha.length < 8) {
-            alertBox.textContent = "A senha deve ter pelo menos 8 caracteres.";
-            alertBox.classList.remove("d-none");
+            mostrarAlerta("A senha deve ter pelo menos 8 caracteres.");
             return;
         }
 
         if (isNaN(idade) || idade <= 0) {
-            alertBox.textContent = "Idade inválida.";
-            alertBox.classList.remove("d-none");
+            mostrarAlerta("Idade inválida");
             return;
         }
 
@@ -107,22 +108,40 @@
             method: "POST",
             headers: { "Content-Type": "application/json" },
             body: JSON.stringify({
-                nome,
-                nomeUtilizador,
-                email,
-                nacionalidade,
-                idade,
-                telefone,
-                senha,
-                idTipoUtilizador
+                Nome: nome,
+                NomeUtilizador: nomeUtilizador,
+                Email: email,
+                Nacionalidade: nacionalidade,
+                Idade: idade,
+                Telefone: telefone,
+                Senha: senha,
+                IdTipoUtilizador: idTipoUtilizador
             })
         });
 
         if (response.ok) {
+            await Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Conta criada com sucesso!',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+
             window.location.href = "/login";
         } else {
             const errorMsg = await response.text();
-            alertBox.textContent = errorMsg || "Erro ao registar.";
+
+            if (errorMsg.includes("Email já está em uso.")) {
+                mostrarAlerta("Email já está em uso.");
+            } else if (errorMsg.includes("Nome de utilizador já está em uso.")) {
+                mostrarAlerta("Nome de utilizador já está em uso.");
+            } else {
+                alertBox.textContent = errorMsg || "Erro ao registar.";
+            }
+
             alertBox.classList.remove("d-none");
         }
     });
@@ -138,6 +157,19 @@
             select.appendChild(option);
         });
     });
+
+    function mostrarAlerta(mensagem) {
+        const alertBox = document.getElementById("alert");
+        alertBox.textContent = mensagem;
+        alertBox.classList.remove("d-none");
+
+        // Desaparece após 3 segundos
+        setTimeout(() => {
+            alertBox.classList.add("d-none");
+            alertBox.textContent = "";
+        }, 2000);
+    }
+
 </script>
 
 

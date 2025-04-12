@@ -32,7 +32,16 @@
 
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                alert("Sessão expirada. Por favor, volte a iniciar sessão.");
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end', // canto superior direito
+                    timerProgressBar: true,
+                    icon: 'warning',
+                    title: 'Sessão Expirada',
+                    text: 'Por favor, volte a iniciar sessão.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 window.location.href = "/login";
                 return;
             }
@@ -58,7 +67,17 @@
                 });
 
                 if (response.ok) {
-                    alert("Evento atualizado com sucesso!");
+                    await Swal.fire({
+                        toast: true,
+                        position: 'top-end', // canto superior direito
+                        timerProgressBar: true,
+                        icon: 'success',
+                        title: 'Evento Atualizado!',
+                        text: 'O evento foi atualizado com sucesso.',
+                        timer: 2500,
+                        showConfirmButton: false
+                    });
+
                     editForm.reset();
                     $('#EditEventModal').modal('hide');
 
@@ -100,15 +119,36 @@
             $('#EditEventModal').modal('show');
         }
     });
+
     document.body.addEventListener("click", async (e) => {
         if (e.target.classList.contains("eliminar-btn")) {
             const id = e.target.dataset.id;
 
-            if (!confirm("Tens a certeza que queres eliminar este evento?")) return;
+            const confirmacao = await Swal.fire({
+                title: "Tens a certeza?",
+                text: "Esta ação não pode ser desfeita.",
+                icon: "warning",
+                showCancelButton: true,
+                confirmButtonColor: "#d33",
+                cancelButtonColor: "#3085d6",
+                confirmButtonText: "Sim, eliminar",
+                cancelButtonText: "Cancelar"
+            });
+
+            if (!confirmacao.isConfirmed) return;
 
             const token = localStorage.getItem("jwtToken");
             if (!token) {
-                alert("Sessão expirada. Por favor, volte a iniciar sessão.");
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end', // canto superior direito
+                    timerProgressBar: true,
+                    icon: 'warning',
+                    title: 'Sessão Expirada',
+                    text: 'Por favor, volte a iniciar sessão.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
                 window.location.href = "/login";
                 return;
             }
@@ -122,7 +162,17 @@
                 });
 
                 if (response.ok) {
-                    alert("Evento eliminado com sucesso!");
+                    await Swal.fire({
+                        icon: 'success',
+                        toast: true,
+                        position: 'top-end', // canto superior direito
+                        timerProgressBar: true,
+                        title: 'Eliminado',
+                        text: 'O evento foi eliminado com sucesso.',
+                        timer: 2500,
+                        showConfirmButton: false
+                    });
+
                     if (typeof loadEventos === "function") {
                         loadEventos();
                     } else {
@@ -130,12 +180,139 @@
                     }
                 } else {
                     const msg = await response.text();
-                    alert(msg || "Erro ao eliminar o evento.");
+                    await Swal.fire({
+                        toast: true,
+                        position: 'top-end', // canto superior direito
+                        timerProgressBar: true,
+                        icon: 'error',
+                        title: 'Erro ao eliminar',
+                        text: msg || "Erro ao eliminar o evento.",
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                 }
             } catch (error) {
                 console.error("Erro ao eliminar evento:", error);
-                alert("Erro de ligação ao servidor.");
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end', // canto superior direito
+                    timerProgressBar: true,
+                    icon: 'error',
+                    title: 'Erro de Ligação',
+                    text: 'Erro de ligação ao servidor.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
         }
     });
+});
+
+document.addEventListener("DOMContentLoaded", function () {
+    const form = document.getElementById("eventForm");
+
+    if (form) {
+        form.addEventListener("submit", async function (e) {
+            e.preventDefault();
+
+            const nome = document.getElementById("eventName").value.trim();
+            const descricao = document.getElementById("eventDescription").value.trim();
+            const data = document.getElementById("eventDate").value;
+            const hora = document.getElementById("eventTime").value;
+            const local = document.getElementById("eventLocation").value.trim();
+            const capacidade = parseInt(document.getElementById("eventCapacity").value);
+            const idCategoria = parseInt(document.getElementById("eventCategory").value);
+
+            if (!nome || !descricao || !data || !hora || !local || isNaN(capacidade) || isNaN(idCategoria)) {
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end', // canto superior direito
+                    timerProgressBar: true,
+                    icon: 'warning',
+                    title: 'Campos obrigatórios',
+                    text: 'Preenche todos os campos antes de continuar.',
+                    timer: 2500,
+                    showConfirmButton: false
+                });
+                return;
+            }
+
+            const token = localStorage.getItem("jwtToken");
+            if (!token) {
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end', // canto superior direito
+                    timerProgressBar: true,
+                    icon: 'warning',
+                    title: 'Sessão Expirada',
+                    text: 'Por favor, inicie sessão novamente.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                window.location.href = "/login";
+                return;
+            }
+
+            const eventoData = {
+                nome, descricao, data, hora, local, capacidade, idCategoria
+            };
+
+            try {
+                const response = await fetch("/api/eventos/register", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json",
+                        "Authorization": `Bearer ${token}`
+                    },
+                    body: JSON.stringify(eventoData)
+                });
+
+                if (response.ok) {
+                    await Swal.fire({
+                        toast: true,
+                        position: 'top-end', // canto superior direito
+                        timerProgressBar: true,
+                        icon: 'success',
+                        title: 'Evento Criado!',
+                        text: 'O evento foi registado com sucesso.',
+                        timer: 2500,
+                        showConfirmButton: false
+                    });
+
+                    form.reset();
+                    $('#newEventModal').modal('hide');
+
+                    if (typeof loadEventos === "function") {
+                        loadEventos();
+                    } else {
+                        location.reload();
+                    }
+                } else {
+                    const msg = await response.text();
+                    await Swal.fire({
+                        toast: true,
+                        position: 'top-end', // canto superior direito
+                        timerProgressBar: true,
+                        icon: 'error',
+                        title: 'Erro ao Registar',
+                        text: msg || "Erro ao criar o evento.",
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
+                }
+            } catch (error) {
+                console.error("Erro:", error);
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end', // canto superior direito
+                    timerProgressBar: true,
+                    icon: 'error',
+                    title: 'Erro de Ligação',
+                    text: 'Erro ao comunicar com o servidor.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        });
+    }
 });

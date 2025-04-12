@@ -24,42 +24,75 @@
     </form>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 <script>
-        document.getElementById("loginForm").addEventListener("submit", async (event) => {
-            event.preventDefault(); // Evita que o formulário recarregue a página
+    document.getElementById("loginForm").addEventListener("submit", async (event) => {
+        event.preventDefault();
 
-            const nomeUtilizador = document.getElementById("nomeUtilizador").value.trim();
-            const senha = document.getElementById("senha").value.trim();
-            const alertBox = document.getElementById("alertBox");
+        const nomeUtilizador = document.getElementById("nomeUtilizador").value.trim();
+        const senha = document.getElementById("senha").value.trim();
 
-            // Validação simples
-            if (!nomeUtilizador || !senha) {
-                alertBox.textContent = "Por favor, preencha todos os campos.";
-                alertBox.classList.remove("d-none");
-                return;
-            }
+        if (!nomeUtilizador || !senha) {
+            await Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'Preencha todos os campos.',
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true
+            });
+            return;
+        }
 
-            try {
-                const response = await fetch("/api/auth/login", {
-                    method: "POST",
-                    headers: { "Content-Type": "application/json" },
-                    body: JSON.stringify({ nomeUtilizador, senha })
+        try {
+            const response = await fetch("/api/auth/login", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ nomeUtilizador, senha })
+            });
+
+            if (response.ok) {
+                const data = await response.json();
+                localStorage.setItem("jwtToken", data.token);
+
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Login efetuado com sucesso!',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true
                 });
 
-                if (response.ok) {
-                    const data = await response.json();
-                    localStorage.setItem("jwtToken", data.token); // Salva o token JWT
-                    window.location.href = "/dashboard"; // Redireciona para a Dashboard
-                } else {
-                    alertBox.textContent = "Credenciais inválidas. Tente novamente.";
-                    alertBox.classList.remove("d-none");
-                }
-            } catch (error) {
-                alertBox.textContent = "Erro ao tentar fazer login. Tente novamente mais tarde.";
-                alertBox.classList.remove("d-none");
+                window.location.href = "/dashboard";
+            } else {
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: 'Credenciais inválidas.',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true
+                });
             }
-        });
-    </script>
+        } catch (error) {
+            console.error(error);
+            await Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'Erro ao conectar com o servidor.',
+                showConfirmButton: false,
+                timer: 2500,
+                timerProgressBar: true
+            });
+        }
+    });
+</script>
+
 </body>
 </html>
 

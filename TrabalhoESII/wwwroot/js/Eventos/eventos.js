@@ -15,20 +15,37 @@
 
         if (response.ok) {
             const data = await response.json();
-            renderizarEventos(data.eventos); // Reutiliza a função para renderizar eventos com os botões
+            renderizarEventos(data.eventos);
         } else if (response.status === 401) {
-            alert("Sessão expirada. Por favor, inicie sessão novamente.");
+            await Swal.fire({
+                icon: 'warning',
+                title: 'Sessão Expirada',
+                text: 'Por favor, inicie sessão novamente.',
+                timer: 2000,
+                showConfirmButton: false
+            });
             localStorage.removeItem("jwtToken");
             window.location.href = "/login";
         } else {
-            alert("Erro ao buscar eventos.");
+            await Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Erro ao buscar eventos.',
+                timer: 2000,
+                showConfirmButton: false
+            });
         }
     } catch (error) {
         console.error("Erro ao carregar eventos:", error);
-        alert("Erro de comunicação com o servidor.");
+        await Swal.fire({
+            icon: 'error',
+            title: 'Erro de ligação',
+            text: 'Erro de comunicação com o servidor.',
+            timer: 2000,
+            showConfirmButton: false
+        });
     }
 
-    // Lógica para o botão de pesquisa
     const botaoPesquisa = document.getElementById("searchBtn");
     if (botaoPesquisa) {
         botaoPesquisa.addEventListener("click", async () => {
@@ -52,14 +69,28 @@
                     const eventos = await response.json();
                     renderizarEventos(eventos);
                 } else {
-                    alert("Erro ao pesquisar eventos.");
+                    await Swal.fire({
+                        icon: 'error',
+                        title: 'Erro ao pesquisar',
+                        text: 'Não foi possível encontrar os eventos com os filtros aplicados.',
+                        timer: 2000,
+                        showConfirmButton: false
+                    });
                 }
             } catch (err) {
                 console.error("Erro:", err);
-                alert("Erro de ligação ao servidor.");
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erro de ligação',
+                    text: 'Erro de ligação ao servidor.',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
             }
         });
     }
+
+    carregarCategorias();
 });
 
 function renderizarEventos(eventos) {
@@ -83,9 +114,11 @@ function renderizarEventos(eventos) {
                 </div>
             </div>
             <div class="mt-3">
-                <button class="btn btn-outline-primary" onclick="location.href='/events/details/${evento.idevento}'">
+                <button class="btn btn-outline-primary" onclick="carregarDetalhesEvento(${evento.idevento})">
                     Detalhes
                 </button>
+                <div id="detalhes-${evento.idevento}" style="display: none;"></div>
+
                 <button 
                     class="btn btn-outline-primary editar-btn"
                     data-id="${evento.idevento}"
@@ -95,7 +128,9 @@ function renderizarEventos(eventos) {
                     data-hora="${evento.hora}"
                     data-local="${evento.local}"
                     data-capacidade="${evento.capacidade}"
-                    data-categoria="${evento.idcategoria}">Editar</button>
+                    data-categoria="${evento.idcategoria}">
+                    Editar
+                </button>
                 <button 
                     class="btn btn-outline-danger eliminar-btn"
                     data-id="${evento.idevento}">
@@ -106,4 +141,73 @@ function renderizarEventos(eventos) {
 
         eventList.appendChild(card);
     });
+}
+
+function carregarDetalhesEvento(id) {
+    const detalhesDiv = document.getElementById(`detalhes-${id}`);
+
+    if (detalhesDiv.style.display === "block") {
+        detalhesDiv.style.display = "none";
+        return;
+    }
+
+    fetch(`/api/eventos/detalhes/${id}`, {
+        headers: {
+            "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
+        }
+    })
+        .then(res => {
+            if (!res.ok) {
+                throw new Error("Erro ao buscar detalhes do evento.");
+            }
+            return res.json();
+        })
+        .then(data => {
+            const dataOriginal = data.data.split("T")[0];
+            const horaOriginal = data.hora;
+
+            detalhesDiv.innerHTML = `
+                <div class="card card-body mt-2">
+                    <p><strong>Nome:</strong> ${data.nome}</p>
+                    <p><strong>Descrição:</strong> ${data.descricao}</p>
+                    <p><strong>Data:</strong> ${dataOriginal} ${horaOriginal}</p>
+                    <p><strong>Local:</strong> ${data.local}</p>
+                    <p><strong>Categoria:</strong> ${data.categoriaNome}</p>
+                    <p><strong>Capacidade:</strong> ${data.capacidade}</p>
+                    <p><strong>Inscritos:</strong> ${data.inscritos ?? "N/A"}</p>
+                </div>
+            `;
+            detalhesDiv.style.display = "block";
+        })
+        .catch(async error => {
+            console.error("Erro ao carregar detalhes:", error);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: 'Erro ao carregar os detalhes do evento.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        });
+}
+
+async function carregarCategorias() {
+    try {
+        const response = await fetch("/api/eventos/categorias");
+        if (response.ok) {
+            const categorias = await response.json();
+            const select = document.getElementById("searchCategoria");
+
+            categorias.forEach(categoria => {
+                const option = document.createElement("option");
+                option.value = categoria.idcategoria;
+                option.textContent = categoria.nome;
+                select.appendChild(option);
+            });
+        } else {
+            console.warn("Erro ao carregar categorias");
+        }
+    } catch (err) {
+        console.error("Erro ao carregar categorias:", err);
+    }
 }

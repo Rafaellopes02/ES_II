@@ -55,18 +55,52 @@ namespace TrabalhoESII.Controllers
 
             return Ok(new { EventoId = novoEvento.idevento });
         }
+        
+        [HttpGet("detalhes/{id}")]
+        [Authorize]
+        public async Task<IActionResult> GetDetalhes(int id)
+        {
+            var evento = await _context.eventos
+                .Include(e => e.categoria) // se tiver navegação configurada
+                .FirstOrDefaultAsync(e => e.idevento == id);
+
+            if (evento == null)
+                return NotFound("Evento não encontrado.");
+
+            return Ok(new
+            {
+                evento.idevento,
+                evento.nome,
+                evento.descricao,
+                evento.data,
+                evento.hora,
+                evento.local,
+                evento.capacidade,
+                evento.idcategoria,
+                categoriaNome = evento.categoria?.nome // só se tiver relação com categorias
+            });
+        }
 
         [HttpGet("search")]
         [Authorize]
-        public IActionResult SearchEventos([FromQuery] string? nome, [FromQuery] DateTime? data, [FromQuery] string? local, [FromQuery] int? idCategoria)
+        public IActionResult SearchEventos(
+            [FromQuery] string? nome,
+            [FromQuery] DateTime? data,
+            [FromQuery] string? local,
+            [FromQuery] int? idCategoria)
         {
-            var query = _context.eventos.AsQueryable();
+            var query = _context.eventos
+                .Include(e => e.categoria)
+                .AsQueryable();
 
             if (!string.IsNullOrEmpty(nome))
                 query = query.Where(e => EF.Functions.ILike(e.nome, $"%{nome}%"));
 
             if (data.HasValue)
-                query = query.Where(e => e.data.Date == data.Value.Date);
+            {
+                var dataUtc = DateTime.SpecifyKind(data.Value, DateTimeKind.Utc);
+                query = query.Where(e => e.data.Date == dataUtc.Date);
+            }
 
             if (!string.IsNullOrEmpty(local))
                 query = query.Where(e => EF.Functions.ILike(e.local, $"%{local}%"));
@@ -83,14 +117,18 @@ namespace TrabalhoESII.Controllers
                     e.data,
                     e.hora,
                     e.local,
-                    e.capacidade
+                    e.capacidade,
+                    categoria = e.categoria.nome // Nome da categoria em vez de ID
                 })
                 .ToList();
 
             return Ok(eventos);
         }
+
+        
+        
         [HttpPut("{id}")] 
-        //[Authorize]
+        [Authorize]
         public async Task<IActionResult> EditEvento(int id, [FromBody] EventosRegisterModel evento)
         {
             if (!ModelState.IsValid)
@@ -116,7 +154,23 @@ namespace TrabalhoESII.Controllers
             return Ok("Evento atualizado com sucesso.");
         }
         
+        [HttpGet("categorias")]
+        public IActionResult GetCategorias()
+        {
+            var categorias = _context.categorias
+                .Select(c => new
+                {
+                    c.idcategoria,
+                    c.nome
+                })
+                .ToList();
+
+            return Ok(categorias);
+        }
+
+        
         [HttpDelete("{id}")]
+        [Authorize]
         public async Task<IActionResult> DeleteEvento(int id)
         {
             var evento = await _context.eventos.FindAsync(id);
@@ -134,4 +188,6 @@ namespace TrabalhoESII.Controllers
             return Ok("Evento eliminado com sucesso.");
         }
     }
+    
 }
+
