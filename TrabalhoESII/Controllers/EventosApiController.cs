@@ -4,6 +4,7 @@ using TrabalhoESII.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
+
 namespace TrabalhoESII.Controllers
 {
     [ApiController]
@@ -119,6 +120,7 @@ namespace TrabalhoESII.Controllers
                     e.local,
                     e.capacidade,
                     categoria = e.categoria.nome // Nome da categoria em vez de ID
+                    
                 })
                 .ToList();
 
@@ -127,12 +129,23 @@ namespace TrabalhoESII.Controllers
 
         
         
-        [HttpPut("{id}")] 
+        [HttpPut("{id}")]
         [Authorize]
         public async Task<IActionResult> EditEvento(int id, [FromBody] EventosRegisterModel evento)
         {
-            if (!ModelState.IsValid)
-                return BadRequest("Dados inválidos.");
+            var userIdClaim = User.FindFirst("UserId");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                return Unauthorized();
+
+            var tipoUtilizador = ObterTipoUtilizadorDoToken();
+
+            // Verificar se o utilizador é o criador do evento
+            var eCriador = await _context.organizadoreseventos
+                .AnyAsync(o => o.idevento == id && o.idutilizador == userId);
+
+            // Apenas o criador OU admin (tipo 1) pode editar
+            if (!eCriador && tipoUtilizador != 1)
+                return BadRequest("Não tem permissões para editar ou eliminar este evento. Apenas o criador pode fazê-lo.");
 
             var eventoExistente = await _context.eventos.FindAsync(id);
 
@@ -148,11 +161,12 @@ namespace TrabalhoESII.Controllers
             eventoExistente.capacidade = evento.capacidade;
             eventoExistente.idcategoria = evento.idCategoria;
 
-            _context.eventos.Update(eventoExistente);
             await _context.SaveChangesAsync();
 
             return Ok("Evento atualizado com sucesso.");
         }
+
+
         
         [HttpGet("categorias")]
         public IActionResult GetCategorias()
@@ -173,12 +187,25 @@ namespace TrabalhoESII.Controllers
         [Authorize]
         public async Task<IActionResult> DeleteEvento(int id)
         {
-            var evento = await _context.eventos.FindAsync(id);
+            var userIdClaim = User.FindFirst("UserId");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                return Unauthorized();
 
+            var tipoUtilizador = ObterTipoUtilizadorDoToken(); // 👈 usar a função que criaste
+
+            // Verificar se o utilizador é o criador do evento
+            var eCriador = await _context.organizadoreseventos
+                .AnyAsync(o => o.idevento == id && o.idutilizador == userId);
+
+            // Se não for criador e também não for admin, não tem permissões
+            if (!eCriador && tipoUtilizador != 1)
+                return BadRequest("Não tem permissões para editar ou eliminar este evento. Apenas o criador pode fazê-lo.");
+
+            var evento = await _context.eventos.FindAsync(id);
             if (evento == null)
                 return NotFound("Evento não encontrado.");
 
-            // Remover possíveis relações em tabelas dependentes (como organizadores)
+            // Apagar a relação com o organizador
             var relacoes = _context.organizadoreseventos.Where(oe => oe.idevento == id);
             _context.organizadoreseventos.RemoveRange(relacoes);
 
@@ -187,7 +214,21 @@ namespace TrabalhoESII.Controllers
 
             return Ok("Evento eliminado com sucesso.");
         }
+
+        
+        private int? ObterTipoUtilizadorDoToken()
+        {
+            var claim = User.FindFirst("TipoUtilizadorId");
+            if (claim != null && int.TryParse(claim.Value, out int tipo))
+            {
+                return tipo;
+            }
+
+            return null;
+        }
+
     }
     
 }
+
 

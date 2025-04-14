@@ -97,6 +97,12 @@
                 alertBox.classList.remove("d-none");
             }
         });
+        document.querySelectorAll('#EditEventModal .close, #EditEventModal .btn-secondary')
+            .forEach(el => {
+                el.addEventListener("click", () => {
+                    $('#EditEventModal').modal('hide');
+                });
+            });
     }
 
     // Preencher e abrir modal ao clicar no botão "Editar"

@@ -90,10 +90,40 @@
         });
     }
 
-    carregarCategorias();
+    carregarCategorias("searchCategoria");
+    carregarCategorias("eventCategory");
+    carregarCategorias("editEventCategory");
 });
 
+function getUserIdFromToken() {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) return null;
+
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return parseInt(payload.UserId);
+    } catch (err) {
+        console.error("Erro ao extrair UserId do token:", err);
+        return null;
+    }
+}
+
+function getUserTypeFromToken() {
+    const token = localStorage.getItem("jwtToken");
+    if (!token) return null;
+
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return parseInt(payload.TipoUtilizadorId); // deve bater com o nome no backend
+    } catch (err) {
+        console.error("Erro ao extrair TipoUtilizadorId do token:", err);
+        return null;
+    }
+}
+
 function renderizarEventos(eventos) {
+    const userId = getUserIdFromToken();
+    const userType = getUserTypeFromToken(); // ← novo
     const eventList = document.getElementById("eventList");
     eventList.innerHTML = "";
 
@@ -102,23 +132,17 @@ function renderizarEventos(eventos) {
         const card = document.createElement("div");
         card.className = "card mb-3 p-3 event-card";
 
-        card.innerHTML = `
-            <h5 class="card-title">${evento.nome}</h5>
-            <p class="card-text">${evento.descricao}</p>
-            <p class="card-text">
-                <small class="text-muted">${formattedDate} · ${evento.hora} · ${evento.local}</small>
-            </p>
-            <div class="progress">
-                <div class="progress-bar bg-info" style="width: 75%">
-                    75% da capacidade
-                </div>
-            </div>
-            <div class="mt-3">
-                <button class="btn btn-outline-primary" onclick="carregarDetalhesEvento(${evento.idevento})">
-                    Detalhes
-                </button>
-                <div id="detalhes-${evento.idevento}" style="display: none;"></div>
+        // Botões comuns
+        let botoes = `
+            <button class="btn btn-outline-primary" onclick="carregarDetalhesEvento(${evento.idevento})">
+                Detalhes
+            </button>
+            <div id="detalhes-${evento.idevento}" style="display: none;"></div>
+        `;
 
+        // Mostrar botões apenas se for o criador ou admin
+        if (evento.idutilizador === userId || userType === 1) {
+            botoes += `
                 <button 
                     class="btn btn-outline-primary editar-btn"
                     data-id="${evento.idevento}"
@@ -136,7 +160,21 @@ function renderizarEventos(eventos) {
                     data-id="${evento.idevento}">
                     Eliminar
                 </button>
+            `;
+        }
+
+        card.innerHTML = `
+            <h5 class="card-title">${evento.nome}</h5>
+            <p class="card-text">${evento.descricao}</p>
+            <p class="card-text">
+                <small class="text-muted">${formattedDate} · ${evento.hora} · ${evento.local}</small>
+            </p>
+            <div class="progress">
+                <div class="progress-bar bg-info" style="width: 75%">
+                    75% da capacidade
+                </div>
             </div>
+            <div class="mt-3">${botoes}</div>
         `;
 
         eventList.appendChild(card);
@@ -191,12 +229,15 @@ function carregarDetalhesEvento(id) {
         });
 }
 
-async function carregarCategorias() {
+async function carregarCategorias(selectId) {
     try {
-        const response = await fetch("/api/eventos/categorias");
+        const response = await fetch("/api/categorias");
         if (response.ok) {
             const categorias = await response.json();
-            const select = document.getElementById("searchCategoria");
+            const select = document.getElementById(selectId);
+            if (!select) return;
+
+            select.innerHTML = '<option value="">Selecionar...</option>';
 
             categorias.forEach(categoria => {
                 const option = document.createElement("option");

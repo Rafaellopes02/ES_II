@@ -39,17 +39,23 @@ namespace TrabalhoESII.Controllers
         {
             var eventos = await _context.eventos
                 .Include(e => e.categoria)
-                .Select(e => new {
-                    e.idevento,
-                    e.nome,
-                    data = e.data.ToString("yyyy-MM-dd"),
-                    e.hora,
-                    e.local,
-                    e.descricao,
-                    e.capacidade,
-                    e.idcategoria
-                })
+                .Join(_context.organizadoreseventos,
+                    e => e.idevento,
+                    oe => oe.idevento,
+                    (e, oe) => new {
+                        e.idevento,
+                        e.nome,
+                        data = e.data.ToString("yyyy-MM-dd"),
+                        e.hora,
+                        e.local,
+                        e.descricao,
+                        e.capacidade,
+                        e.idcategoria,
+                        idutilizador = oe.idutilizador, // 👈 adiciona aqui o ID do criador
+                        categoriaNome = e.categoria.nome
+                    })
                 .ToListAsync();
+
 
             return Json(new { eventos });
         }
