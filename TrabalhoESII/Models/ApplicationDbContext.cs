@@ -212,17 +212,7 @@ namespace TrabalhoESII.Models
         [ForeignKey("idestado")]
         public estadospagamentos estadospagamentos { get; set; }
     }
-
-    public class organizadoreseventos
-    {
-        public int idutilizador { get; set; }
-        [ForeignKey("idutilizador")]
-        public utilizadores utilizadores { get; set; }
-
-        public int idevento { get; set; }
-        [ForeignKey("idevento")]
-        public eventos eventos { get; set; }
-    }
+    
 
     public class atividades
     {

@@ -2,12 +2,13 @@
 
 namespace TrabalhoESII.Models
 {
-    public class OrganizadoresEventos
+    public class organizadoreseventos
     {
         public int idutilizador { get; set; }
         public utilizadores utilizadores { get; set; }
 
         public int idevento { get; set; }
         public eventos eventos { get; set; }
+        public bool eorganizador { get; set; }
     }
 }

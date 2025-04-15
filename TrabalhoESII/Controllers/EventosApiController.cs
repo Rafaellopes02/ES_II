@@ -47,7 +47,8 @@ namespace TrabalhoESII.Controllers
                 var registoOrganizador = new organizadoreseventos
                 {
                     idutilizador = utilizadorId,
-                    idevento = novoEvento.idevento
+                    idevento = novoEvento.idevento,
+                    eorganizador = true
                 };
 
                 _context.organizadoreseventos.Add(registoOrganizador);
@@ -67,6 +68,10 @@ namespace TrabalhoESII.Controllers
 
             if (evento == null)
                 return NotFound("Evento não encontrado.");
+            
+            var inscritos = await _context.organizadoreseventos
+                .CountAsync(oe => oe.idevento == id && !oe.eorganizador);
+
 
             return Ok(new
             {
@@ -78,18 +83,22 @@ namespace TrabalhoESII.Controllers
                 evento.local,
                 evento.capacidade,
                 evento.idcategoria,
-                categoriaNome = evento.categoria?.nome // só se tiver relação com categorias
+                categoriaNome = evento.categoria?.nome, // só se tiver relação com categorias
+                inscritos
             });
         }
 
         [HttpGet("search")]
         [Authorize]
-        public IActionResult SearchEventos(
+        public async Task<IActionResult> SearchEventos(
             [FromQuery] string? nome,
             [FromQuery] DateTime? data,
             [FromQuery] string? local,
             [FromQuery] int? idCategoria)
         {
+            var userIdClaim = User.FindFirst("UserId");
+            int.TryParse(userIdClaim?.Value, out int userId);
+
             var query = _context.eventos
                 .Include(e => e.categoria)
                 .AsQueryable();
@@ -109,23 +118,35 @@ namespace TrabalhoESII.Controllers
             if (idCategoria.HasValue)
                 query = query.Where(e => e.idcategoria == idCategoria.Value);
 
-            var eventos = query
+            var eventos = await query
                 .Select(e => new
                 {
                     e.idevento,
                     e.nome,
-                    e.descricao,
-                    e.data,
+                    data = e.data.ToString("yyyy-MM-dd"),
                     e.hora,
                     e.local,
+                    e.descricao,
                     e.capacidade,
-                    categoria = e.categoria.nome // Nome da categoria em vez de ID
-                    
+                    e.idcategoria,
+                    categoriaNome = e.categoria.nome,
+                    inscrito = _context.organizadoreseventos.Any(o => o.idevento == e.idevento && o.idutilizador == userId),
+                    eorganizador = _context.organizadoreseventos
+                        .Where(o => o.idevento == e.idevento && o.idutilizador == userId)
+                        .Select(o => o.eorganizador)
+                        .FirstOrDefault(),
+                    idutilizador = _context.organizadoreseventos
+                        .Where(o => o.idevento == e.idevento && o.eorganizador)
+                        .Select(o => o.idutilizador)
+                        .FirstOrDefault(),
+                    inscritos = _context.organizadoreseventos
+                        .Count(o => o.idevento == e.idevento && !o.eorganizador)
                 })
-                .ToList();
+                .ToListAsync();
 
             return Ok(eventos);
         }
+
 
         
         
@@ -139,20 +160,16 @@ namespace TrabalhoESII.Controllers
 
             var tipoUtilizador = ObterTipoUtilizadorDoToken();
 
-            // Verificar se o utilizador é o criador do evento
             var eCriador = await _context.organizadoreseventos
-                .AnyAsync(o => o.idevento == id && o.idutilizador == userId);
+                .AnyAsync(o => o.idevento == id && o.idutilizador == userId && o.eorganizador);
 
-            // Apenas o criador OU admin (tipo 1) pode editar
             if (!eCriador && tipoUtilizador != 1)
-                return BadRequest("Não tem permissões para editar ou eliminar este evento. Apenas o criador pode fazê-lo.");
+                return BadRequest("Não tem permissões para editar ou eliminar este evento. Apenas o criador ou um administrador pode fazê-lo.");
 
             var eventoExistente = await _context.eventos.FindAsync(id);
-
             if (eventoExistente == null)
                 return NotFound("Evento não encontrado.");
 
-            // Atualizar campos
             eventoExistente.nome = evento.nome;
             eventoExistente.descricao = evento.descricao;
             eventoExistente.data = DateTime.SpecifyKind(evento.data, DateTimeKind.Utc);
@@ -162,7 +179,6 @@ namespace TrabalhoESII.Controllers
             eventoExistente.idcategoria = evento.idCategoria;
 
             await _context.SaveChangesAsync();
-
             return Ok("Evento atualizado com sucesso.");
         }
 
@@ -191,21 +207,21 @@ namespace TrabalhoESII.Controllers
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
                 return Unauthorized();
 
-            var tipoUtilizador = ObterTipoUtilizadorDoToken(); // 👈 usar a função que criaste
+            var tipoUtilizador = ObterTipoUtilizadorDoToken(); // 1 = admin
 
-            // Verificar se o utilizador é o criador do evento
+            // Verifica se o utilizador atual é o criador (eorganizador = true)
             var eCriador = await _context.organizadoreseventos
-                .AnyAsync(o => o.idevento == id && o.idutilizador == userId);
+                .AnyAsync(o => o.idevento == id && o.idutilizador == userId && o.eorganizador);
 
-            // Se não for criador e também não for admin, não tem permissões
+            // Se não for criador nem admin, não pode apagar
             if (!eCriador && tipoUtilizador != 1)
-                return BadRequest("Não tem permissões para editar ou eliminar este evento. Apenas o criador pode fazê-lo.");
+                return BadRequest("Não tem permissões para eliminar este evento. Apenas o criador ou um administrador pode fazê-lo.");
 
             var evento = await _context.eventos.FindAsync(id);
             if (evento == null)
                 return NotFound("Evento não encontrado.");
 
-            // Apagar a relação com o organizador
+            // Apagar todas as relações com este evento
             var relacoes = _context.organizadoreseventos.Where(oe => oe.idevento == id);
             _context.organizadoreseventos.RemoveRange(relacoes);
 
@@ -226,6 +242,52 @@ namespace TrabalhoESII.Controllers
 
             return null;
         }
+        
+        [HttpPost("{id}/inscrever")]
+        [Authorize]
+        public async Task<IActionResult> Inscrever(int id)
+        {
+            var userIdClaim = User.FindFirst("UserId");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                return Unauthorized();
+
+            var evento = await _context.eventos.FindAsync(id);
+            if (evento == null)
+                return NotFound("Evento não encontrado.");
+
+            // Não permitir inscrição em eventos passados
+            var agora = DateTime.UtcNow.Date;
+            if (evento.data.Date < agora)
+                return BadRequest("Não é possível inscrever-se em eventos que já passaram.");
+
+            // já inscrito
+            bool jaInscrito = await _context.organizadoreseventos
+                .AnyAsync(o => o.idevento == id && o.idutilizador == userId);
+            if (jaInscrito)
+                return BadRequest("Já está inscrito neste evento.");
+
+            // Capacidade esgotada
+            int inscritos = await _context.organizadoreseventos
+                .CountAsync(o => o.idevento == id && !o.eorganizador);
+
+            if (inscritos >= evento.capacidade)
+                return BadRequest("A capacidade deste evento já foi atingida.");
+
+            // Inscrever como participante
+            var novo = new organizadoreseventos
+            {
+                idevento = id,
+                idutilizador = userId,
+                eorganizador = false
+            };
+
+            _context.organizadoreseventos.Add(novo);
+            await _context.SaveChangesAsync();
+
+            return Ok("Inscrição feita com sucesso!");
+        }
+
+
 
     }
     

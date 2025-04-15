@@ -37,27 +37,47 @@ namespace TrabalhoESII.Controllers
         [HttpGet("/eventos/stats")]
         public async Task<IActionResult> GetEventosStats()
         {
+            var userIdClaim = User.FindFirst("UserId");
+            int.TryParse(userIdClaim?.Value, out int userId);
+
             var eventos = await _context.eventos
                 .Include(e => e.categoria)
-                .Join(_context.organizadoreseventos,
-                    e => e.idevento,
-                    oe => oe.idevento,
-                    (e, oe) => new {
-                        e.idevento,
-                        e.nome,
-                        data = e.data.ToString("yyyy-MM-dd"),
-                        e.hora,
-                        e.local,
-                        e.descricao,
-                        e.capacidade,
-                        e.idcategoria,
-                        idutilizador = oe.idutilizador, // 👈 adiciona aqui o ID do criador
-                        categoriaNome = e.categoria.nome
-                    })
-                .ToListAsync();
+                .Select(e => new
+                {
+                    e.idevento,
+                    e.nome,
+                    data = e.data.ToString("yyyy-MM-dd"),
+                    e.hora,
+                    e.local,
+                    e.descricao,
+                    e.capacidade,
+                    e.idcategoria,
+                    categoriaNome = e.categoria.nome,
 
+                    // Verifica se o utilizador está inscrito neste evento
+                    inscrito = _context.organizadoreseventos
+                        .Any(o => o.idevento == e.idevento && o.idutilizador == userId),
+
+                    // Verifica se é o organizador (criador)
+                    eorganizador = _context.organizadoreseventos
+                        .Where(o => o.idevento == e.idevento && o.idutilizador == userId)
+                        .Select(o => o.eorganizador)
+                        .FirstOrDefault(),
+
+                    // ID do organizador (criador)
+                    idutilizador = _context.organizadoreseventos
+                        .Where(o => o.idevento == e.idevento && o.eorganizador)
+                        .Select(o => o.idutilizador)
+                        .FirstOrDefault(),
+
+                    // Contagem de inscritos (excluindo organizador)
+                    inscritos = _context.organizadoreseventos
+                        .Count(o => o.idevento == e.idevento && !o.eorganizador)
+                })
+                .ToListAsync();
 
             return Json(new { eventos });
         }
+
     }
 }

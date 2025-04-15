@@ -206,6 +206,9 @@ namespace TrabalhoESII.Migrations
                     b.Property<int>("idevento")
                         .HasColumnType("integer");
 
+                    b.Property<bool>("eorganizador")
+                        .HasColumnType("boolean");
+
                     b.HasKey("idutilizador", "idevento");
 
                     b.HasIndex("idevento");
