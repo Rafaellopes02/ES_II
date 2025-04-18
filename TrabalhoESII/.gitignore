@@ -1,6 +1,7 @@
 # Build artifacts
 bin/
 obj/
+Migrations/
 *.dll
 *.exe
 *.pdb
