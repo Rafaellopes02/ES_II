@@ -23,4 +23,8 @@
     <ItemGroup>
       <Folder Include="Migrations\" />
     </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\EventoDetalhes\Index.cshtml" />
+    </ItemGroup>
 </Project>

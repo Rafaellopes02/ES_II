@@ -241,5 +241,9 @@ namespace TrabalhoESII.Models
         public int idatividade { get; set; }
         [ForeignKey("idatividade")]
         public atividades atividades { get; set; }
+        
+        public int idevento { get; set; }
+        [ForeignKey("idevento")]
+        public eventos eventos { get; set; }
     }
 }

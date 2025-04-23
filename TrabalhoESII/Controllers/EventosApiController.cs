@@ -19,13 +19,11 @@ namespace TrabalhoESII.Controllers
         }
 
         [HttpPost("register")]
-        // [Authorize] ← removido para permitir acesso sem autenticação
         public async Task<IActionResult> RegisterEvento([FromBody] EventosRegisterModel evento)
         {
             if (!ModelState.IsValid)
                 return BadRequest("Dados inválidos.");
 
-            // Criar o novo evento
             var novoEvento = new eventos
             {
                 nome = evento.nome,
@@ -40,7 +38,6 @@ namespace TrabalhoESII.Controllers
             _context.eventos.Add(novoEvento);
             await _context.SaveChangesAsync();
 
-            // Tentar obter o ID do utilizador autenticado (opcional)
             var userIdClaim = User.FindFirst("UserId");
             if (userIdClaim != null && int.TryParse(userIdClaim.Value, out int utilizadorId))
             {

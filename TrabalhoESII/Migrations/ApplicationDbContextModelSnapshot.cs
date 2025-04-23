@@ -370,9 +370,14 @@ namespace TrabalhoESII.Migrations
                     b.Property<int>("idatividade")
                         .HasColumnType("integer");
 
+                    b.Property<int>("idevento")
+                        .HasColumnType("integer");
+
                     b.HasKey("idutilizador", "idatividade");
 
                     b.HasIndex("idatividade");
+
+                    b.HasIndex("idevento");
 
                     b.ToTable("utilizadoresatividades");
                 });
@@ -510,6 +515,12 @@ namespace TrabalhoESII.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("TrabalhoESII.Models.eventos", "eventos")
+                        .WithMany()
+                        .HasForeignKey("idevento")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("TrabalhoESII.Models.utilizadores", "utilizadores")
                         .WithMany()
                         .HasForeignKey("idutilizador")
@@ -517,6 +528,8 @@ namespace TrabalhoESII.Migrations
                         .IsRequired();
 
                     b.Navigation("atividades");
+
+                    b.Navigation("eventos");
 
                     b.Navigation("utilizadores");
                 });

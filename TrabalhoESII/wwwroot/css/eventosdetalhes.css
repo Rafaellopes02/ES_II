@@ -1,0 +1,43 @@
+﻿.hero-section {
+    background-color: #f8f9fa;
+    border-radius: 16px;
+    padding: 2rem;
+}
+
+.textinfo {
+    text-align: left;
+    margin-bottom: 0.5rem;
+}
+
+.containerAtividades {
+    margin-top: 2rem;
+}
+
+.card {
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+    transition: all 0.2s ease-in-out;
+}
+
+.card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.card-title {
+    font-size: 1.25rem;
+    font-weight: 600;
+}
+
+.card p {
+    margin: 0;
+    font-size: 0.95rem;
+    color: #333;
+}
+
+.btn.inscrever-btn {
+    white-space: nowrap;
+    font-size: 0.9rem;
+    padding: 0.4rem 1rem;
+    font-weight: 500;
+}

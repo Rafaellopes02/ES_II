@@ -171,16 +171,27 @@ function renderizarEventos(eventos) {
                     Eliminar
                 </button>
             `;
-        } else if (!evento.inscrito && userType === 3 && evento.inscritos < evento.capacidade && !eventoPassado) {
-
-            botoes += `
-                <button 
-                    class="btn btn-outline-success inscrever-btn"
-                    data-id="${evento.idevento}">
-                    Inscrever-me
-                </button>
-            `;
         }
+        else if (!evento.inscrito && userType === 3 && evento.inscritos < evento.capacidade && !eventoPassado) {
+            botoes += `
+        <button 
+            class="btn btn-outline-success inscrever-btn"
+            data-id="${evento.idevento}">
+            Inscrever-me
+        </button>
+    `;
+        } else {
+            botoes += `
+        <button 
+    class="btn btn-outline-success Entrar-btn"
+    onclick="window.location.href='/Eventos/${evento.idevento}'">
+    Entrar
+</button>
+
+    `;
+        }
+        botoes += `</div>`;
+
 
         const card = document.createElement("div");
         card.className = "card mb-3 p-3 event-card";

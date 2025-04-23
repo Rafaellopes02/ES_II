@@ -30,7 +30,7 @@ namespace TrabalhoESII.Controllers
             }
 
             ViewBag.UserType = tipo;
-            return View(); // renderiza Views/Eventos/Index.cshtml
+            return View();
         }
 
         [Authorize]
@@ -78,6 +78,5 @@ namespace TrabalhoESII.Controllers
 
             return Json(new { eventos });
         }
-
     }
 }
