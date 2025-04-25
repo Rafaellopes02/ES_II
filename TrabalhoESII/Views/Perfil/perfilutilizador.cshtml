@@ -1,0 +1,130 @@
+﻿@{
+ViewData["Title"] = "Perfil do Utilizador";
+}
+
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-md-10 offset-md-1">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                    <h3 class="mb-0">Meu Perfil</h3>
+                    <div>
+                        <button id="btnEditar" class="btn btn-light btn-sm me-2" style="display:none;">
+                            <i class="bi bi-pencil-fill"></i> Editar
+                        </button>
+                        <button id="btnSalvar" class="btn btn-success btn-sm me-2" style="display:none;">
+                            <i class="bi bi-check-lg"></i> Salvar
+                        </button>
+                        <button id="btnCancelar" class="btn btn-light btn-sm" style="display:none;">
+                            <i class="bi bi-x-lg"></i> Cancelar
+                        </button>
+                    </div>
+                </div>
+                <div class="card-body">
+                    <div id="errorMessage" class="alert alert-danger" style="display:none;"></div>
+
+                    <!-- Formulário do perfil (inicialmente oculto) -->
+                    <div id="perfilInfo" style="display:none;">
+                        <div class="row g-4">
+                            <!-- Coluna de informações pessoais -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Informações Pessoais</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Nome Completo</label>
+                                            <p id="viewNome" class="view-mode"></p>
+                                            <div class="edit-mode" style="display:none;">
+                                                <input type="text" id="editNome" class="form-control" />
+                                                <div class="invalid-feedback">Por favor, insira seu nome completo.</div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">E-mail</label>
+                                            <p id="viewEmail" class="view-mode"></p>
+                                            <div class="edit-mode" style="display:none;">
+                                                <input type="email" id="editEmail" class="form-control" />
+                                                <div class="invalid-feedback">Por favor, insira um e-mail válido.</div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Idade</label>
+                                            <p id="viewIdade" class="view-mode"></p>
+                                            <div class="edit-mode" style="display:none;">
+                                                <input type="number" id="editIdade" class="form-control" min="1" max="120" />
+                                                <div class="invalid-feedback">Por favor, insira uma idade válida.</div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Nacionalidade</label>
+                                            <p id="viewNacionalidade" class="view-mode"></p>
+                                            <div class="edit-mode" style="display:none;">
+                                                <input type="text" id="editNacionalidade" class="form-control" />
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <!-- Coluna de informações de conta -->
+                            <div class="col-md-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="mb-0">Informações de Conta</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Nome de Utilizador</label>
+                                            <p id="viewNomeUtilizador" class="view-mode"></p>
+                                            <div class="edit-mode" style="display:none;">
+                                                <input type="text" id="editNomeUtilizador" class="form-control" />
+                                                <div class="invalid-feedback">Por favor, insira um nome de utilizador válido.</div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Telefone</label>
+                                            <p id="viewTelefone" class="view-mode"></p>
+                                            <div class="edit-mode" style="display:none;">
+                                                <input type="tel" id="editTelefone" class="form-control" />
+                                            </div>
+                                        </div>
+                                        <div class="edit-mode" style="display:none;">
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Nova Senha (deixe em branco para não alterar)</label>
+                                                <input type="password" id="editSenha" class="form-control" />
+                                                <div class="invalid-feedback">A senha deve ter pelo menos 6 caracteres.</div>
+                                            </div>
+                                            <div class="mb-3">
+                                                <label class="form-label fw-bold">Confirmar Nova Senha</label>
+                                                <input type="password" id="editConfirmarSenha" class="form-control" />
+                                                <div class="invalid-feedback">As senhas não coincidem.</div>
+                                            </div>
+                                        </div>
+                                        <div class="mb-3">
+                                            <label class="form-label fw-bold">Tipo de Conta</label>
+                                            <p id="viewTipoConta" class="view-mode"></p>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="card-footer bg-light">
+                    <div class="d-flex justify-content-between">
+                        <button id="btnVoltar" class="btn btn-secondary">
+                            <i class="bi bi-arrow-left"></i> Voltar
+                        </button>
+                        <div id="msgSucesso" class="alert alert-success py-1 px-3 mb-0" style="display:none;">
+                            Perfil atualizado com sucesso!
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="~/js/perfilutilizador.js"></script>

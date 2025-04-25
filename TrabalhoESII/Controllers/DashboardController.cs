@@ -27,7 +27,7 @@ namespace TrabalhoESII.Controllers
 
                 if (tipoId == "1") tipo = "Admin";
                 else if (tipoId == "2") tipo = "UserManager";
-                else if (tipoId == "3") tipo = "User"; // Ajusta conforme a tua BD
+                else if (tipoId == "3") tipo = "User";
             }
 
             ViewBag.UserType = tipo;
