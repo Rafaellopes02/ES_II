@@ -1,6 +1,6 @@
 ﻿namespace TrabalhoESII.Models;
 
-public class PerfilUtilizadorModel
+public class ProfileModel
 {
     public int Id { get;}
     public string Nome { get; set; }
