@@ -22,6 +22,15 @@
 
     <ItemGroup>
       <Folder Include="Migrations\" />
+      <Folder Include="Views\Profile\" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <None Include="wwwroot\js\perfilutilizador.js" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <_ContentIncludedByDefault Remove="Views\Perfil\perfilutilizador.cshtml" />
     </ItemGroup>
 
     <ItemGroup>

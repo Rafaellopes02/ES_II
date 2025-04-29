@@ -31,6 +31,9 @@
                     </li>
                 </ul>
                 <ul class="navbar-nav ms-auto">
+                    <li class="nav-item d-none" id="perfilLink">
+                        <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="UserProfile">Perfil</a>
+                    </li>
                     <li class="nav-item">
                         <button id="logoutBtn" class="btn btn-outline-danger d-none">Logout</button>
                     </li>
@@ -61,9 +64,11 @@
     document.addEventListener("DOMContentLoaded", () => {
         const token = localStorage.getItem("jwtToken");
         const logoutBtn = document.getElementById("logoutBtn");
+        const perfilLink = document.getElementById("perfilLink");
 
-        if (token && logoutBtn) {
+        if (token && logoutBtn && perfilLink) {
             logoutBtn.classList.remove("d-none");
+            perfilLink.classList.remove("d-none");
             logoutBtn.addEventListener("click", () => {
                 localStorage.removeItem("jwtToken");
                 window.location.href = "/login";

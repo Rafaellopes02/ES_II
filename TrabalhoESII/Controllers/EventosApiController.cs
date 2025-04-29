@@ -4,7 +4,6 @@ using TrabalhoESII.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
 
-
 namespace TrabalhoESII.Controllers
 {
     [ApiController]

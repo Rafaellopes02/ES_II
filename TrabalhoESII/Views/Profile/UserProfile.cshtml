@@ -1,0 +1,22 @@
+﻿@{
+    ViewData["Title"] = "Perfil de Utilizador";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<main class="container mt-4">
+    <h2>Perfil de Utilizador</h2>
+    <div class="alert alert-info" id="profileStatus">A carregar informações...</div>
+    <div class="card shadow mt-3" id="profileCard" style="display: none;">
+        <div class="card-body">
+            <h5 class="card-title" id="userNome"></h5>
+            <p class="card-text"><strong>Email:</strong> <span id="userEmail"></span></p>
+            <p class="card-text"><strong>Idade:</strong> <span id="userIdade"></span></p>
+            <p class="card-text"><strong>Telefone:</strong> <span id="userTelefone"></span></p>
+            <p class="card-text"><strong>Nacionalidade:</strong> <span id="userNacionalidade"></span></p>
+            
+            <!--<a asp-controller="Profile" asp-action="EditUserProfile" class="btn btn-primary mt-3">Editar Perfil</a>-->
+        </div>
+    </div>
+</main>
+
+<script src="~/js/profile.js"></script>

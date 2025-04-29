@@ -39,15 +39,12 @@ namespace TrabalhoESII.Controllers
                 {
                     return BadRequest("Nome de utilizador já está em uso.");
                 }
-
-
-
-
+                
                 var user = new utilizadores
                 {
                     nome = model.Nome,
                     nomeutilizador = model.NomeUtilizador,
-                    senha = BCrypt.Net.BCrypt.HashPassword(model.Senha), // Encriptar senha
+                    senha = BCrypt.Net.BCrypt.HashPassword(model.Senha),
                     email = model.Email,
                     nacionalidade = model.Nacionalidade,
                     idade = model.Idade,
@@ -73,33 +70,72 @@ namespace TrabalhoESII.Controllers
                 return BadRequest("Requisição inválida.");
             }
 
-            // Buscar o utilizador na base de dados
-            var user = _context.utilizadores.FirstOrDefault(u => u.nomeutilizador == model.NomeUtilizador);
+            var user = _context.utilizadores
+                .FirstOrDefault(u => u.nomeutilizador == model.NomeUtilizador);
 
             if (user == null || !BCrypt.Net.BCrypt.Verify(model.Senha, user.senha))
             {
                 return Unauthorized("Credenciais inválidas.");
             }
-
-            // Criar token JWT
-            var tokenHandler = new JwtSecurityTokenHandler();
+            
             var key = Encoding.UTF8.GetBytes(_configuration["Jwt:Key"]);
-            var tokenDescriptor = new SecurityTokenDescriptor
+            var signingCredentials = new SigningCredentials(
+                new SymmetricSecurityKey(key),
+                SecurityAlgorithms.HmacSha256Signature
+            );
+            
+            var claims = new ClaimsIdentity(new[]
             {
-                Subject = new ClaimsIdentity(new[]
-                {
-                    new Claim(ClaimTypes.Name, user.nomeutilizador),
-                    new Claim("UserId", user.idutilizador.ToString()),
-                    new Claim("TipoUtilizadorId", user.idtipoutilizador.ToString())
-                }),
-                Expires = DateTime.UtcNow.AddHours(2),
-                SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
-            };
+                new Claim(ClaimTypes.Name, user.nomeutilizador),
+                new Claim("UserId", user.idutilizador.ToString()),
+                new Claim("TipoUtilizadorId", user.idtipoutilizador.ToString())
+            });
 
-            var token = tokenHandler.CreateToken(tokenDescriptor);
+            var token = new JwtTokenBuilder()
+                .SetSubject(claims)
+                .SetExpires(DateTime.UtcNow.AddHours(2))
+                .SetSigningCredentials(signingCredentials)
+                .Build();
+            
+            var tokenHandler = new JwtSecurityTokenHandler();
             var tokenString = tokenHandler.WriteToken(token);
 
             return Ok(new { Token = tokenString });
+        }
+    }
+    
+    public class JwtTokenBuilder
+    {
+        private readonly JwtSecurityTokenHandler _tokenHandler;
+        private readonly SecurityTokenDescriptor _tokenDescriptor;
+
+        public JwtTokenBuilder()
+        {
+            _tokenHandler = new JwtSecurityTokenHandler();
+            _tokenDescriptor = new SecurityTokenDescriptor();
+        }
+
+        public JwtTokenBuilder SetSubject(ClaimsIdentity subject)
+        {
+            _tokenDescriptor.Subject = subject;
+            return this;
+        }
+
+        public JwtTokenBuilder SetExpires(DateTime expires)
+        {
+            _tokenDescriptor.Expires = expires;
+            return this;
+        }
+
+        public JwtTokenBuilder SetSigningCredentials(SigningCredentials signingCredentials)
+        {
+            _tokenDescriptor.SigningCredentials = signingCredentials;
+            return this;
+        }
+
+        public SecurityToken Build()
+        {
+            return _tokenHandler.CreateToken(_tokenDescriptor);
         }
     }
 
@@ -112,7 +148,7 @@ namespace TrabalhoESII.Controllers
         public string Nacionalidade { get; set; }
         public int Idade { get; set; }
         public string Telefone { get; set; }
-        public int IdTipoUtilizador { get; set; } // Alterado para corresponder à chave estrangeira
+        public int IdTipoUtilizador { get; set; }
     }
 
     public class LoginModel
