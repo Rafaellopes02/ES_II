@@ -25,6 +25,7 @@ namespace TrabalhoESII.Models
         public DbSet<organizadoreseventos> organizadoreseventos { get; set; }
         public DbSet<atividades> atividades { get; set; }
         public DbSet<utilizadoresatividades> utilizadoresatividades { get; set; }
+        public DbSet<notificacoes> notificacoes { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -245,5 +246,21 @@ namespace TrabalhoESII.Models
         public int idevento { get; set; }
         [ForeignKey("idevento")]
         public eventos eventos { get; set; }
+    }
+    
+    public class notificacoes
+    {
+        [Key]
+        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+        public int idnotificacao { get; set; }
+    
+        [Required]
+        public int idutilizador { get; set; }
+    
+        [Required, MaxLength]
+        public string mensagem { get; set; }
+    
+        [ForeignKey("idutilizador")]
+        public virtual utilizadores utilizador { get; set; }
     }
 }
