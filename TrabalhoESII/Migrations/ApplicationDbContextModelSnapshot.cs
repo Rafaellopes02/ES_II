@@ -198,6 +198,28 @@ namespace TrabalhoESII.Migrations
                     b.ToTable("ingressos");
                 });
 
+            modelBuilder.Entity("TrabalhoESII.Models.notificacoes", b =>
+                {
+                    b.Property<int>("idnotificacao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("idnotificacao"));
+
+                    b.Property<int>("idutilizador")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("mensagem")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("idnotificacao");
+
+                    b.HasIndex("idutilizador");
+
+                    b.ToTable("notificacoes");
+                });
+
             modelBuilder.Entity("TrabalhoESII.Models.organizadoreseventos", b =>
                 {
                     b.Property<int>("idutilizador")
@@ -440,6 +462,17 @@ namespace TrabalhoESII.Migrations
                     b.Navigation("eventos");
 
                     b.Navigation("tiposingressos");
+                });
+
+            modelBuilder.Entity("TrabalhoESII.Models.notificacoes", b =>
+                {
+                    b.HasOne("TrabalhoESII.Models.utilizadores", "utilizador")
+                        .WithMany()
+                        .HasForeignKey("idutilizador")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("utilizador");
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.organizadoreseventos", b =>

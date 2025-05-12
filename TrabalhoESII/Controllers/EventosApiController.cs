@@ -282,11 +282,32 @@ namespace TrabalhoESII.Controllers
 
             return Ok("Inscrição feita com sucesso!");
         }
+        
+        [Authorize]
+        [HttpPost("/api/eventos/{id}/cancelar")]
+        public async Task<IActionResult> CancelarInscricao(int id)
+        {
+            var userIdClaim = User.FindFirst("UserId")?.Value;
+            if (!int.TryParse(userIdClaim, out var userId))
+                return Forbid();
+
+            var inscricao = await _context.organizadoreseventos
+                .FirstOrDefaultAsync(oe => oe.idevento == id && oe.idutilizador == userId && !oe.eorganizador);
+
+            if (inscricao == null)
+                return NotFound("Inscrição não encontrada.");
+
+            _context.organizadoreseventos.Remove(inscricao);
+            await _context.SaveChangesAsync();
+
+            return Ok("Inscrição cancelada com sucesso.");
+        }
+
+
 
 
 
     }
-    
 }
 
 
