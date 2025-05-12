@@ -14,6 +14,25 @@ namespace TrabalhoESII.Controllers
             _context = context;
         }
 
+         public async Task<IActionResult> AnaliseParticipacao(int? idevento)
+    {
+        if (idevento == null)
+            return BadRequest("Evento não especificado.");
+
+        var dados = await _context.atividades
+            .Where(a => a.idevento == idevento)
+            .Select(a => new GraficoParticipacaoViewModel
+            {
+                NomeAtividade = a.nome,
+                NumeroParticipantes = _context.utilizadoresatividades.Count(u => u.idatividade == a.idatividade)
+            })
+            .ToListAsync();
+
+        ViewBag.DadosGrafico = System.Text.Json.JsonSerializer.Serialize(dados);
+        return View();
+    }
+
+
         // A dashboard pode ser acedida sem login, mas vai exigir token via JS para os dados
         [AllowAnonymous]
         [HttpGet("/dashboard")]
@@ -51,5 +70,12 @@ namespace TrabalhoESII.Controllers
                 totalCategorias
             });
         }
+    
+    public async Task<IActionResult> EventosComGraficos()
+{
+    var eventos = await _context.eventos.ToListAsync();
+    return View(eventos);
+}
+    
     }
 }
