@@ -148,6 +148,9 @@ function renderizarEventos(eventos) {
             <button class="btn btn-outline-primary" onclick="carregarDetalhesEvento(${evento.idevento})">
                 Detalhes
             </button>
+            <button class="btn btn-outline-secondary">
+                Gerar Relatório
+            </button>
             <div id="detalhes-${evento.idevento}" style="display: none;"></div>
         `;
 
@@ -282,7 +285,114 @@ async function carregarCategorias(selectId) {
     }
 }
 
+async function gerarRelatorioEvento(id) {
+    try {
+        const token = localStorage.getItem("jwtToken");
+
+        const responseEvento = await fetch(`/api/eventos/detalhes/${id}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        if (!responseEvento.ok) throw new Error("Erro ao buscar detalhes do evento.");
+        const data = await responseEvento.json();
+
+        const responseAtividades = await fetch(`/api/atividades/search-atividades?idevento=${id}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        const atividades = responseAtividades.ok ? await responseAtividades.json() : [];
+
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+
+        let y = 20;
+
+        // Cabeçalho com fundo
+        doc.setFillColor(33, 150, 243); // Azul
+        doc.rect(0, 0, 210, 20, "F"); // Fundo retângulo no topo
+
+        doc.setFontSize(16);
+        doc.setTextColor(255, 255, 255);
+        doc.text("Relatório do Evento", 105, 13, null, null, "center");
+
+        doc.setTextColor(0, 0, 0); // voltar ao texto preto
+        doc.setFontSize(12);
+        y = 30;
+
+        // Dados do evento
+        doc.setFont(undefined, "bold");
+        doc.text("Informações do Evento:", 14, y); y += 8;
+        doc.setFont(undefined, "normal");
+
+        const info = [
+            [`Nome`, data.nome],
+            [`Descrição`, data.descricao],
+            [`Data`, data.data.split("T")[0]],
+            [`Hora`, data.hora],
+            [`Local`, data.local],
+            [`Categoria`, data.categoriaNome],
+            [`Capacidade`, data.capacidade.toString()],
+            [`Inscritos`, (data.inscritos ?? "N/A").toString()]
+        ];
+
+        info.forEach(([label, valor]) => {
+            doc.text(`${label}:`, 20, y);
+            doc.text(valor, 60, y);
+            y += 7;
+        });
+
+        y += 5;
+
+        // Separador
+        doc.setDrawColor(200, 200, 200);
+        doc.line(20, y, 190, y);
+        y += 10;
+
+        // Título da secção de atividades
+        doc.setFont(undefined, "bold");
+        doc.setFontSize(13);
+        doc.text("Atividades do Evento", 14, y);
+        y += 8;
+        doc.setFont(undefined, "normal");
+        doc.setFontSize(11);
+
+        if (atividades.length === 0) {
+            doc.text("Sem atividades registadas.", 20, y); y += 10;
+        } else {
+            atividades.forEach(atv => {
+                if (y > 270) { doc.addPage(); y = 20; }
+
+                doc.setFont(undefined, "bold");
+                doc.text(`• ${atv.nome}`, 20, y); y += 6;
+
+                doc.setFont(undefined, "normal");
+                doc.text(`Data: ${atv.data}    Hora: ${atv.hora}`, 25, y); y += 6;
+                doc.text(`Capacidade: ${atv.quantidademaxima}`, 25, y); y += 6;
+
+                if (atv.descricao) {
+                    const splitDescricao = doc.splitTextToSize(`Descrição: ${atv.descricao}`, 160);
+                    doc.text(splitDescricao, 25, y);
+                    y += splitDescricao.length * 6;
+                }
+
+                y += 4;
+            });
+        }
+
+        doc.save(`Evento_${data.nome.replace(/\s+/g, "_")}.pdf`);
+    } catch (err) {
+        console.error("Erro ao gerar relatório:", err);
+        await Swal.fire({
+            icon: 'error',
+            title: 'Erro',
+            text: 'Não foi possível gerar o relatório.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+    }
+}
 document.body.addEventListener("click", async (e) => {
+    // Inscrever-me
     if (e.target.classList.contains("inscrever-btn")) {
         const id = e.target.dataset.id;
 
@@ -354,5 +464,23 @@ document.body.addEventListener("click", async (e) => {
                 showConfirmButton: false
             });
         }
+    }
+
+    // Gerar Relatório (PDF)
+    if (e.target.classList.contains("btn-outline-secondary")) {
+        const id = e.target.closest(".event-card")?.querySelector(".editar-btn")?.dataset.id;
+
+        if (!id) {
+            await Swal.fire({
+                icon: "error",
+                title: "Erro",
+                text: "ID do evento não encontrado.",
+                timer: 2000,
+                showConfirmButton: false
+            });
+            return;
+        }
+
+        await gerarRelatorioEvento(id);
     }
 });
