@@ -28,6 +28,19 @@ public class Program
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
+
+                // 🔑 Lê o token diretamente do cookie (jwtToken)
+                options.Events = new JwtBearerEvents
+                {
+                    OnMessageReceived = context =>
+                    {
+                        if (context.Request.Cookies.ContainsKey("jwtToken"))
+                        {
+                            context.Token = context.Request.Cookies["jwtToken"];
+                        }
+                        return Task.CompletedTask;
+                    }
+                };
             });
 
         // Configuração da autorização

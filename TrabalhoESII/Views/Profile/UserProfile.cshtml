@@ -1,4 +1,6 @@
-﻿@{
+﻿@addTagHelper *, Microsoft.AspNetCore.Mvc.TagHelpers
+
+@{
     ViewData["Title"] = "Perfil de Utilizador";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
@@ -13,8 +15,7 @@
             <p class="card-text"><strong>Idade:</strong> <span id="userIdade"></span></p>
             <p class="card-text"><strong>Telefone:</strong> <span id="userTelefone"></span></p>
             <p class="card-text"><strong>Nacionalidade:</strong> <span id="userNacionalidade"></span></p>
-            
-            <!--<a asp-controller="Profile" asp-action="EditUserProfile" class="btn btn-primary mt-3">Editar Perfil</a>-->
+            <a class="btn btn-primary" asp-controller="Profile" asp-action="EditUserProfile">Editar Perfil</a>
         </div>
     </div>
 </main>
