@@ -100,7 +100,15 @@ namespace TrabalhoESII.Controllers
             var tokenHandler = new JwtSecurityTokenHandler();
             var tokenString = tokenHandler.WriteToken(token);
 
-            return Ok(new { Token = tokenString });
+            Response.Cookies.Append("jwtToken", tokenString, new CookieOptions
+            {
+                HttpOnly = true,
+                Secure = true,
+                SameSite = SameSiteMode.Strict,
+                Expires = DateTime.UtcNow.AddHours(2)
+            });
+
+return Ok(new { message = "Login efetuado com sucesso" });
         }
     }
     

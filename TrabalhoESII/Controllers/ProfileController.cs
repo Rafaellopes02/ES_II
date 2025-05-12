@@ -53,17 +53,14 @@ namespace TrabalhoESII.Controllers
         [HttpGet("/profile/edit")]
         public async Task<IActionResult> EditUserProfile()
         {
-            // Obtém o ID do utilizador logado
             var userIdClaim = User.FindFirst("UserId");
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-                return Unauthorized(); // ou redirecionar para login
-            
-            // Localiza o utilizador pelo ID
+                return Unauthorized();
+
             var user = await _context.utilizadores.FirstOrDefaultAsync(u => u.idutilizador == userId);
             if (user == null)
                 return NotFound();
 
-            // Monta um model para a view, preenchendo dados atuais
             var model = new ProfileModel
             {
                 Nome = user.nome,
@@ -89,31 +86,20 @@ namespace TrabalhoESII.Controllers
             if (user == null)
                 return NotFound();
 
-            // Atualiza apenas os campos permitidos
             user.nome = model.Nome;
             user.email = model.Email;
             user.idade = model.Idade;
             user.telefone = model.Telefone;
             user.nacionalidade = model.Nacionalidade;
-            // user.nomeutilizador não deve ser alterado
 
-            // Se o utilizador preencheu a nova senha
-            if (!string.IsNullOrEmpty(NovaSenha) || !string.IsNullOrEmpty(ConfirmarSenha))
+            if (!string.IsNullOrEmpty(NovaSenha) && NovaSenha == ConfirmarSenha)
             {
-                if (NovaSenha != ConfirmarSenha)
-                {
-                    ViewBag.StatusMessage = "As senhas não coincidem.";
-                    return View("EditUserProfile", model);
-                }
-
-                // Hasheia usando o mesmo método do AuthController
                 user.senha = BCrypt.Net.BCrypt.HashPassword(NovaSenha);
             }
 
             await _context.SaveChangesAsync();
-            
-            // Opcional: Exibir mensagem de sucesso ou redirecionar para o perfil
-            ViewBag.StatusMessage = "Dados atualizados com sucesso!";
+
+            ViewBag.StatusMessage = "Perfil atualizado com sucesso!";
             return View("EditUserProfile", model);
         }
     }
