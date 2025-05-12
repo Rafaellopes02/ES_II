@@ -31,6 +31,7 @@
 
     <ItemGroup>
       <_ContentIncludedByDefault Remove="Views\Perfil\perfilutilizador.cshtml" />
+      <_ContentIncludedByDefault Remove="Views\Eventos\Relatorio\Index.cshtml" />
     </ItemGroup>
 
     <ItemGroup>
