@@ -28,8 +28,6 @@ public class Program
                     ValidateIssuer = false,
                     ValidateAudience = false
                 };
-
-                // 🔑 Lê o token diretamente do cookie (jwtToken)
                 options.Events = new JwtBearerEvents
                 {
                     OnMessageReceived = context =>
