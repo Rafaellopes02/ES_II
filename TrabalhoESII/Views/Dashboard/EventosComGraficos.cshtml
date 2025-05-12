@@ -1,0 +1,31 @@
+@model List<TrabalhoESII.Models.eventos>
+
+@{
+    ViewData["Title"] = "Eventos e Gráficos";
+}
+
+<h2>Eventos Disponíveis</h2>
+
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Nome</th>
+            <th>Data</th>
+            <th>Ações</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var evento in Model)
+        {
+            <tr>
+                <td>@evento.nome</td>
+                <td>@evento.data.ToShortDateString()</td>
+                <td>
+                    <a class="btn btn-sm btn-outline-primary" href="/dashboard/analiseparticipacao?idevento=@evento.idevento">
+                        Ver Gráfico de Participação
+                    </a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

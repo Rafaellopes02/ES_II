@@ -1,0 +1,38 @@
+@{
+    ViewData["Title"] = "Análise de Participação";
+    var dados = ViewBag.DadosGrafico;
+}
+
+<h2>Análise de Participação</h2>
+
+<canvas id="graficoParticipacao" width="600" height="300"></canvas>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const ctx = document.getElementById('graficoParticipacao').getContext('2d');
+    const dadosGrafico = JSON.parse('@Html.Raw(dados)');
+
+    const labels = dadosGrafico.map(d => d.NomeAtividade);
+    const valores = dadosGrafico.map(d => d.NumeroParticipantes);
+
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: labels,
+            datasets: [{
+                label: 'Participantes por Atividade',
+                data: valores,
+                borderWidth: 1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    precision: 0
+                }
+            }
+        }
+    });
+</script>
