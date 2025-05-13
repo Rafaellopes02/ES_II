@@ -12,10 +12,11 @@
 
 <link rel="stylesheet" href="~/css/eventosdetalhes.css" />
 
+<!-- DETALHES DO EVENTO -->
 <div class="hero-section bg-light rounded p-4 mb-4 shadow-sm">
     <div class="container">
         <h1 class="display-5 fw-bold text-center mb-4">#@idEvento - @nomeEvento</h1>
-
+        
         <div class="row">
             <div class="col-md-12">
                 <p><strong>Descrição:</strong> @descricaoEvento</p>
@@ -26,8 +27,15 @@
             </div>
         </div>
     </div>
+    <div id="verInscritosContainer" class="mb-3">
+        <button id="verInscritosBtn" class="btn btn-primary mt-3">Ver Inscritos</button>
+
+    </div>
+
+    <div id="listaInscritos" class="mt-3" style="display: none;"></div>
 </div>
 
+<!-- ATIVIDADES -->
 <div class="container mb-5">
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h2 class="fw-bold">Atividades</h2>
@@ -41,13 +49,12 @@
 
     <input type="hidden" id="ideventoHidden" value="@idEvento" />
 
-    <!-- Lista de Atividades -->
     <div id="listaAtividades">
         <!-- preenchido via JS -->
     </div>
 </div>
 
-@* Modal *@
+<!-- MODAL NOVA ATIVIDADE -->
 <div class="modal fade" id="modalNovaAtividade" tabindex="-1" aria-labelledby="modalNovaAtividadeLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -83,7 +90,7 @@
     </div>
 </div>
 
-<!-- Importações JS -->
+<!-- IMPORTAÇÕES JS -->
 <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet" />
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>

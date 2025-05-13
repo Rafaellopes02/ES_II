@@ -142,7 +142,27 @@ namespace TrabalhoESII.Controllers
 
             return Ok(eventos);
         }
+        
+        [HttpGet("{id}/inscritos")]
+        [Authorize]
+        public async Task<IActionResult> ObterInscritos(int id)
+        {
+            var evento = await _context.eventos.FindAsync(id);
+            if (evento == null)
+                return NotFound("Evento não encontrado.");
 
+            var inscritos = await _context.organizadoreseventos
+                .Where(o => o.idevento == id && o.eorganizador == false)
+                .Include(o => o.utilizadores) // garantir que os dados do utilizador são carregados
+                .Select(o => new
+                {
+                    nome = o.utilizadores.nome,
+                    email = o.utilizadores.email
+                })
+                .ToListAsync();
+
+            return Ok(inscritos);
+        }
 
         
         

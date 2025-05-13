@@ -1,7 +1,51 @@
-﻿document.addEventListener("DOMContentLoaded", carregarAtividades);
+﻿document.addEventListener("DOMContentLoaded", async () => {
+    await carregarAtividades();
+});
+
+// ✅ Função correta para ler o token dos cookies
+function getCookieToken() {
+    const name = "jwtToken=";
+    const decoded = decodeURIComponent(document.cookie);
+    const parts = decoded.split(';');
+
+    for (let i = 0; i < parts.length; i++) {
+        let c = parts[i].trim();
+        if (c.indexOf(name) === 0) {
+            return c.substring(name.length, c.length);
+        }
+    }
+
+    return null;
+}
+
+function getUserIdFromToken() {
+    const token = getCookieToken();
+    if (!token) return null;
+
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return parseInt(payload.UserId);
+    } catch (err) {
+        console.error("Erro ao extrair UserId:", err);
+        return null;
+    }
+}
+
+function getUserTypeFromToken() {
+    const token = getCookieToken();
+    if (!token) return null;
+
+    try {
+        const payload = JSON.parse(atob(token.split('.')[1]));
+        return parseInt(payload.TipoUtilizadorId);
+    } catch (err) {
+        console.error("Erro ao extrair TipoUtilizadorId:", err);
+        return null;
+    }
+}
 
 async function carregarAtividades() {
-    const token = localStorage.getItem("jwtToken");
+    const token = getCookieToken();
     const idevento = parseInt(document.getElementById("ideventoHidden").value);
 
     try {
@@ -50,7 +94,7 @@ async function carregarAtividades() {
 }
 
 async function submeterAtividade() {
-    const token = localStorage.getItem("jwtToken");
+    const token = getCookieToken();
     const idevento = parseInt(document.getElementById("ideventoHidden").value);
 
     const atividade = {
@@ -108,7 +152,7 @@ document.body.addEventListener("click", async (e) => {
 
         if (!confirmacao.isConfirmed) return;
 
-        const token = localStorage.getItem("jwtToken");
+        const token = getCookieToken();
 
         try {
             const response = await fetch(`/api/atividades/${id}/inscrever`, {
@@ -136,4 +180,51 @@ document.body.addEventListener("click", async (e) => {
             Swal.fire("Erro", "Erro ao comunicar com o servidor", "error");
         }
     }
+
+    if (e.target.id === "verInscritosBtn") {
+        await carregarInscritos();
+    }
 });
+
+async function carregarInscritos() {
+    const lista = document.getElementById("listaInscritos");
+
+    // Se a lista já estiver visível, oculta-a e termina
+    if (lista.style.display === "block") {
+        lista.style.display = "none";
+        return;
+    }
+
+    // Caso contrário, mostra a lista (e carrega os dados)
+    const token = getCookieToken();
+    const idevento = parseInt(document.getElementById("ideventoHidden").value);
+
+    try {
+        const response = await fetch(`/api/eventos/${idevento}/inscritos`, {
+            headers: {
+                "Authorization": `Bearer ${token}`
+            }
+        });
+
+        if (!response.ok) throw new Error("Erro ao buscar inscritos");
+
+        const inscritos = await response.json();
+
+        if (inscritos.length === 0) {
+            lista.innerHTML = "<p class='text-muted mt-3'>Sem inscritos neste evento.</p>";
+        } else {
+            let html = "<ul class='list-group mt-3'>";
+            inscritos.forEach(i => {
+                html += `<li class='list-group-item'>${i.nome} (${i.email})</li>`;
+            });
+            html += "</ul>";
+            lista.innerHTML = html;
+        }
+
+        lista.style.display = "block"; // mostra a lista
+    } catch (err) {
+        console.error("Erro ao buscar inscritos:", err);
+        Swal.fire("Erro", "Não foi possível carregar a lista de inscritos.", "error");
+    }
+}
+
