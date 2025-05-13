@@ -1,4 +1,6 @@
-﻿@model TrabalhoESII.Models.ProfileModel
+﻿<script src="~/js/paises.js"></script>
+
+@model TrabalhoESII.Models.ProfileModel
 
 @{
     ViewData["Title"] = "Editar Perfil";
@@ -36,9 +38,12 @@
         </div>
 
         <div class="mb-3">
-            <label asp-for="Nacionalidade" class="form-label"></label>
-            <input asp-for="Nacionalidade" class="form-control" />
+            <label for="nacionalidade" class="form-label">Nacionalidade</label>
+            <select id="nacionalidade" name="Nacionalidade" class="form-select">
+                <option value="">Selecione...</option>
+            </select>
         </div>
+
 
         <!-- Mostra apenas como texto o nome de utilizador (não editável) -->
         <div class="mb-3">
@@ -60,4 +65,31 @@
 
         <button type="submit" class="btn btn-primary">Aplicar Alterações</button>
     </form>
+
+    <script>
+        document.addEventListener("DOMContentLoaded", function () {
+            const tentaPreencher = () => {
+                if (typeof paises === "undefined") {
+                    setTimeout(tentaPreencher, 50);
+                    return;
+                }
+
+                const select = document.getElementById("nacionalidade");
+                const atual = "@Model.Nacionalidade";
+
+                paises.forEach(pais => {
+                    const option = document.createElement("option");
+                    option.value = pais;
+                    option.text = pais;
+                    if (pais === atual) option.selected = true;
+                    select.appendChild(option);
+                });
+            };
+
+            tentaPreencher();
+        });
+    </script>
+
+
+
 </main>
