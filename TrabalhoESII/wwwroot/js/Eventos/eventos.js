@@ -130,32 +130,40 @@ function renderizarEventos(eventos) {
     eventos.forEach(evento => {
         const formattedDate = new Date(evento.data).toLocaleDateString('pt-PT');
         const eventoPassado = new Date(evento.data) < new Date().setHours(0, 0, 0, 0);
-        // Calcular percentagem de inscritos (fallback para 0 se não vier do backend)
         const inscritos = evento.inscritos ?? 0;
         const percentagem = Math.min(100, Math.round((inscritos / evento.capacidade) * 100));
+        const corBarra = percentagem === 100 ? "bg-primary" : "bg-info";
 
-        const corBarra = percentagem === 100 ? "bg-primary" : "bg-info"; // azul escuro se cheio
         const barra = `
             <div class="progress">
-                 <div class="progress-bar ${corBarra}" style="width: ${percentagem}%">
-                     ${percentagem}% da capacidade
-                 </div>
+                <div class="progress-bar ${corBarra}" style="width: ${percentagem}%">
+                    ${percentagem}% da capacidade
+                </div>
             </div>
         `;
 
+        let botoesPrincipais = `
+    <button class="btn btn-outline-primary" onclick="carregarDetalhesEvento(${evento.idevento})">
+        Detalhes
+    </button>
+`;
 
-        let botoes = `
-            <button class="btn btn-outline-primary" onclick="carregarDetalhesEvento(${evento.idevento})">
-                Detalhes
-            </button>
-            <button class="btn btn-outline-secondary">
-                Gerar Relatório
-            </button>
-            <div id="detalhes-${evento.idevento}" style="display: none;"></div>
-        `;
+        if ((evento.eorganizador && evento.idutilizador === userId) || userType === 1) {
+            botoesPrincipais += `
+        <button class="btn btn-outline-secondary">
+            Gerar Relatório
+        </button>
+    `;
+        }
 
-        if ((evento.idutilizador === userId && evento.eorganizador) || userType === 1) {
-            botoes += `
+        botoesPrincipais += `
+    <div id="detalhes-${evento.idevento}" style="display: none;"></div>
+`;
+
+
+        // Botões de edição para organizadores ou admin
+        if ((evento.eorganizador && evento.idutilizador === userId) || userType === 1) {
+            botoesPrincipais += `
                 <button 
                     class="btn btn-outline-primary editar-btn"
                     data-id="${evento.idevento}"
@@ -175,26 +183,51 @@ function renderizarEventos(eventos) {
                 </button>
             `;
         }
-        else if (!evento.inscrito && userType === 3 && evento.inscritos < evento.capacidade && !eventoPassado) {
-            botoes += `
-        <button 
-            class="btn btn-outline-success inscrever-btn"
-            data-id="${evento.idevento}">
-            Inscrever-me
-        </button>
-    `;
-        } else {
-            botoes += `
-        <button 
-    class="btn btn-outline-success Entrar-btn"
-    onclick="window.location.href='/Eventos/${evento.idevento}'">
-    Entrar
-</button>
 
-    `;
+        // Botões secundários (Entrar, Inscrever, Cancelar) com alinhamento à direita
+        let botoesSecundarios = "";
+
+        // Entrar: participante inscrito, organizador ou admin
+        if (
+            (evento.inscrito && userType === 3) ||
+            (evento.eorganizador && evento.idutilizador === userId) ||
+            userType === 1
+        ) {
+            botoesSecundarios += `
+                <button 
+                    class="btn btn-outline-success Entrar-btn me-2"
+                    onclick="window.location.href='/Eventos/${evento.idevento}'">
+                    Entrar
+                </button>
+            `;
         }
-        botoes += `</div>`;
 
+        // Cancelar inscrição: apenas participante inscrito (que não seja organizador)
+        if (
+            userType === 3 &&
+            evento.inscrito &&
+            !eventoPassado &&
+            !(evento.eorganizador && evento.idutilizador === userId)
+        ) {
+            botoesSecundarios += `
+                <button 
+                    class="btn btn-outline-warning cancelar-btn"
+                    data-id="${evento.idevento}">
+                    Cancelar inscrição
+                </button>
+            `;
+        }
+
+        // Inscrever-me: participante não inscrito, evento com vagas e futuro
+        if (!evento.inscrito && userType === 3 && inscritos < evento.capacidade && !eventoPassado) {
+            botoesSecundarios += `
+                <button 
+                    class="btn btn-outline-success inscrever-btn"
+                    data-id="${evento.idevento}">
+                    Inscrever-me
+                </button>
+            `;
+        }
 
         const card = document.createElement("div");
         card.className = "card mb-3 p-3 event-card";
@@ -205,12 +238,17 @@ function renderizarEventos(eventos) {
                 <small class="text-muted">${formattedDate} · ${evento.hora} · ${evento.local}</small>
             </p>
             ${barra}
-            <div class="mt-3">${botoes}</div>
+            <div class="d-flex justify-content-between align-items-center mt-3 flex-wrap gap-2">
+                <div>${botoesPrincipais}</div>
+                <div class="ms-auto">${botoesSecundarios}</div>
+            </div>
         `;
 
         eventList.appendChild(card);
     });
 }
+
+
 
 
 function carregarDetalhesEvento(id) {
@@ -482,5 +520,130 @@ document.body.addEventListener("click", async (e) => {
         }
 
         await gerarRelatorioEvento(id);
+    }
+});
+
+document.body.addEventListener("click", async (e) => {
+    if (e.target.classList.contains("inscrever-btn")) {
+        const id = e.target.dataset.id;
+
+        const confirmacao = await Swal.fire({
+            title: "Confirmar inscrição?",
+            icon: "question",
+            showCancelButton: true,
+            confirmButtonText: "Sim, inscrever-me",
+            cancelButtonText: "Cancelar"
+        });
+
+        if (!confirmacao.isConfirmed) return;
+
+        const token = localStorage.getItem("jwtToken");
+        if (!token) {
+            await Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'warning',
+                title: 'Sessão expirada',
+                text: 'Por favor, inicie sessão.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+            window.location.href = "/login";
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/eventos/${id}/inscrever`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${token}`
+                }
+            });
+
+            if (response.ok) {
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Inscrito com sucesso!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+
+                location.reload();
+            } else {
+                const msg = await response.text();
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao inscrever',
+                    text: msg,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        } catch (err) {
+            console.error("Erro ao inscrever:", err);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Erro de ligação',
+                text: 'Erro ao comunicar com o servidor.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    }
+
+    // ✅ Cancelar inscrição — FORA do outro listener
+    if (e.target.classList.contains("cancelar-btn")) {
+        const id = e.target.dataset.id;
+
+        const confirmacao = await Swal.fire({
+            title: "Cancelar inscrição?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, cancelar",
+            cancelButtonText: "Não"
+        });
+
+        if (!confirmacao.isConfirmed) return;
+
+        try {
+            const response = await fetch(`/api/eventos/${id}/cancelar`, {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
+                }
+            });
+
+            if (response.ok) {
+                await Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Inscrição cancelada!',
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                location.reload();
+            } else {
+                const msg = await response.text();
+                await Swal.fire({
+                    icon: 'error',
+                    title: 'Erro ao cancelar',
+                    text: msg,
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+            }
+        } catch (err) {
+            console.error("Erro ao cancelar inscrição:", err);
+            await Swal.fire({
+                icon: 'error',
+                title: 'Erro de ligação',
+                text: 'Erro ao comunicar com o servidor.',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
     }
 });
