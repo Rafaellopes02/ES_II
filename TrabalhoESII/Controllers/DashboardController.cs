@@ -14,47 +14,34 @@ namespace TrabalhoESII.Controllers
             _context = context;
         }
 
-         public async Task<IActionResult> AnaliseParticipacao(int? idevento)
-    {
-        if (idevento == null)
-            return BadRequest("Evento não especificado.");
+        // ✅ Página com gráfico de participação (apenas renderiza a view, pode ser pública)
+        public async Task<IActionResult> AnaliseParticipacao(int? idevento)
+        {
+            if (idevento == null)
+                return BadRequest("Evento não especificado.");
 
-        var dados = await _context.atividades
-            .Where(a => a.idevento == idevento)
-            .Select(a => new GraficoParticipacaoViewModel
-            {
-                NomeAtividade = a.nome,
-                NumeroParticipantes = _context.utilizadoresatividades.Count(u => u.idatividade == a.idatividade)
-            })
-            .ToListAsync();
+            var dados = await _context.atividades
+                .Where(a => a.idevento == idevento)
+                .Select(a => new GraficoParticipacaoViewModel
+                {
+                    NomeAtividade = a.nome,
+                    NumeroParticipantes = _context.utilizadoresatividades.Count(u => u.idatividade == a.idatividade)
+                })
+                .ToListAsync();
 
-        ViewBag.DadosGrafico = System.Text.Json.JsonSerializer.Serialize(dados);
-        return View();
-    }
+            ViewBag.DadosGrafico = System.Text.Json.JsonSerializer.Serialize(dados);
+            return View();
+        }
 
-
-        // A dashboard pode ser acedida sem login, mas vai exigir token via JS para os dados
+        // ✅ A View é pública, mas o JS vai buscar os dados protegidos
         [AllowAnonymous]
         [HttpGet("/dashboard")]
         public IActionResult Index()
         {
-            string tipo = "Desconhecido";
-
-            if (User.Identity != null && User.Identity.IsAuthenticated)
-            {
-                var tipoId = User.Claims.FirstOrDefault(c => c.Type == "TipoUtilizadorId")?.Value;
-
-                if (tipoId == "1") tipo = "Admin";
-                else if (tipoId == "2") tipo = "UserManager";
-                else if (tipoId == "3") tipo = "User";
-            }
-
-            ViewBag.UserType = tipo;
             return View("Dashboard");
         }
 
-
-        // Este endpoint exige JWT e retorna JSON
+        // ✅ Protegido com JWT — só acessível se tiver token válido
         [Authorize]
         [HttpGet("/dashboard/stats")]
         public async Task<IActionResult> GetDashboardStats()
@@ -70,12 +57,12 @@ namespace TrabalhoESII.Controllers
                 totalCategorias
             });
         }
-    
-    public async Task<IActionResult> EventosComGraficos()
-{
-    var eventos = await _context.eventos.ToListAsync();
-    return View(eventos);
-}
-    
+
+        // ✅ Página que mostra gráficos com eventos
+        public async Task<IActionResult> EventosComGraficos()
+        {
+            var eventos = await _context.eventos.ToListAsync();
+            return View(eventos);
+        }
     }
 }

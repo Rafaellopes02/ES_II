@@ -1,21 +1,41 @@
-﻿document.addEventListener("DOMContentLoaded", async () => {
-    const token = localStorage.getItem("jwtToken");
+﻿async function getUserIdAndType() {
+    try {
+        const response = await fetch("/api/auth/me", {
+            credentials: "include"
+        });
 
-    if (!token) {
+        if (!response.ok) throw new Error("Não autenticado");
+
+        const data = await response.json();
+        return {
+            userId: parseInt(data.userId),
+            userType: parseInt(data.tipoUtilizador)
+        };
+    } catch (err) {
+        console.error("Erro ao obter dados do utilizador:", err);
+        return { userId: null, userType: null };
+    }
+}
+
+document.addEventListener("DOMContentLoaded", async () => {
+    const auth = await getUserIdAndType();
+
+    
+    
+    
+    if (!auth.userId || !auth.userType) {
         window.location.href = "/login";
         return;
     }
 
     try {
         const response = await fetch("/eventos/stats", {
-            headers: {
-                "Authorization": `Bearer ${token}`
-            }
+            credentials: "include" // Usa cookie HttpOnly
         });
 
         if (response.ok) {
             const data = await response.json();
-            renderizarEventos(data.eventos);
+            renderizarEventos(data.eventos, auth.userId, auth.userType); // Aqui sim!
         } else if (response.status === 401) {
             await Swal.fire({
                 icon: 'warning',
@@ -24,7 +44,6 @@
                 timer: 2000,
                 showConfirmButton: false
             });
-            localStorage.removeItem("jwtToken");
             window.location.href = "/login";
         } else {
             await Swal.fire({
@@ -46,84 +65,15 @@
         });
     }
 
-    const botaoPesquisa = document.getElementById("searchBtn");
-    if (botaoPesquisa) {
-        botaoPesquisa.addEventListener("click", async () => {
-            const nome = document.getElementById("searchNome").value;
-            const data = document.getElementById("searchData").value;
-            const local = document.getElementById("searchLocal").value;
-            const idCategoria = document.getElementById("searchCategoria").value;
-
-            const params = new URLSearchParams();
-            if (nome) params.append("nome", nome);
-            if (data) params.append("data", data);
-            if (local) params.append("local", local);
-            if (idCategoria) params.append("idCategoria", idCategoria);
-
-            try {
-                const response = await fetch(`/api/eventos/search?${params.toString()}`, {
-                    headers: { "Authorization": `Bearer ${token}` }
-                });
-
-                if (response.ok) {
-                    const eventos = await response.json();
-                    renderizarEventos(eventos);
-                } else {
-                    await Swal.fire({
-                        icon: 'error',
-                        title: 'Erro ao pesquisar',
-                        text: 'Não foi possível encontrar os eventos com os filtros aplicados.',
-                        timer: 2000,
-                        showConfirmButton: false
-                    });
-                }
-            } catch (err) {
-                console.error("Erro:", err);
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Erro de ligação',
-                    text: 'Erro de ligação ao servidor.',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            }
-        });
-    }
-
     carregarCategorias("searchCategoria");
     carregarCategorias("eventCategory");
     carregarCategorias("editEventCategory");
 });
 
-function getUserIdFromToken() {
-    const token = localStorage.getItem("jwtToken");
-    if (!token) return null;
 
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return parseInt(payload.UserId);
-    } catch (err) {
-        console.error("Erro ao extrair UserId do token:", err);
-        return null;
-    }
-}
 
-function getUserTypeFromToken() {
-    const token = localStorage.getItem("jwtToken");
-    if (!token) return null;
-
-    try {
-        const payload = JSON.parse(atob(token.split('.')[1]));
-        return parseInt(payload.TipoUtilizadorId); // deve bater com o nome no backend
-    } catch (err) {
-        console.error("Erro ao extrair TipoUtilizadorId do token:", err);
-        return null;
-    }
-}
-
-function renderizarEventos(eventos) {
-    const userId = getUserIdFromToken();
-    const userType = getUserTypeFromToken();
+function renderizarEventos(eventos, userId, userType) {
+    
     const eventList = document.getElementById("eventList");
     eventList.innerHTML = "";
 

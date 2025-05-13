@@ -61,20 +61,34 @@
 @await RenderSectionAsync("Scripts", required: false)
 
 <script>
-    document.addEventListener("DOMContentLoaded", () => {
-        const token = localStorage.getItem("jwtToken");
+    document.addEventListener("DOMContentLoaded", async () => {
         const logoutBtn = document.getElementById("logoutBtn");
         const perfilLink = document.getElementById("perfilLink");
 
-        if (token && logoutBtn && perfilLink) {
-            logoutBtn.classList.remove("d-none");
-            perfilLink.classList.remove("d-none");
-            logoutBtn.addEventListener("click", () => {
-                localStorage.removeItem("jwtToken");
-                window.location.href = "/login";
-            });
+        try {
+            const res = await fetch("/api/auth/me", { credentials: "include" });
+            if (res.ok) {
+                logoutBtn?.classList.remove("d-none");
+                perfilLink?.classList.remove("d-none");
+            }
+        } catch (e) {
+            console.warn("Utilizador não autenticado.");
         }
+
+        logoutBtn?.addEventListener("click", async () => {
+            try {
+                await fetch("/api/auth/logout", {
+                    method: "POST",
+                    credentials: "include"
+                });
+            } catch (error) {
+                console.error("Erro ao fazer logout:", error);
+            } finally {
+                window.location.href = "/login";
+            }
+        });
     });
+
 </script>
 
 </body>
