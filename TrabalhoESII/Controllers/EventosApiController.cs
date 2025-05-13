@@ -165,6 +165,10 @@ namespace TrabalhoESII.Controllers
             var eventoExistente = await _context.eventos.FindAsync(id);
             if (eventoExistente == null)
                 return NotFound("Evento não encontrado.");
+            
+            bool dataAlterada = eventoExistente.data != DateTime.SpecifyKind(evento.data, DateTimeKind.Utc);
+            bool localAlterado = eventoExistente.local != evento.local;
+            bool nomeAlterado = eventoExistente.nome != evento.nome;
 
             eventoExistente.nome = evento.nome;
             eventoExistente.descricao = evento.descricao;
@@ -175,10 +179,12 @@ namespace TrabalhoESII.Controllers
             eventoExistente.idcategoria = evento.idCategoria;
 
             await _context.SaveChangesAsync();
+            if (dataAlterada || localAlterado || nomeAlterado)
+            {
+                await CriarNotificacoesParaInscritos(id, eventoExistente, dataAlterada, localAlterado, nomeAlterado);
+            }
             return Ok("Evento atualizado com sucesso.");
         }
-
-
         
         [HttpGet("categorias")]
         public IActionResult GetCategorias()
@@ -216,6 +222,21 @@ namespace TrabalhoESII.Controllers
             var evento = await _context.eventos.FindAsync(id);
             if (evento == null)
                 return NotFound("Evento não encontrado.");
+            
+            var participantes = await _context.organizadoreseventos
+                .Where(oe => oe.idevento == id && !oe.eorganizador)
+                .Select(oe => oe.idutilizador)
+                .ToListAsync();
+
+            foreach (var idUtilizador in participantes)
+            {
+                var notificacao = new notificacoes
+                {
+                    idutilizador = idUtilizador,
+                    mensagem = $"O evento {evento.nome} foi cancelado."
+                };
+                _context.notificacoes.Add(notificacao);
+            }
 
             // Apagar todas as relações com este evento
             var relacoes = _context.organizadoreseventos.Where(oe => oe.idevento == id);
@@ -303,10 +324,39 @@ namespace TrabalhoESII.Controllers
             return Ok("Inscrição cancelada com sucesso.");
         }
 
+        private async Task CriarNotificacoesParaInscritos(int idevento, eventos evento, bool dataAlterada, bool localAlterado, bool nomeAlterado)
+        {
+            var participantes = await _context.organizadoreseventos
+                .Where(oe => oe.idevento == idevento && !oe.eorganizador)
+                .Select(oe => oe.idutilizador)
+                .ToListAsync();
 
+            if (!participantes.Any()) return;
 
+            // Construir mensagem baseada nas alterações
+            var mensagem = "O evento " + evento.nome + " foi alterado: ";
+            var alteracoes = new List<string>();
+    
+            if (nomeAlterado) alteracoes.Add("nome");
+            if (dataAlterada) alteracoes.Add("data");
+            if (localAlterado) alteracoes.Add("localização");
+    
+            mensagem += string.Join(", ", alteracoes) + ".";
 
+            // Criar notificações para cada participante
+            foreach (var idUtilizador in participantes)
+            {
+                var notificacao = new notificacoes
+                {
+                    idutilizador = idUtilizador,
+                    mensagem = mensagem
+                };
 
+                _context.notificacoes.Add(notificacao);
+            }
+
+            await _context.SaveChangesAsync();
+        }
     }
 }
 
