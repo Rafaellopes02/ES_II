@@ -82,64 +82,63 @@
             </div>
         </div>
     </section>
-    <div class="alert alert-info text-center my-3" id="userTypeMessage"></div>
 
 <a class="btn btn-outline-secondary" href="/dashboard/eventoscomgraficos">
     Ver Participação por Evento
 </a>
 </main>
 
-<script>
-    document.addEventListener("DOMContentLoaded", async () => {
-        const token = localStorage.getItem("jwtToken");
-        if (!token) {
-            window.location.href = "/login";
-            return;
-        }
+    <script>
+        document.addEventListener("DOMContentLoaded", async () => {
+        // Função para obter dados do utilizador autenticado
+        async function getUserInfo() {
+            try {
+                const response = await fetch("/api/auth/me", {
+                    credentials: "include" // envia o cookie jwtToken
+                });
 
-        try {
-            const response = await fetch("/dashboard/stats", {
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
+                if (!response.ok) throw new Error("Token inválido");
 
-            if (response.ok) {
                 const data = await response.json();
-                document.getElementById("totalEventos").textContent = data.totalEventos;
-                document.getElementById("totalParticipantes").textContent = data.totalParticipantes;
-                document.getElementById("totalCategorias").textContent = data.totalCategorias;
-            } else if (response.status === 401) {
-                alert("Não autorizado. Faça login novamente.");
-                localStorage.removeItem("jwtToken");
-                window.location.href = "/login";
-                return;
-            } else {
-                alert("Erro ao buscar dados da dashboard.");
+                return {
+                    userId: parseInt(data.userId),
+                    tipoUtilizador: parseInt(data.tipoUtilizador)
+                };
+            } catch (err) {
+                console.error("Erro ao obter dados do utilizador:", err);
+                return null;
             }
-        } catch (error) {
-            console.error(error);
-            alert("Erro de comunicação com o servidor.");
         }
 
-        // ⚠️ IMPORTANTE: analisar o token e extrair o payload
+        // Verificar autenticação
+        const userInfo = await getUserInfo();
+        if (!userInfo || !userInfo.userId || !userInfo.tipoUtilizador) {
+        window.location.href = "/login";
+        return;
+    }
+
+        // Carregar dados da dashboard
         try {
-            const payload = JSON.parse(atob(token.split('.')[1]));
-            const tipoId = payload.TipoUtilizadorId;
-            const userMessage = document.getElementById("userTypeMessage");
+        const response = await fetch("/dashboard/stats", {
+        credentials: "include"
+    });
 
-            if (tipoId === "1") {
-                userMessage.textContent = "Você está autenticado como Admin";
-            } else if (tipoId === "2") {
-                userMessage.textContent = "Você está autenticado como Gestor de Utilizadores.";
-            } else if (tipoId === "3") {
-                userMessage.textContent = "Você está autenticado como participante.";
-            } else {
-                userMessage.textContent = "Tipo de utilizador desconhecido.";
-            }
-        } catch (e) {
-            console.error("Erro ao analisar o token:", e);
-            document.getElementById("userTypeMessage").textContent = "Erro ao identificar o tipo de utilizador.";
-        }
+        if (response.ok) {
+        const data = await response.json();
+        document.getElementById("totalEventos").textContent = data.totalEventos;
+        document.getElementById("totalParticipantes").textContent = data.totalParticipantes;
+        document.getElementById("totalCategorias").textContent = data.totalCategorias;
+    } else if (response.status === 401) {
+        alert("Não autorizado. Faça login novamente.");
+        window.location.href = "/login";
+    } else {
+        alert("Erro ao buscar dados da dashboard.");
+    }
+    } catch (error) {
+        console.error("Erro de comunicação com o servidor:", error);
+        alert("Erro de comunicação com o servidor.");
+    }
     });
 </script>
+
+

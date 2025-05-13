@@ -49,15 +49,14 @@ public class Program
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
+        
 
         app.UseRouting();
+        
 
-        // Usar autenticação e autorização
-        app.UseAuthentication();
-        app.UseAuthorization();
-
-        app.UseStaticFiles();
-
+        app.UseStaticFiles();       // ✅ Primeiro os ficheiros estáticos
+        app.UseAuthentication();    // ✅ Depois autenticação
+        app.UseAuthorization();   
         // Definir a rota padrão
         app.MapControllerRoute(
             name: "default",
