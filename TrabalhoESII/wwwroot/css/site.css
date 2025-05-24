@@ -86,3 +86,8 @@ body {
 .navbar-nav .nav-item:last-child {
   margin-right: 0;
 }
+
+.navbar-brand {
+  pointer-events: none;
+  user-select: none;
+}
