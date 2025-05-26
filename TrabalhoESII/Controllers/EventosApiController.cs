@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using TrabalhoESII.Models;
 using Microsoft.AspNetCore.Authorization;
 using System.Security.Claims;
+using TrabalhoESII.Models;
 
 namespace TrabalhoESII.Controllers
 {
@@ -51,7 +52,7 @@ namespace TrabalhoESII.Controllers
                 await _context.SaveChangesAsync();
             }
 
-            return Ok(new { EventoId = novoEvento.idevento });
+            return Ok(novoEvento); // <-- Alteração principal: retorna o objeto com o ID
         }
         
         [HttpGet("detalhes/{id}")]
@@ -282,7 +283,7 @@ namespace TrabalhoESII.Controllers
         
         [HttpPost("{id}/inscrever")]
         [Authorize]
-        public async Task<IActionResult> Inscrever(int id)
+        public async Task<IActionResult> Inscrever(int id, [FromBody] InscricaoRequest request)
         {
             var userIdClaim = User.FindFirst("UserId");
             if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
@@ -292,36 +293,35 @@ namespace TrabalhoESII.Controllers
             if (evento == null)
                 return NotFound("Evento não encontrado.");
 
-            // Não permitir inscrição em eventos passados
-            var agora = DateTime.UtcNow.Date;
-            if (evento.data.Date < agora)
-                return BadRequest("Não é possível inscrever-se em eventos que já passaram.");
+            if (evento.data.Date < DateTime.UtcNow.Date)
+                return BadRequest("Evento já decorreu.");
 
-            // já inscrito
             bool jaInscrito = await _context.organizadoreseventos
                 .AnyAsync(o => o.idevento == id && o.idutilizador == userId);
             if (jaInscrito)
-                return BadRequest("Já está inscrito neste evento.");
+                return BadRequest("Já está inscrito.");
 
-            // Capacidade esgotada
-            int inscritos = await _context.organizadoreseventos
-                .CountAsync(o => o.idevento == id && !o.eorganizador);
+            // ✅ Usar a propriedade recebida do JSON
+            var ingresso = await _context.ingressos.FindAsync(request.idingresso);
+            if (ingresso == null || ingresso.idevento != id)
+                return BadRequest("Ingresso inválido para este evento.");
 
-            if (inscritos >= evento.capacidade)
-                return BadRequest("A capacidade deste evento já foi atingida.");
+            if (ingresso.quantidadeatual <= 0)
+                return BadRequest("Não há mais disponibilidade para este ingresso.");
 
-            // Inscrever como participante
-            var novo = new organizadoreseventos
+            var novaInscricao = new organizadoreseventos
             {
                 idevento = id,
                 idutilizador = userId,
                 eorganizador = false
             };
+            _context.organizadoreseventos.Add(novaInscricao);
 
-            _context.organizadoreseventos.Add(novo);
+            ingresso.quantidadeatual -= 1;
+
             await _context.SaveChangesAsync();
 
-            return Ok("Inscrição feita com sucesso!");
+            return Ok("Inscrição realizada com sucesso!");
         }
         
         [Authorize]
@@ -338,11 +338,22 @@ namespace TrabalhoESII.Controllers
             if (inscricao == null)
                 return NotFound("Inscrição não encontrada.");
 
+            // Repor quantidade do ingresso (caso exista)
+            var ingresso = await _context.ingressos
+                .FirstOrDefaultAsync(i => i.idevento == id && i.quantidadeatual < i.quantidadedefinida);
+
+            if (ingresso != null)
+            {
+                ingresso.quantidadeatual++;
+                _context.ingressos.Update(ingresso);
+            }
+
             _context.organizadoreseventos.Remove(inscricao);
             await _context.SaveChangesAsync();
 
             return Ok("Inscrição cancelada com sucesso.");
         }
+
 
         private async Task CriarNotificacoesParaInscritos(int idevento, eventos evento, bool dataAlterada, bool localAlterado, bool nomeAlterado)
         {
@@ -377,6 +388,23 @@ namespace TrabalhoESII.Controllers
 
             await _context.SaveChangesAsync();
         }
+        
+        [HttpGet("ingressos/por-evento/{idevento}")]
+        [Authorize]
+        public IActionResult GetIngressosPorEvento(int idevento)
+        {
+            var ingressos = _context.ingressos
+                .Where(i => i.idevento == idevento)
+                .Select(i => new {
+                    i.idingresso,
+                    i.nomeingresso,
+                    i.preco
+                })
+                .ToList();
+
+            return Ok(ingressos);
+        }
+
     }
 }
 

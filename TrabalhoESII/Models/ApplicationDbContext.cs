@@ -166,23 +166,33 @@ namespace TrabalhoESII.Models
     {
         [Key]
         public int idingresso { get; set; }
+
         [Required, Column(TypeName = "decimal(10,2)")]
         public decimal preco { get; set; }
+
         [Required]
         public int quantidadeatual { get; set; }
+
         [Required]
         public int quantidadedefinida { get; set; }
 
         [Required]
         public int idevento { get; set; }
+
         [ForeignKey("idevento")]
         public eventos eventos { get; set; }
 
         [Required]
         public int idtipoingresso { get; set; }
+
         [ForeignKey("idtipoingresso")]
         public tiposingressos tiposingressos { get; set; }
+
+        [Required]
+        public string nomeingresso { get; set; }
     }
+
+
 
     public class pagamentos
     {
