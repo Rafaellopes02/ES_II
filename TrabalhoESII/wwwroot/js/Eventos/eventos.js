@@ -379,171 +379,137 @@ async function gerarRelatorioEvento(id) {
         });
     }
 }
+
+let ingressoSelecionadoId = null;
+let eventoSelecionadoId = null;
+
+// Ao clicar no botão "Inscrever-me"
 document.body.addEventListener("click", async (e) => {
-    // Inscrever-me
     if (e.target.classList.contains("inscrever-btn")) {
-        const id = e.target.dataset.id;
-
-        const confirmacao = await Swal.fire({
-            title: "Confirmar inscrição?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Sim, inscrever-me",
-            cancelButtonText: "Cancelar"
-        });
-
-        if (!confirmacao.isConfirmed) return;
-
-        const token = localStorage.getItem("jwtToken");
-        if (!token) {
-            await Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'warning',
-                title: 'Sessão expirada',
-                text: 'Por favor, inicie sessão.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            window.location.href = "/login";
-            return;
-        }
+        eventoSelecionadoId = e.target.dataset.id;
 
         try {
-            const response = await fetch(`/api/eventos/${id}/inscrever`, {
-                method: "POST",
+            const response = await fetch(`/api/ingressos/por-evento/${eventoSelecionadoId}`, {
                 headers: {
-                    "Authorization": `Bearer ${token}`
+                    "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
                 }
             });
 
-            if (response.ok) {
-                await Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Inscrito com sucesso!',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
+            if (!response.ok) throw new Error("Erro ao buscar ingressos.");
 
-                if (typeof loadEventos === "function") {
-                    loadEventos();
-                } else {
-                    location.reload();
-                }
-            } else {
-                const msg = await response.text();
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Erro ao inscrever',
-                    text: msg,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            }
+            const ingressos = await response.json();
+            const select = document.getElementById("selectIngresso");
+            select.innerHTML = "";
+
+            ingressos.forEach(ing => {
+                const option = document.createElement("option");
+                option.value = ing.idingresso;
+                option.textContent = `${ing.nomeingresso} - ${ing.preco.toFixed(2)} €`;
+                select.appendChild(option);
+            });
+
+            $('#modalIngressos').modal('show');
+
         } catch (err) {
-            console.error("Erro ao inscrever:", err);
+            console.error("Erro ao carregar ingressos:", err);
             await Swal.fire({
                 icon: 'error',
-                title: 'Erro de ligação',
-                text: 'Erro ao comunicar com o servidor.',
+                title: 'Erro',
+                text: 'Erro ao carregar os ingressos.',
                 timer: 2000,
                 showConfirmButton: false
             });
         }
     }
+});
 
-    // Gerar Relatório (PDF)
-    if (e.target.classList.contains("btn-outline-secondary")) {
-        const id = e.target.closest(".event-card")?.querySelector(".editar-btn")?.dataset.id;
+// Ao confirmar escolha de ingresso no modal
+document.getElementById("confirmarIngressoBtn").addEventListener("click", async () => {
+    ingressoSelecionadoId = document.getElementById("selectIngresso").value;
 
-        if (!id) {
+    if (!ingressoSelecionadoId) {
+        await Swal.fire({
+            icon: 'warning',
+            title: 'Selecione um ingresso',
+            text: 'Por favor, selecione um ingresso antes de confirmar.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        return;
+    }
+
+    $('#modalIngressos').modal('hide');
+
+    const confirmacao = await Swal.fire({
+        title: "Confirmar inscrição?",
+        text: "Deseja inscrever-se com o ingresso selecionado?",
+        icon: "question",
+        showCancelButton: true,
+        confirmButtonText: "Sim, inscrever-me",
+        cancelButtonText: "Cancelar"
+    });
+
+    if (!confirmacao.isConfirmed) return;
+
+    const token = localStorage.getItem("jwtToken");
+    if (!token) {
+        await Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'warning',
+            title: 'Sessão expirada',
+            text: 'Por favor, inicie sessão.',
+            timer: 2000,
+            showConfirmButton: false
+        });
+        window.location.href = "/login";
+        return;
+    }
+
+    try {
+        const response = await fetch(`/api/eventos/${eventoSelecionadoId}/inscrever`, {
+            method: "POST",
+            headers: {
+                "Authorization": `Bearer ${token}`,
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({ idingresso: ingressoSelecionadoId })
+        });
+
+        if (response.ok) {
             await Swal.fire({
-                icon: "error",
-                title: "Erro",
-                text: "ID do evento não encontrado.",
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Inscrito com sucesso!',
                 timer: 2000,
                 showConfirmButton: false
             });
-            return;
-        }
 
-        await gerarRelatorioEvento(id);
+            location.reload();
+        } else {
+            const msg = await response.text();
+            await Swal.fire({
+                icon: 'error',
+                title: 'Erro ao inscrever',
+                text: msg,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    } catch (err) {
+        console.error("Erro ao inscrever:", err);
+        await Swal.fire({
+            icon: 'error',
+            title: 'Erro de ligação',
+            text: 'Erro ao comunicar com o servidor.',
+            timer: 2000,
+            showConfirmButton: false
+        });
     }
 });
 
 document.body.addEventListener("click", async (e) => {
-    if (e.target.classList.contains("inscrever-btn")) {
-        const id = e.target.dataset.id;
-
-        const confirmacao = await Swal.fire({
-            title: "Confirmar inscrição?",
-            icon: "question",
-            showCancelButton: true,
-            confirmButtonText: "Sim, inscrever-me",
-            cancelButtonText: "Cancelar"
-        });
-
-        if (!confirmacao.isConfirmed) return;
-
-        const token = localStorage.getItem("jwtToken");
-        if (!token) {
-            await Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'warning',
-                title: 'Sessão expirada',
-                text: 'Por favor, inicie sessão.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            window.location.href = "/login";
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/eventos/${id}/inscrever`, {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${token}`
-                }
-            });
-
-            if (response.ok) {
-                await Swal.fire({
-                    toast: true,
-                    position: 'top-end',
-                    icon: 'success',
-                    title: 'Inscrito com sucesso!',
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-
-                location.reload();
-            } else {
-                const msg = await response.text();
-                await Swal.fire({
-                    icon: 'error',
-                    title: 'Erro ao inscrever',
-                    text: msg,
-                    timer: 2000,
-                    showConfirmButton: false
-                });
-            }
-        } catch (err) {
-            console.error("Erro ao inscrever:", err);
-            await Swal.fire({
-                icon: 'error',
-                title: 'Erro de ligação',
-                text: 'Erro ao comunicar com o servidor.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-        }
-    }
-
-    // ✅ Cancelar inscrição — FORA do outro listener
     if (e.target.classList.contains("cancelar-btn")) {
         const id = e.target.dataset.id;
 
@@ -597,3 +563,4 @@ document.body.addEventListener("click", async (e) => {
         }
     }
 });
+

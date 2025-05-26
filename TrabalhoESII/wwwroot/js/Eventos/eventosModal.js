@@ -232,7 +232,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!nome || !descricao || !data || !hora || !local || isNaN(capacidade) || isNaN(idCategoria)) {
                 await Swal.fire({
                     toast: true,
-                    position: 'top-end', // canto superior direito
+                    position: 'top-end',
                     timerProgressBar: true,
                     icon: 'warning',
                     title: 'Campos obrigatórios',
@@ -247,7 +247,7 @@ document.addEventListener("DOMContentLoaded", function () {
             if (!token) {
                 await Swal.fire({
                     toast: true,
-                    position: 'top-end', // canto superior direito
+                    position: 'top-end',
                     timerProgressBar: true,
                     icon: 'warning',
                     title: 'Sessão Expirada',
@@ -274,18 +274,68 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
 
                 if (response.ok) {
+                    const eventoCriado = await response.json();
+                    const idevento = eventoCriado.idevento;
+
+                    // Recolher os ingressos criados dinamicamente
+                    const ingressos = [];
+                    const tickets = document.querySelectorAll('#ticketsContainer > div');
+
+                    tickets.forEach(ticket => {
+                        const nome = ticket.querySelector(`[name="ticketName[]"]`).value;
+                        const tipo = parseInt(ticket.querySelector(`[name="ticketType[]"]`).value);
+                        const quantidade = parseInt(ticket.querySelector(`[name="ticketQuantity[]"]`).value);
+                        const preco = parseFloat(ticket.querySelector(`[name="ticketPrice[]"]`).value);
+
+                        ingressos.push({
+                            nomeingresso: nome,
+                            idtipoingresso: tipo,
+                            quantidadedefinida: quantidade,
+                            quantidadeatual: quantidade,
+                            preco: preco,
+                            idevento: idevento
+                        });
+                    });
+
+                    // Submeter os ingressos, se existirem
+                    if (ingressos.length > 0) {
+                        const ingressosResponse = await fetch("/api/IngressosApi", {
+                            method: "POST",
+                            headers: {
+                                "Content-Type": "application/json",
+                                "Authorization": `Bearer ${token}`
+                            },
+                            body: JSON.stringify(ingressos)
+                        });
+
+                        if (!ingressosResponse.ok) {
+                            const msg = await ingressosResponse.text();
+                            return await Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                timerProgressBar: true,
+                                icon: 'error',
+                                title: 'Erro ao registar ingressos',
+                                text: msg || "O evento foi criado, mas houve erro ao criar os ingressos.",
+                                timer: 3000,
+                                showConfirmButton: false
+                            });
+                        }
+                    }
+
                     await Swal.fire({
                         toast: true,
-                        position: 'top-end', // canto superior direito
+                        position: 'top-end',
                         timerProgressBar: true,
                         icon: 'success',
                         title: 'Evento Criado!',
-                        text: 'O evento foi registado com sucesso.',
+                        text: 'O evento e os ingressos foram registados com sucesso.',
                         timer: 2500,
                         showConfirmButton: false
                     });
 
                     form.reset();
+                    document.getElementById("ticketsContainer").innerHTML = ""; // limpa os ingressos
                     $('#newEventModal').modal('hide');
 
                     if (typeof loadEventos === "function") {
@@ -297,7 +347,7 @@ document.addEventListener("DOMContentLoaded", function () {
                     const msg = await response.text();
                     await Swal.fire({
                         toast: true,
-                        position: 'top-end', // canto superior direito
+                        position: 'top-end',
                         timerProgressBar: true,
                         icon: 'error',
                         title: 'Erro ao Registar',
@@ -310,7 +360,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 console.error("Erro:", error);
                 await Swal.fire({
                     toast: true,
-                    position: 'top-end', // canto superior direito
+                    position: 'top-end',
                     timerProgressBar: true,
                     icon: 'error',
                     title: 'Erro de Ligação',
