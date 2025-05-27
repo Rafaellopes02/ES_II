@@ -2,7 +2,6 @@
     await carregarAtividades();
 });
 
-// ✅ Função correta para ler o token dos cookies
 function getCookieToken() {
     const name = "jwtToken=";
     const decoded = decodeURIComponent(document.cookie);
@@ -70,20 +69,23 @@ async function carregarAtividades() {
             const card = document.createElement("div");
             card.className = "card mb-3 p-3";
 
-            const botao = atividade.inscrito
-                ? ""
-                : `<button class="btn btn-outline-success inscrever-btn" data-id="${atividade.idatividade}">Inscrever-me</button>`;
+            let botaoHtml = "";
+            if (atividade.inscrito) {
+                botaoHtml = `<button class="btn btn-outline-danger cancelar-inscricao-btn" data-id="${atividade.idatividade}">Cancelar inscrição</button>`;
+            } else {
+                botaoHtml = `<button class="btn btn-outline-success inscrever-btn" data-id="${atividade.idatividade}">Inscrever-me</button>`;
+            }
 
             card.innerHTML = `
-                <div class="d-flex justify-content-between align-items-center">
-                    <div>
-                        <h5 class="card-title mb-1">${atividade.nome}</h5>
-                        <p class="mb-1"><strong>Data:</strong> ${atividade.data} <strong>Hora:</strong> ${atividade.hora}</p>
-                        <p class="mb-1"><strong>Quantidade Máxima:</strong> ${atividade.quantidademaxima}</p>
-                    </div>
-                    ${botao}
-                </div>
-            `;
+        <div class="d-flex justify-content-between align-items-center">
+            <div>
+                <h5 class="card-title mb-1">${atividade.nome}</h5>
+                <p class="mb-1"><strong>Data:</strong> ${atividade.data} <strong>Hora:</strong> ${atividade.hora}</p>
+                <p class="mb-1"><strong>Quantidade Máxima:</strong> ${atividade.quantidademaxima}</p>
+            </div>
+            ${botaoHtml}
+        </div>
+    `;
 
             listaDiv.appendChild(card);
         });
@@ -96,14 +98,41 @@ async function carregarAtividades() {
 async function submeterAtividade() {
     const token = getCookieToken();
     const idevento = parseInt(document.getElementById("ideventoHidden").value);
+    const capacidadeEvento = parseInt(document.getElementById("capacidadeEventoHidden").value);
 
-    const atividade = {
-        nome: document.getElementById("nomeAtividade").value,
-        quantidademaxima: parseInt(document.getElementById("quantidadeMaxima").value),
-        data: document.getElementById("dataAtividade").value,
-        hora: document.getElementById("horaAtividade").value,
-        idevento: idevento
-    };
+    const nome = document.getElementById("nomeAtividade").value;
+    const quantidademaxima = parseInt(document.getElementById("quantidadeMaxima").value);
+    const data = document.getElementById("dataAtividade").value;
+    const hora = document.getElementById("horaAtividade").value;
+
+    // No EventoDetalhes.js, antes de submeter
+    const dataString = document.getElementById("dataAtividade").value; // '2025-05-27'
+    const dataEventoHidden = document.getElementById("dataEventoHidden").value; // '27/05/2025'
+
+    // Converter dataEventoHidden para ISO (yyyy-MM-dd)
+    function converterParaISO(dataBR) {
+        const partes = dataBR.split('/');
+        if (partes.length === 3) {
+            // [dia, mês, ano]
+            return `${partes[2]}-${partes[1].padStart(2, '0')}-${partes[0].padStart(2, '0')}`;
+        }
+        return dataBR; // fallback se não estiver no formato esperado
+    }
+
+    const dataEvento = converterParaISO(dataEventoHidden);
+    // Agora use dataEvento nas validações de JS e, SE PRECISAR enviar ao servidor, envie sempre no formato ISO.
+
+    // Validação frontend
+    if (data < dataEvento) {
+        await Swal.fire("Erro", "A data da atividade não pode ser anterior à data do evento.", "error");
+        return;
+    }
+    if (quantidademaxima > capacidadeEvento) {
+        await Swal.fire("Erro", "A capacidade da atividade não pode ser superior à capacidade do evento.", "error");
+        return;
+    }
+
+    const atividade = { nome, quantidademaxima, data, hora, idevento };
 
     try {
         const response = await fetch("/api/atividades/register", {
@@ -124,8 +153,15 @@ async function submeterAtividade() {
             });
 
             document.getElementById("formNovaAtividade").reset();
-            const modal = bootstrap.Modal.getInstance(document.getElementById('modalNovaAtividade'));
+            const modalEl = document.getElementById('modalNovaAtividade');
+            const modal = bootstrap.Modal.getInstance(modalEl);
             modal.hide();
+
+            const backdrops = document.querySelectorAll('.modal-backdrop');
+            backdrops.forEach(bd => bd.remove());
+
+            document.body.classList.remove('modal-open');
+            document.body.style = "";
 
             carregarAtividades();
         } else {
@@ -171,6 +207,46 @@ document.body.addEventListener("click", async (e) => {
                 });
 
                 e.target.style.display = "none";
+                await carregarAtividades(); // Atualiza a lista
+            } else {
+                const msg = await response.text();
+                Swal.fire("Erro", msg, "error");
+            }
+        } catch (err) {
+            console.error(err);
+            Swal.fire("Erro", "Erro ao comunicar com o servidor", "error");
+        }
+    }
+
+    if (e.target.classList.contains("cancelar-inscricao-btn")) {
+        const id = e.target.dataset.id;
+
+        const confirmacao = await Swal.fire({
+            title: "Cancelar inscrição?",
+            icon: "warning",
+            showCancelButton: true,
+            confirmButtonText: "Sim, cancelar",
+            cancelButtonText: "Não"
+        });
+
+        if (!confirmacao.isConfirmed) return;
+
+        const token = getCookieToken();
+
+        try {
+            const response = await fetch(`/api/atividades/${id}/cancelar-inscricao`, {
+                method: "POST",
+                headers: { "Authorization": `Bearer ${token}` }
+            });
+
+            if (response.ok) {
+                await Swal.fire({
+                    icon: "success",
+                    title: "Inscrição cancelada!",
+                    timer: 2000,
+                    showConfirmButton: false
+                });
+                await carregarAtividades();
             } else {
                 const msg = await response.text();
                 Swal.fire("Erro", msg, "error");
@@ -188,14 +264,12 @@ document.body.addEventListener("click", async (e) => {
 
 async function carregarInscritos() {
     const lista = document.getElementById("listaInscritos");
-
-    // Se a lista já estiver visível, oculta-a e termina
+    
     if (lista.style.display === "block") {
         lista.style.display = "none";
         return;
     }
 
-    // Caso contrário, mostra a lista (e carrega os dados)
     const token = getCookieToken();
     const idevento = parseInt(document.getElementById("ideventoHidden").value);
 
@@ -221,10 +295,9 @@ async function carregarInscritos() {
             lista.innerHTML = html;
         }
 
-        lista.style.display = "block"; // mostra a lista
+        lista.style.display = "block";
     } catch (err) {
         console.error("Erro ao buscar inscritos:", err);
         Swal.fire("Erro", "Não foi possível carregar a lista de inscritos.", "error");
     }
 }
-

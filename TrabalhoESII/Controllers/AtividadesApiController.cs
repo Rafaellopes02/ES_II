@@ -28,6 +28,8 @@ namespace TrabalhoESII.Controllers
 
             var query = _context.atividades
                 .Where(a => a.idevento == idevento)
+                .OrderBy(a => a.data)
+                .ThenBy(a => a.hora) // Ordena também por hora, caso haja mais de uma atividade na mesma data
                 .AsQueryable();
 
             var atividades = await query
@@ -36,7 +38,7 @@ namespace TrabalhoESII.Controllers
                     a.idatividade,
                     a.nome,
                     data = a.data.ToString("yyyy-MM-dd"),
-                    hora = a.hora.ToString(), // .ToString("hh\\:mm") se quiseres formatado
+                    hora = a.hora.ToString(@"hh\:mm"),
                     a.quantidademaxima,
                     inscrito = _context.utilizadoresatividades
                         .Any(u => u.idatividade == a.idatividade && u.idutilizador == userId)
@@ -53,11 +55,27 @@ namespace TrabalhoESII.Controllers
             if (!ModelState.IsValid)
                 return BadRequest("Dados inválidos.");
 
-            var atividade = new atividades // 👈 muda aqui de "atividade" para "atividades"
+            var evento = await _context.eventos.FindAsync(novaAtividade.idevento);
+            if (evento == null)
+                return BadRequest("Evento não encontrado.");
+
+            var dataAtividade = DateTime.SpecifyKind(novaAtividade.data.Date, DateTimeKind.Utc);
+            var dataEvento = DateTime.SpecifyKind(evento.data.Date, DateTimeKind.Utc);
+
+            if (dataAtividade < dataEvento)
+                return BadRequest("A data da atividade não pode ser anterior à data do evento.");
+
+            if (dataAtividade == dataEvento && novaAtividade.hora < evento.hora)
+                return BadRequest("A hora da atividade não pode ser anterior à hora do evento.");
+            
+            if (novaAtividade.quantidademaxima > evento.capacidade)
+                return BadRequest("A capacidade da atividade não pode ser superior à capacidade do evento.");
+
+            var atividade = new atividades
             {
                 nome = novaAtividade.nome,
                 quantidademaxima = novaAtividade.quantidademaxima,
-                data = DateTime.SpecifyKind(novaAtividade.data, DateTimeKind.Utc),
+                data = dataAtividade,
                 hora = novaAtividade.hora,
                 idevento = novaAtividade.idevento
             };
@@ -79,14 +97,12 @@ namespace TrabalhoESII.Controllers
             if (atividade == null)
                 return NotFound("Atividade não encontrada.");
 
-            // Verifica se já está inscrito
             var jaInscrito = await _context.utilizadoresatividades
                 .AnyAsync(a => a.idatividade == id && a.idutilizador == userId);
 
             if (jaInscrito)
                 return BadRequest("Já está inscrito nesta atividade.");
 
-            // Inscrever
             var novaInscricao = new utilizadoresatividades
             {
                 idutilizador = userId,
@@ -99,6 +115,25 @@ namespace TrabalhoESII.Controllers
 
             return Ok("Inscrição realizada com sucesso.");
         }
+        
+        [HttpPost("{id}/cancelar-inscricao")]
+        [Authorize]
+        public async Task<IActionResult> CancelarInscricaoNaAtividade(int id)
+        {
+            var userIdClaim = User.FindFirst("UserId");
+            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+                return Unauthorized();
 
+            var inscricao = await _context.utilizadoresatividades
+                .FirstOrDefaultAsync(a => a.idatividade == id && a.idutilizador == userId);
+
+            if (inscricao == null)
+                return NotFound("Não está inscrito nesta atividade.");
+
+            _context.utilizadoresatividades.Remove(inscricao);
+            await _context.SaveChangesAsync();
+
+            return Ok("Inscrição cancelada com sucesso.");
+        }
     }
 }

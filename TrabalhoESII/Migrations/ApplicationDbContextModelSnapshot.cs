@@ -51,7 +51,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasIndex("idevento");
 
-                    b.ToTable("atividades");
+                    b.ToTable("atividades", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.categorias", b =>
@@ -69,7 +69,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasKey("idcategoria");
 
-                    b.ToTable("categorias");
+                    b.ToTable("categorias", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.estadospagamentos", b =>
@@ -87,7 +87,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasKey("idestado");
 
-                    b.ToTable("estadospagamentos");
+                    b.ToTable("estadospagamentos", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.eventos", b =>
@@ -129,7 +129,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasIndex("idcategoria");
 
-                    b.ToTable("eventos");
+                    b.ToTable("eventos", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.feedbacks", b =>
@@ -163,7 +163,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasIndex("idutilizador");
 
-                    b.ToTable("feedbacks");
+                    b.ToTable("feedbacks", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.ingressos", b =>
@@ -180,6 +180,10 @@ namespace TrabalhoESII.Migrations
                     b.Property<int>("idtipoingresso")
                         .HasColumnType("integer");
 
+                    b.Property<string>("nomeingresso")
+                        .IsRequired()
+                        .HasColumnType("text");
+
                     b.Property<decimal>("preco")
                         .HasColumnType("decimal(10,2)");
 
@@ -195,7 +199,29 @@ namespace TrabalhoESII.Migrations
 
                     b.HasIndex("idtipoingresso");
 
-                    b.ToTable("ingressos");
+                    b.ToTable("ingressos", (string)null);
+                });
+
+            modelBuilder.Entity("TrabalhoESII.Models.notificacoes", b =>
+                {
+                    b.Property<int>("idnotificacao")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("idnotificacao"));
+
+                    b.Property<int>("idutilizador")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("mensagem")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.HasKey("idnotificacao");
+
+                    b.HasIndex("idutilizador");
+
+                    b.ToTable("notificacoes", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.organizadoreseventos", b =>
@@ -254,7 +280,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasIndex("idutilizador");
 
-                    b.ToTable("pagamentos");
+                    b.ToTable("pagamentos", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.tiposingressos", b =>
@@ -272,7 +298,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasKey("idtipoingresso");
 
-                    b.ToTable("tiposingressos");
+                    b.ToTable("tiposingressos", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.tipospagamentos", b =>
@@ -290,7 +316,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasKey("idtipopagamento");
 
-                    b.ToTable("tipospagamentos");
+                    b.ToTable("tipospagamentos", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.tiposutilizadores", b =>
@@ -308,7 +334,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasKey("idtipoutilizador");
 
-                    b.ToTable("tiposutilizadores");
+                    b.ToTable("tiposutilizadores", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.utilizadores", b =>
@@ -359,7 +385,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasIndex("idtipoutilizador");
 
-                    b.ToTable("utilizadores");
+                    b.ToTable("utilizadores", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.utilizadoresatividades", b =>
@@ -379,7 +405,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasIndex("idevento");
 
-                    b.ToTable("utilizadoresatividades");
+                    b.ToTable("utilizadoresatividades", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.atividades", b =>
@@ -440,6 +466,17 @@ namespace TrabalhoESII.Migrations
                     b.Navigation("eventos");
 
                     b.Navigation("tiposingressos");
+                });
+
+            modelBuilder.Entity("TrabalhoESII.Models.notificacoes", b =>
+                {
+                    b.HasOne("TrabalhoESII.Models.utilizadores", "utilizador")
+                        .WithMany()
+                        .HasForeignKey("idutilizador")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("utilizador");
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.organizadoreseventos", b =>

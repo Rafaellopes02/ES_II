@@ -47,6 +47,12 @@ namespace TrabalhoESII.Models
 
             modelBuilder.Entity<utilizadoresatividades>()
                 .HasKey(ua => new { ua.idutilizador, ua.idatividade });
+            
+            modelBuilder.Entity<atividades>()
+                .HasOne(a => a.eventos)
+                .WithMany()
+                .HasForeignKey(a => a.idevento)
+                .OnDelete(DeleteBehavior.Cascade);
 
             base.OnModelCreating(modelBuilder);
         }
@@ -191,9 +197,7 @@ namespace TrabalhoESII.Models
         [Required]
         public string nomeingresso { get; set; }
     }
-
-
-
+    
     public class pagamentos
     {
         [Key]

@@ -259,7 +259,6 @@ namespace TrabalhoESII.Controllers
                 _context.notificacoes.Add(notificacao);
             }
 
-            // Apagar todas as relações com este evento
             var relacoes = _context.organizadoreseventos.Where(oe => oe.idevento == id);
             _context.organizadoreseventos.RemoveRange(relacoes);
 
@@ -337,8 +336,7 @@ namespace TrabalhoESII.Controllers
 
             if (inscricao == null)
                 return NotFound("Inscrição não encontrada.");
-
-            // Repor quantidade do ingresso (caso exista)
+            
             var ingresso = await _context.ingressos
                 .FirstOrDefaultAsync(i => i.idevento == id && i.quantidadeatual < i.quantidadedefinida);
 
@@ -347,14 +345,23 @@ namespace TrabalhoESII.Controllers
                 ingresso.quantidadeatual++;
                 _context.ingressos.Update(ingresso);
             }
-
+            
+            var atividadesIds = await _context.atividades
+                .Where(a => a.idevento == id)
+                .Select(a => a.idatividade)
+                .ToListAsync();
+            
+            var inscricoesAtividades = _context.utilizadoresatividades
+                .Where(ua => atividadesIds.Contains(ua.idatividade) && ua.idutilizador == userId);
+            
+            _context.utilizadoresatividades.RemoveRange(inscricoesAtividades);
+            
             _context.organizadoreseventos.Remove(inscricao);
             await _context.SaveChangesAsync();
 
             return Ok("Inscrição cancelada com sucesso.");
         }
-
-
+        
         private async Task CriarNotificacoesParaInscritos(int idevento, eventos evento, bool dataAlterada, bool localAlterado, bool nomeAlterado)
         {
             var participantes = await _context.organizadoreseventos
@@ -364,7 +371,6 @@ namespace TrabalhoESII.Controllers
 
             if (!participantes.Any()) return;
 
-            // Construir mensagem baseada nas alterações
             var mensagem = "O evento " + evento.nome + " foi alterado: ";
             var alteracoes = new List<string>();
     
@@ -374,7 +380,6 @@ namespace TrabalhoESII.Controllers
     
             mensagem += string.Join(", ", alteracoes) + ".";
 
-            // Criar notificações para cada participante
             foreach (var idUtilizador in participantes)
             {
                 var notificacao = new notificacoes
