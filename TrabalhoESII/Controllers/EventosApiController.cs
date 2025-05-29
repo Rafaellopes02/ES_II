@@ -129,9 +129,7 @@ namespace TrabalhoESII.Controllers
                     categoriaNome = e.categoria.nome,
                     inscrito = _context.organizadoreseventos.Any(o => o.idevento == e.idevento && o.idutilizador == userId),
                     eorganizador = _context.organizadoreseventos
-                        .Where(o => o.idevento == e.idevento && o.idutilizador == userId)
-                        .Select(o => o.eorganizador)
-                        .FirstOrDefault(),
+                        .Any(o => o.idevento == e.idevento && o.idutilizador == userId && o.eorganizador), // ✔ seguro como bool
                     idutilizador = _context.organizadoreseventos
                         .Where(o => o.idevento == e.idevento && o.eorganizador)
                         .Select(o => o.idutilizador)
@@ -143,6 +141,7 @@ namespace TrabalhoESII.Controllers
 
             return Ok(eventos);
         }
+
         
         [HttpGet("{id}/inscritos")]
         [Authorize]

@@ -26,10 +26,6 @@
     </ItemGroup>
 
     <ItemGroup>
-      <None Include="wwwroot\js\perfilutilizador.js" />
-    </ItemGroup>
-
-    <ItemGroup>
       <_ContentIncludedByDefault Remove="Views\Perfil\perfilutilizador.cshtml" />
       <_ContentIncludedByDefault Remove="Views\Eventos\Relatorio\Index.cshtml" />
     </ItemGroup>

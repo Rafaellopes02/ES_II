@@ -6,6 +6,7 @@
 
 <main class="container-fluid">
     <section>
+        <!-- Filtros por tipo -->
         <div class="d-flex justify-content-between align-items-center event-tabs">
             <ul class="nav nav-tabs">
                 <li class="nav-item">
@@ -24,9 +25,8 @@
             </div>
         </div>
 
-        <!-- Modal Novo Evento -->
+        <!-- Modais -->
         @Html.Partial("_ModalNovoEvento")
-        <!-- Modal Editar Evento -->
         @Html.Partial("_ModalEditarEvento")
 
         <!-- Filtros -->
@@ -36,7 +36,7 @@
             </div>
             <div class="col-md-2">
                 <input type="date" id="searchData" class="form-control" />
-            </div> 
+            </div>
             <div class="col-md-2">
                 <input type="text" id="searchLocal" class="form-control" placeholder="Local" />
             </div>
@@ -45,51 +45,50 @@
                     <option value="">Todas as Categorias</option>
                 </select>
             </div>
-
             <div class="col-md-2">
-                <button id="searchBtn" class="btn btn-outline-secondary w-100">Pesquisar</button>
+                <button id="btnPesquisar" class="btn btn-primary">Pesquisar</button>
             </div>
         </div>
 
-        <!-- Lista de Eventos -->
+        <!-- Lista de eventos -->
         <div id="eventList" class="row">
-            <!-- Os eventos serão renderizados via JS -->
+            <!-- Renderizado via JS -->
         </div>
 
+        <!-- Modal de Ingressos -->
         <div class="modal fade" id="modalIngressos" tabindex="-1" role="dialog" aria-labelledby="modalIngressosLabel" aria-hidden="true">
-                 <div class="modal-dialog" role="document">
-                         <div class="modal-content">
-                                <div class="modal-header">
-                                         <h5 class="modal-title" id="modalIngressosLabel">Escolher Ingresso</h5>
-                                         <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
-                                                 <span aria-hidden="true">&times;</span>
-                                             </button>
-                                    </div>
-                                 <div class="modal-body">
-                                   <select class="form-control" id="selectIngresso"></select>
-                           </div>
-                             <div class="modal-footer">
-                           <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
-                         <button type="button" class="btn btn-primary" id="confirmarIngressoBtn">Confirmar</button>
-                          </div>
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title" id="modalIngressosLabel">Escolher Ingresso</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Fechar">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <select class="form-control" id="selectIngresso"></select>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancelar</button>
+                        <button type="button" class="btn btn-primary" id="confirmarIngressoBtn">Confirmar</button>
+                    </div>
+                </div>
+            </div>
         </div>
-               </div>
-             </div>
     </section>
 </main>
 
-<!-- Scripts -->
+<!-- Scripts Bootstrap e jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
 
-@section Scripts {
-    <script src="~/js/Eventos/eventos.js?v=1.0.5"></script>
-    <script src="~/js/Eventos/Relatorioeventos.js?v=1.0.5"></script>
-    <script src="~/js/Eventos/eventosModal.js?v=1.0.5"></script>
-    <script src="~/js/Eventos/filtrosEventos.js?v=1.0.5"></script>
-    <!-- SweetAlert2 CSS e JS -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+<!-- SweetAlert2 -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
+<script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
 
-}
+<!-- ✅ Scripts do projeto (após HTML estar pronto) -->
+<script src="~/js/Eventos/eventos.js?v=1.0.5"></script>
+<script src="~/js/Eventos/eventosModal.js?v=1.0.5"></script>
+<script src="~/js/Eventos/Relatorioeventos.js?v=1.0.5"></script>
+<script src="~/js/Eventos/filtrosEventos.js?v=1.0.5"></script>

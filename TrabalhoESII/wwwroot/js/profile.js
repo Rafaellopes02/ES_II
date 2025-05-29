@@ -29,7 +29,7 @@
         document.getElementById("userNacionalidade").textContent = data.nacionalidade || "";
 
         profileCard.style.display = "block";
-        profileStatus.textContent = "";
+        profileStatus.style.display = "none"; // ✅ Esconde a barra azul
     } catch {
         window.location.href = "/login";
     }
