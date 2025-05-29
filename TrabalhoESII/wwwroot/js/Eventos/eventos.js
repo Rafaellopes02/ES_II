@@ -181,6 +181,7 @@ function renderizarEventos(eventos, userId, userType) {
 
         const card = document.createElement("div");
         card.className = "card mb-3 p-3 event-card";
+        card.dataset.categoria = evento.idcategoria; // ← Adiciona isto
         card.innerHTML = `
             <h5 class="card-title">${evento.nome}</h5>
             <p class="card-text">${evento.descricao}</p>
@@ -562,5 +563,7 @@ document.body.addEventListener("click", async (e) => {
             });
         }
     }
+    
+    
 });
 

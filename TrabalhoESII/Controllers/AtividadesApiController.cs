@@ -85,36 +85,67 @@ namespace TrabalhoESII.Controllers
 
             return Ok(new { id = atividade.idatividade });
         }
-        [HttpPost("{id}/inscrever")]
-        [Authorize]
-        public async Task<IActionResult> InscreverNaAtividade(int id)
-        {
-            var userIdClaim = User.FindFirst("UserId");
-            if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-                return Unauthorized();
+        
+       [HttpPost("{id}/inscrever")]
+[Authorize]
+public async Task<IActionResult> InscreverNaAtividade(int id)
+{
+    var userIdClaim = User.FindFirst("UserId");
+    if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+    {
+        Console.WriteLine("DEBUG: UserId inválido ou não autenticado.");
+        return Unauthorized();
+    }
 
-            var atividade = await _context.atividades.FindAsync(id);
-            if (atividade == null)
-                return NotFound("Atividade não encontrada.");
+    Console.WriteLine($"DEBUG: Utilizador {userId} está a tentar inscrever-se na atividade {id}");
 
-            var jaInscrito = await _context.utilizadoresatividades
-                .AnyAsync(a => a.idatividade == id && a.idutilizador == userId);
+    var atividade = await _context.atividades.FindAsync(id);
+    if (atividade == null)
+    {
+        Console.WriteLine("DEBUG: Atividade não encontrada.");
+        return NotFound("Atividade não encontrada.");
+    }
 
-            if (jaInscrito)
-                return BadRequest("Já está inscrito nesta atividade.");
+    Console.WriteLine($"DEBUG: A atividade pertence ao evento {atividade.idevento}");
 
-            var novaInscricao = new utilizadoresatividades
-            {
-                idutilizador = userId,
-                idatividade = id,
-                idevento = atividade.idevento
-            };
+    // 🔒 Verificar se o utilizador é organizador do evento da atividade
+    bool eOrganizador = await _context.organizadoreseventos
+        .AnyAsync(o => o.idevento == atividade.idevento && o.idutilizador == userId && o.eorganizador);
 
-            _context.utilizadoresatividades.Add(novaInscricao);
-            await _context.SaveChangesAsync();
+    Console.WriteLine($"DEBUG: Utilizador {userId} é organizador do evento {atividade.idevento}? {eOrganizador}");
 
-            return Ok("Inscrição realizada com sucesso.");
-        }
+    if (eOrganizador)
+    {
+        Console.WriteLine("DEBUG: Inscrição recusada — utilizador é organizador do evento.");
+        return BadRequest("Organizadores não podem inscrever-se nas atividades do seu próprio evento.");
+    }
+
+    var jaInscrito = await _context.utilizadoresatividades
+        .AnyAsync(a => a.idatividade == id && a.idutilizador == userId);
+
+    Console.WriteLine($"DEBUG: Já está inscrito nesta atividade? {jaInscrito}");
+
+    if (jaInscrito)
+    {
+        Console.WriteLine("DEBUG: Inscrição recusada — já está inscrito.");
+        return BadRequest("Já está inscrito nesta atividade.");
+    }
+
+    var novaInscricao = new utilizadoresatividades
+    {
+        idutilizador = userId,
+        idatividade = id,
+        idevento = atividade.idevento
+    };
+
+    _context.utilizadoresatividades.Add(novaInscricao);
+    await _context.SaveChangesAsync();
+
+    Console.WriteLine("DEBUG: Inscrição realizada com sucesso.");
+    return Ok("Inscrição realizada com sucesso.");
+}
+
+
         
         [HttpPost("{id}/cancelar-inscricao")]
         [Authorize]
