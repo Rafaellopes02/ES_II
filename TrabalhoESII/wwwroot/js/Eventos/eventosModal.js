@@ -299,7 +299,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
                     // Submeter os ingressos, se existirem
                     if (ingressos.length > 0) {
-                        const ingressosResponse = await fetch("/api/IngressosApi", {
+                        const ingressosResponse = await fetch("/api/ingressos", {
                             method: "POST",
                             headers: {
                                 "Content-Type": "application/json",
