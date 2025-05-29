@@ -20,9 +20,9 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const auth = await getUserIdAndType();
 
-    
-    
-    
+
+
+
     if (!auth.userId || !auth.userType) {
         window.location.href = "/login";
         return;
@@ -73,7 +73,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
 
 function renderizarEventos(eventos, userId, userType) {
-    
+
     const eventList = document.getElementById("eventList");
     eventList.innerHTML = "";
 
@@ -563,4 +563,3 @@ document.body.addEventListener("click", async (e) => {
         }
     }
 });
-
