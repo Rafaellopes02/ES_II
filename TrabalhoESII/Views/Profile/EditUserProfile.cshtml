@@ -10,10 +10,9 @@
 <main class="container mt-4">
     <h2>Editar Perfil</h2>
 
-    <!-- Exemplo de mensagem de feedback (opcional) -->
     @if (!string.IsNullOrEmpty(ViewBag.StatusMessage))
     {
-        <div class="alert alert-info">@ViewBag.StatusMessage</div>
+        <div class="alert alert-info">@Html.Raw(ViewBag.StatusMessage)</div>
     }
 
     <form asp-action="EditUserProfile" asp-controller="Profile" method="post" class="mt-3">
@@ -40,12 +39,10 @@
         <div class="mb-3">
             <label for="nacionalidade" class="form-label">Nacionalidade</label>
             <select id="nacionalidade" name="Nacionalidade" class="form-select">
-                <option value="">Selecione...</option>
+                <!-- opções inseridas via JS -->
             </select>
         </div>
-
-
-        <!-- Mostra apenas como texto o nome de utilizador (não editável) -->
+        
         <div class="mb-3">
             <label>Nome de Utilizador (não editável)</label>
             <input class="form-control" value="@Model.NomeUtilizador" disabled />
@@ -75,13 +72,15 @@
                 }
 
                 const select = document.getElementById("nacionalidade");
-                const atual = "@Model.Nacionalidade";
+                const atual = "@Model.Nacionalidade".trim();
 
                 paises.forEach(pais => {
                     const option = document.createElement("option");
                     option.value = pais;
                     option.text = pais;
-                    if (pais === atual) option.selected = true;
+                    if (pais === atual) {
+                        option.selected = true;
+                    }
                     select.appendChild(option);
                 });
             };
@@ -89,7 +88,4 @@
             tentaPreencher();
         });
     </script>
-
-
-
 </main>
