@@ -53,7 +53,8 @@
                 hora,
                 local,
                 capacidade,
-                idCategoria
+                idCategoria,
+                ingressos
             };
 
             try {

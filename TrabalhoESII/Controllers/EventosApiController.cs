@@ -22,7 +22,7 @@ namespace TrabalhoESII.Controllers
         public async Task<IActionResult> RegisterEvento([FromBody] EventosRegisterModel evento)
         {
             if (!ModelState.IsValid)
-                return BadRequest("Dados inválidos.");
+                return BadRequest(ModelState);
 
             var novoEvento = new eventos
             {
@@ -48,10 +48,22 @@ namespace TrabalhoESII.Controllers
                     eorganizador = true
                 };
 
-                _context.organizadoreseventos.Add(registoOrganizador);
-                await _context.SaveChangesAsync();
+                _context.organizadoreseventos.Add(registoOrganizador);               
             }
 
+foreach (var ingresso in evento.ingressos)
+    {
+        _context.ingressos.Add(new ingressos
+        {
+            nomeingresso = ingresso.nomeingresso,
+            idtipoingresso = ingresso.idtipoingresso,
+            quantidadedefinida = ingresso.quantidadedefinida,
+            quantidadeatual = ingresso.quantidadedefinida,
+            preco = ingresso.preco,
+            idevento = novoEvento.idevento
+        });
+    }
+            await _context.SaveChangesAsync();
             return Ok(novoEvento); // <-- Alteração principal: retorna o objeto com o ID
         }
         
@@ -127,7 +139,7 @@ namespace TrabalhoESII.Controllers
                     e.capacidade,
                     e.idcategoria,
                     categoriaNome = e.categoria.nome,
-                    inscrito = _context.organizadoreseventos.Any(o => o.idevento == e.idevento && o.idutilizador == userId),
+                    inscrito = _context.utilizadoreseventos.Any(o => o.idevento == e.idevento && o.idutilizador == userId ),
                     eorganizador = _context.organizadoreseventos
                         .Any(o => o.idevento == e.idevento && o.idutilizador == userId && o.eorganizador), // ✔ seguro como bool
                     idutilizador = _context.organizadoreseventos
@@ -135,14 +147,30 @@ namespace TrabalhoESII.Controllers
                         .Select(o => o.idutilizador)
                         .FirstOrDefault(),
                     inscritos = _context.organizadoreseventos
-                        .Count(o => o.idevento == e.idevento && !o.eorganizador)
+                        .Count(o => o.idevento == e.idevento && !o.eorganizador),  
+                    jaComprouIngresso = _context.organizadoreseventos
+                         .Any(u => u.idevento == e.idevento && u.idutilizador == userId && !u.eorganizador),                   
                 })
                 .ToListAsync();
 
             return Ok(eventos);
         }
 
-        
+        [HttpGet("{idevento}/verificar-compra")]
+        [Authorize]
+        public IActionResult VerificarCompra(int idevento)
+    {
+         var userIdClaim = User.FindFirst("UserId");
+         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
+             return Unauthorized();
+
+         bool comprou = _context.utilizadoreseventos.Any(ue =>
+                ue.idevento == idevento &&
+                ue.idutilizador == userId &&
+                ue.estado == "Confirmado");
+
+         return Ok(new { comprou });
+}
         [HttpGet("{id}/inscritos")]
         [Authorize]
         public async Task<IActionResult> ObterInscritos(int id)
@@ -297,7 +325,17 @@ namespace TrabalhoESII.Controllers
             bool jaInscrito = await _context.organizadoreseventos
                 .AnyAsync(o => o.idevento == id && o.idutilizador == userId);
             if (jaInscrito)
-                return BadRequest("Já está inscrito.");
+            {
+                    
+var existente = await _context.organizadoreseventos
+        .FirstOrDefaultAsync(o => o.idevento == id && o.idutilizador == userId);
+
+    if (existente?.eorganizador == true)
+        return BadRequest("Já é organizador deste evento e não pode inscrever-se como participante.");
+else
+    return BadRequest("Já está inscrito.");
+
+                }
 
             // ✅ Usar a propriedade recebida do JSON
             var ingresso = await _context.ingressos.FindAsync(request.idingresso);
