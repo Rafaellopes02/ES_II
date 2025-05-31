@@ -12,5 +12,7 @@ namespace TrabalhoESII.Models
         public int capacidade { get; set; }
         public int idCategoria { get; set; }
 
+        public List<IngressoDTO> ingressos { get; set; } = new();
+
     }
 }

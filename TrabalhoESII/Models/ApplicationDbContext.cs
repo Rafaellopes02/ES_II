@@ -11,7 +11,8 @@ namespace TrabalhoESII.Models
             : base(options)
         {
         }
-
+        public DbSet<utilizadoreseventos> ingressosDTO { get; set; }
+        public DbSet<utilizadoreseventos> utilizadoreseventos { get; set; }
         public DbSet<tiposutilizadores> tiposutilizadores { get; set; }
         public DbSet<tipospagamentos> tipospagamentos { get; set; }
         public DbSet<categorias> categorias { get; set; }
@@ -53,6 +54,9 @@ namespace TrabalhoESII.Models
                 .WithMany()
                 .HasForeignKey(a => a.idevento)
                 .OnDelete(DeleteBehavior.Cascade);
+
+                 modelBuilder.Entity<utilizadoreseventos>()
+                .HasKey(u => new { u.idutilizador, u.idevento, u.idingresso });
 
             base.OnModelCreating(modelBuilder);
         }

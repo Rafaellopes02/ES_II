@@ -68,7 +68,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     carregarCategorias("searchCategoria");
     carregarCategorias("eventCategory");
     carregarCategorias("editEventCategory");
+    carregarTiposIngresso("tipoIngresso");
 });
+
 
 
 
@@ -78,6 +80,9 @@ function renderizarEventos(eventos, userId, userType) {
     eventList.innerHTML = "";
 
     eventos.forEach(evento => {
+
+         console.log("Evento carregado:", evento);
+         
         const formattedDate = new Date(evento.data).toLocaleDateString('pt-PT');
         const eventoPassado = new Date(evento.data) < new Date().setHours(0, 0, 0, 0);
         const inscritos = evento.inscritos ?? 0;
@@ -133,7 +138,7 @@ function renderizarEventos(eventos, userId, userType) {
                 </button>
             `;
         }
-
+        
         // Botões secundários (Entrar, Inscrever, Cancelar) com alinhamento à direita
         let botoesSecundarios = "";
 
@@ -168,15 +173,15 @@ function renderizarEventos(eventos, userId, userType) {
             `;
         }
 
-        // Inscrever-me: participante não inscrito, evento com vagas e futuro
-        if (!evento.inscrito && userType === 3 && inscritos < evento.capacidade && !eventoPassado) {
+        
+        if (userType === 3 && inscritos < evento.capacidade && !eventoPassado && !evento.jaComprouIngresso ) {
             botoesSecundarios += `
-                <button 
-                    class="btn btn-outline-success inscrever-btn"
-                    data-id="${evento.idevento}">
-                    Inscrever-me
-                </button>
-            `;
+              <button 
+            class="btn btn-outline-success"
+            onclick="window.location.href='/Ingressos/Comprar/${evento.idevento}'">
+            Comprar Ingressos
+              </button>
+    `;
         }
 
         const card = document.createElement("div");
@@ -271,6 +276,28 @@ async function carregarCategorias(selectId) {
         }
     } catch (err) {
         console.error("Erro ao carregar categorias:", err);
+    }
+}
+
+async function carregarTiposIngresso(selectId) {
+    try {
+        const response = await fetch("/api/TiposIngressosApi");
+        if (!response.ok) throw new Error("Erro ao carregar tipos de ingresso");
+
+        const tipos = await response.json();
+        const select = document.getElementById(selectId);
+        if (!select) return;
+
+        select.innerHTML = '<option value="">Selecionar tipo...</option>';
+
+        tipos.forEach(tipo => {
+            const option = document.createElement("option");
+            option.value = tipo.idtipoingresso;
+            option.textContent = tipo.nome;
+            select.appendChild(option);
+        });
+    } catch (err) {
+        console.error("Erro ao carregar tipos de ingresso:", err);
     }
 }
 

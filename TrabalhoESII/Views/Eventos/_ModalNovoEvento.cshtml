@@ -70,7 +70,7 @@
     let ticketIndex = 0;
 
     function carregarTiposIngressos(selectElement) {
-        fetch('https://localhost:7164/api/TiposIngressosApi') // Usa aqui o link confirmado
+        fetch('/api/TiposIngressosApi') // Usa aqui o link confirmado
             .then(response => {
                 if (!response.ok) throw new Error("Erro ao buscar os tipos de ingresso");
                 return response.json();
