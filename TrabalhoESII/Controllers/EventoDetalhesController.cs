@@ -60,6 +60,15 @@ namespace TrabalhoESII.Controllers
             ViewBag.Capacidade = evento.capacidade;
             ViewBag.EventoId = evento.idevento;
 
+
+            var participantes = await _context.utilizadoresatividades
+                .Include(ua => ua.utilizadores)
+                .Where(ua => ua.idevento == id)
+                .Select(ua => ua.utilizadores)
+                .ToListAsync();
+
+            ViewBag.Participantes = participantes;
+
             return View("~/Views/Eventos/Detalhes/Index.cshtml");
         }
     }
