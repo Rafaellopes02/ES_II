@@ -19,9 +19,6 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
     const auth = await getUserIdAndType();
-
-    
-    
     
     if (!auth.userId || !auth.userType) {
         window.location.href = "/login";

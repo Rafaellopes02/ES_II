@@ -11,7 +11,7 @@ namespace TrabalhoESII.Models
             : base(options)
         {
         }
-        public DbSet<utilizadoreseventos> ingressosDTO { get; set; }
+
         public DbSet<utilizadoreseventos> utilizadoreseventos { get; set; }
         public DbSet<tiposutilizadores> tiposutilizadores { get; set; }
         public DbSet<tipospagamentos> tipospagamentos { get; set; }
@@ -28,7 +28,6 @@ namespace TrabalhoESII.Models
         public DbSet<utilizadoresatividades> utilizadoresatividades { get; set; }
         public DbSet<notificacoes> notificacoes { get; set; }
         public DbSet<Mensagem> Mensagens { get; set; }
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -58,12 +57,14 @@ namespace TrabalhoESII.Models
                 .OnDelete(DeleteBehavior.Cascade);
 
             modelBuilder.Entity<utilizadoreseventos>()
-           .HasKey(u => new { u.idutilizador, u.idevento, u.idingresso });
+                .ToTable("utilizadoreseventos")
+                .HasKey(u => new { u.idutilizador, u.idevento, u.idingresso });
 
             base.OnModelCreating(modelBuilder);
         }
     }
 
+    // modelo para a tabela utilizadoreseventos
     public class tiposutilizadores
     {
         [Key]
@@ -71,7 +72,6 @@ namespace TrabalhoESII.Models
         [Required, StringLength(50)]
         public string nome { get; set; }
     }
-
     public class tipospagamentos
     {
         [Key]

@@ -454,7 +454,7 @@ namespace TrabalhoESII.Migrations
 
                     b.HasKey("idutilizador", "idevento", "idingresso");
 
-                    b.ToTable("utilizadoreseventos");
+                    b.ToTable("utilizadoreseventos", (string)null);
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.atividades", b =>

@@ -24,6 +24,13 @@ namespace TrabalhoESII.Controllers
             if (!ModelState.IsValid)
                 return BadRequest(ModelState);
 
+            // ⚠️ Validar data + hora combinadas
+            DateTime dataHoraEvento = evento.data.Date + evento.hora;
+            if (dataHoraEvento < DateTime.UtcNow)
+            {
+                return BadRequest("A data e hora do evento não podem estar no passado.");
+            }
+
             var novoEvento = new eventos
             {
                 nome = evento.nome,
@@ -48,24 +55,26 @@ namespace TrabalhoESII.Controllers
                     eorganizador = true
                 };
 
-                _context.organizadoreseventos.Add(registoOrganizador);               
+                _context.organizadoreseventos.Add(registoOrganizador);
             }
 
-foreach (var ingresso in evento.ingressos)
-    {
-        _context.ingressos.Add(new ingressos
-        {
-            nomeingresso = ingresso.nomeingresso,
-            idtipoingresso = ingresso.idtipoingresso,
-            quantidadedefinida = ingresso.quantidadedefinida,
-            quantidadeatual = ingresso.quantidadedefinida,
-            preco = ingresso.preco,
-            idevento = novoEvento.idevento
-        });
-    }
+            foreach (var ingresso in evento.ingressos)
+            {
+                _context.ingressos.Add(new ingressos
+                {
+                    nomeingresso = ingresso.nomeingresso,
+                    idtipoingresso = ingresso.idtipoingresso,
+                    quantidadedefinida = ingresso.quantidadedefinida,
+                    quantidadeatual = ingresso.quantidadedefinida,
+                    preco = ingresso.preco,
+                    idevento = novoEvento.idevento
+                });
+            }
+
             await _context.SaveChangesAsync();
-            return Ok(novoEvento); // <-- Alteração principal: retorna o objeto com o ID
+            return Ok(novoEvento);
         }
+
         
         [HttpGet("detalhes/{id}")]
         [Authorize]
