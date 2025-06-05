@@ -1,5 +1,4 @@
-﻿<!-- Modal para novo evento -->
-<div class="modal fade" id="newEventModal" tabindex="-1" role="dialog" aria-labelledby="newEventModalLabel" aria-hidden="true">
+﻿<div class="modal fade" id="newEventModal" tabindex="-1" role="dialog" aria-labelledby="newEventModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-dialog-centered" role="document">
         <div class="modal-content">
             <form id="eventForm">
@@ -50,10 +49,8 @@
                         </select>
                     </div>
 
-                    <!-- Container de ingressos -->
                     <div id="ticketsContainer"></div>
 
-                    <!-- Botão para adicionar ingresso -->
                     <div class="form-group">
                         <button type="button" class="btn btn-outline-primary" id="addTicketBtn">Adicionar Ingresso</button>
                     </div>
@@ -68,98 +65,5 @@
     </div>
 </div>
 
-<!-- Script para adicionar ingressos e validar data/hora -->
-<script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const form = document.getElementById('eventForm');
-        const alertDiv = document.getElementById('eventAlert');
-
-        // ⚙️ Define o mínimo da data como hoje
-        const today = new Date().toISOString().split('T')[0];
-        document.getElementById('eventDate').setAttribute('min', today);
-
-        // 🎟️ Lógica de ingressos
-        let ticketIndex = 0;
-
-        function carregarTiposIngressos(selectElement) {
-            fetch('/api/TiposIngressosApi')
-                .then(response => {
-                    if (!response.ok) throw new Error("Erro ao buscar tipos de ingresso");
-                    return response.json();
-                })
-                .then(data => {
-                    selectElement.innerHTML = '<option value="">Selecionar...</option>';
-                    data.forEach(tipo => {
-                        const option = document.createElement('option');
-                        option.value = tipo.idtipoingresso;
-                        option.textContent = tipo.nome;
-                        selectElement.appendChild(option);
-                    });
-                })
-                .catch(error => console.error('Erro ao carregar tipos de ingresso:', error));
-        }
-
-        document.getElementById('addTicketBtn').addEventListener('click', function () {
-            const container = document.getElementById('ticketsContainer');
-            const currentIndex = ticketIndex;
-
-            const ticketHTML = `
-                <div class="border p-3 mb-3 rounded bg-light">
-                    <h6>Ingresso ${currentIndex + 1}</h6>
-                    <div class="form-group">
-                        <label for="ticketName${currentIndex}">Nome</label>
-                        <input type="text" class="form-control" id="ticketName${currentIndex}" name="ticketName[]" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="ticketType${currentIndex}">Tipo</label>
-                        <select class="form-control ticket-type-select" id="ticketType${currentIndex}" name="ticketType[]" required></select>
-                    </div>
-                    <div class="form-group">
-                        <label for="ticketQuantity${currentIndex}">Quantidade</label>
-                        <input type="number" class="form-control" id="ticketQuantity${currentIndex}" name="ticketQuantity[]" min="1" required>
-                    </div>
-                    <div class="form-group">
-                        <label for="ticketPrice${currentIndex}">Preço (€)</label>
-                        <input type="number" step="0.01" class="form-control" id="ticketPrice${currentIndex}" name="ticketPrice[]" min="0" required>
-                    </div>
-                </div>
-            `;
-
-            container.insertAdjacentHTML('beforeend', ticketHTML);
-            requestAnimationFrame(() => {
-                const selectElement = document.getElementById(`ticketType${currentIndex}`);
-                if (selectElement) carregarTiposIngressos(selectElement);
-            });
-
-            ticketIndex++;
-        });
-
-        // ✅ Validação de data/hora
-        form.addEventListener('submit', function (e) {
-            e.preventDefault(); // bloquear envio por padrão
-
-            const dataInput = document.getElementById('eventDate').value;
-            const horaInput = document.getElementById('eventTime').value;
-
-            if (!dataInput || !horaInput) {
-                alertDiv.textContent = "Preencha a data e hora do evento.";
-                alertDiv.classList.remove('d-none');
-                return;
-            }
-
-            const eventDateTime = new Date(`${dataInput}T${horaInput}`);
-            const now = new Date();
-
-            if (eventDateTime < now) {
-                alertDiv.textContent = "A data e hora do evento não podem estar no passado.";
-                alertDiv.classList.remove('d-none');
-                return;
-            }
-
-            alertDiv.classList.add('d-none');
-
-            // Agora sim: submissão forçada e válida
-            form.submit();
-        });
-    });
-</script>
+<!-- Inclui o JS -->
+<script src="~/js/Eventos/NovoEvento.js?v=1.0.6"></script>
