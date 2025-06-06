@@ -33,34 +33,34 @@ namespace TrabalhoESII.Controllers
             return View();
         }
 
-        [Authorize]
+        [AllowAnonymous]
         [HttpGet("/eventos/stats")]
         public async Task<IActionResult> GetEventosStats()
-{
-    var userIdClaim = User.FindFirst("UserId");
-    int.TryParse(userIdClaim?.Value, out int userId);
+        {
+            int userId = 0;
+            var userIdClaim = User.FindFirst("UserId");
+            if (userIdClaim != null) int.TryParse(userIdClaim.Value, out userId);
 
-    var eventosRaw = await _context.eventos
-        .Include(e => e.categoria)
-        .ToListAsync();
+            var eventosRaw = await _context.eventos
+                .Include(e => e.categoria)
+                .ToListAsync();
 
-    var organizadores = await _context.organizadoreseventos
-        .Where(o => o.idutilizador == userId)
-        .ToListAsync();
+            var organizadores = userId > 0
+                ? await _context.organizadoreseventos
+                    .Where(o => o.idutilizador == userId)
+                    .ToListAsync()
+                : new List<organizadoreseventos>();
 
-    var confirmados = await _context.utilizadoreseventos
-        .Where(u => u.idutilizador == userId && u.estado == "Confirmado")
-        .ToListAsync();
+            var confirmados = userId > 0
+                ? await _context.utilizadoreseventos
+                    .Where(u => u.idutilizador == userId && u.estado == "Confirmado")
+                    .ToListAsync()
+                : new List<utilizadoreseventos>();
 
-    var eventos = new List<object>();
+            var eventos = new List<object>();
 
             foreach (var e in eventosRaw)
             {
-                var eorganizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento)?.eorganizador ?? false;
-                var idutilizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento && o.eorganizador)?.idutilizador ?? 0;
-                var inscrito = confirmados.Any(c => c.idevento == e.idevento);
-                var jaComprou = confirmados.Any(c => c.idevento == e.idevento);
-
                 var inscritos = await _context.organizadoreseventos
                     .CountAsync(o => o.idevento == e.idevento && !o.eorganizador);
 
@@ -74,16 +74,16 @@ namespace TrabalhoESII.Controllers
                     e.descricao,
                     e.capacidade,
                     e.idcategoria,
-                    categoriaNome = e.categoria.nome,
-                    inscrito,
-                    jaComprouIngresso = jaComprou,
-                    eorganizador,
-                    idutilizador,
-                    inscritos
+                    categoriaNome = e.categoria?.nome ?? "",
+                    inscritos,
+                    eorganizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento)?.eorganizador ?? false,
+                    idutilizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento && o.eorganizador)?.idutilizador ?? 0,
+                    inscrito = confirmados.Any(c => c.idevento == e.idevento),
+                    jaComprou = confirmados.Any(c => c.idevento == e.idevento)
                 });
-                        
             }
-            return Json(new { eventos });
+
+            return Ok(new { eventos });
         }
     }
 }
