@@ -18,6 +18,14 @@ namespace TrabalhoESII.Controllers
         {
             return View(); // Aponta para Views/Account/Register.cshtml
         }
+
+        [HttpPost]
+        public IActionResult Logout()
+        {
+            Response.Cookies.Delete("jwtToken"); 
+            return RedirectToAction("Index", "Home"); // redireciona para a Home
+        }
+
     }
 }
 
