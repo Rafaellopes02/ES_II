@@ -41,12 +41,25 @@
                         </ul>
                     </li>
                     
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <a class="nav-link" asp-controller="Mensagens" asp-action="MinhasMensagens">Minhas Mensagens</a>
+                        </li>
+                    }
+
                     <li class="nav-item d-none" id="perfilLink">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Profile" asp-action="UserProfile">Perfil</a>
                     </li>
-                    <li class="nav-item">
-                        <button id="logoutBtn" class="btn btn-outline-danger d-none">Logout</button>
-                    </li>
+                    
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <li class="nav-item">
+                            <form method="post" asp-controller="Account" asp-action="Logout">
+                                <button type="submit" class="btn btn-outline-danger">Logout</button>
+                            </form>
+                        </li>
+                    }
                 </ul>
             </div>
         </div>

@@ -43,6 +43,9 @@ namespace TrabalhoESII.Migrations
                     b.Property<int>("EventoId")
                         .HasColumnType("integer");
 
+                    b.Property<int>("RemetenteId")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.ToTable("Mensagens");

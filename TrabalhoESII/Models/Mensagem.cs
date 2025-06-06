@@ -1,5 +1,6 @@
 using System;
 using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace TrabalhoESII.Models
 {
@@ -17,6 +18,13 @@ namespace TrabalhoESII.Models
         [Required]
         public int DestinatarioId { get; set; }
 
-        public DateTime DataEnvio { get; set; } = DateTime.Now;
+        [Required]
+        public int RemetenteId { get; set; }
+
+        public DateTime DataEnvio { get; set; } = DateTime.Now; 
+        
+        [ForeignKey("RemetenteId")]
+        public utilizadores Remetente { get; set; }
+        
     }
 }
