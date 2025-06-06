@@ -21,8 +21,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     const auth = await getUserIdAndType();
     
     if (!auth.userId || !auth.userType) {
-        window.location.href = "/login";
-        return;
+        auth.userId = null;
+        auth.userType = null;
     }
 
     try {
@@ -34,14 +34,8 @@ document.addEventListener("DOMContentLoaded", async () => {
             const data = await response.json();
             renderizarEventos(data.eventos, auth.userId, auth.userType); // Aqui sim!
         } else if (response.status === 401) {
-            await Swal.fire({
-                icon: 'warning',
-                title: 'Sessão Expirada',
-                text: 'Por favor, inicie sessão novamente.',
-                timer: 2000,
-                showConfirmButton: false
-            });
-            window.location.href = "/login";
+                const data = await response.json();
+                renderizarEventos(data.eventos ?? [], null, null);
         } else {
             await Swal.fire({
                 icon: 'error',
