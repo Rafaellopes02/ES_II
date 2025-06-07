@@ -8,9 +8,7 @@
         public int quantidadeatual { get; set; }
         public decimal preco { get; set; }
         public int idevento { get; set; }
-        public int IdIngresso { get; set; }
-        public int idutilizador { get; set; }
-        
+      
         
     }
 }

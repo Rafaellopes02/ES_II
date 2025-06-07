@@ -437,28 +437,7 @@ namespace TrabalhoESII.Migrations
                     b.ToTable("utilizadoresatividades");
                 });
 
-            modelBuilder.Entity("utilizadoreseventos", b =>
-                {
-                    b.Property<int>("idutilizador")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("idevento")
-                        .HasColumnType("integer");
-
-                    b.Property<int>("idingresso")
-                        .HasColumnType("integer");
-
-                    b.Property<DateTime>("datainscricao")
-                        .HasColumnType("timestamp with time zone");
-
-                    b.Property<string>("estado")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("idutilizador", "idevento", "idingresso");
-
-                    b.ToTable("utilizadoreseventos", (string)null);
-                });
+           
 
             modelBuilder.Entity("TrabalhoESII.Models.atividades", b =>
                 {

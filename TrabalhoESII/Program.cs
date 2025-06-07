@@ -9,7 +9,7 @@ public class Program
     public static void Main(string[] args)
     {
         var builder = WebApplication.CreateBuilder(args);
-
+        builder.Services.AddSession();
         // Configurar o DbContext com PostgreSQL
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
@@ -47,7 +47,7 @@ public class Program
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
-        
+        app.UseSession();
 
         app.UseRouting();
         

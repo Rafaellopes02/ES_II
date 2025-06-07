@@ -22,7 +22,7 @@ namespace TrabalhoESII.Controllers
         public async Task<IActionResult> RegisterEvento([FromBody] EventosRegisterModel evento)
         {
             if (!ModelState.IsValid)
-                return BadRequest(ModelState);
+                return BadRequest("Dados inválidos.");
 
             // ⚠️ Validar data + hora combinadas
             DateTime dataHoraEvento = evento.data.Date + evento.hora;
@@ -56,22 +56,10 @@ namespace TrabalhoESII.Controllers
                 };
 
                 _context.organizadoreseventos.Add(registoOrganizador);
-            }
 
-            foreach (var ingresso in evento.ingressos)
-            {
-                _context.ingressos.Add(new ingressos
-                {
-                    nomeingresso = ingresso.nomeingresso,
-                    idtipoingresso = ingresso.idtipoingresso,
-                    quantidadedefinida = ingresso.quantidadedefinida,
-                    quantidadeatual = ingresso.quantidadedefinida,
-                    preco = ingresso.preco,
-                    idevento = novoEvento.idevento
-                });
-            }
 
-            await _context.SaveChangesAsync();
+                await _context.SaveChangesAsync();
+            }
             return Ok(novoEvento);
         }
 
@@ -148,7 +136,7 @@ namespace TrabalhoESII.Controllers
                     e.capacidade,
                     e.idcategoria,
                     categoriaNome = e.categoria.nome,
-                    inscrito = _context.utilizadoreseventos.Any(o => o.idevento == e.idevento && o.idutilizador == userId ),
+                    inscrito = _context.organizadoreseventos.Any(o => o.idevento == e.idevento && o.idutilizador == userId),
                     eorganizador = _context.organizadoreseventos
                         .Any(o => o.idevento == e.idevento && o.idutilizador == userId && o.eorganizador), // ✔ seguro como bool
                     idutilizador = _context.organizadoreseventos
@@ -156,30 +144,15 @@ namespace TrabalhoESII.Controllers
                         .Select(o => o.idutilizador)
                         .FirstOrDefault(),
                     inscritos = _context.organizadoreseventos
-                        .Count(o => o.idevento == e.idevento && !o.eorganizador),  
-                    jaComprouIngresso = _context.organizadoreseventos
-                         .Any(u => u.idevento == e.idevento && u.idutilizador == userId && !u.eorganizador),                   
-                })
+                        .Count(o => o.idevento == e.idevento && !o.eorganizador)
+                })  
                 .ToListAsync();
 
             return Ok(eventos);
         }
 
-        [HttpGet("{idevento}/verificar-compra")]
-        [Authorize]
-        public IActionResult VerificarCompra(int idevento)
-    {
-         var userIdClaim = User.FindFirst("UserId");
-         if (userIdClaim == null || !int.TryParse(userIdClaim.Value, out int userId))
-             return Unauthorized();
-
-         bool comprou = _context.utilizadoreseventos.Any(ue =>
-                ue.idevento == idevento &&
-                ue.idutilizador == userId &&
-                ue.estado == "Confirmado");
-
-         return Ok(new { comprou });
-}
+        
+        
         [HttpGet("{id}/inscritos")]
         [Authorize]
         public async Task<IActionResult> ObterInscritos(int id)
@@ -334,17 +307,10 @@ namespace TrabalhoESII.Controllers
             bool jaInscrito = await _context.organizadoreseventos
                 .AnyAsync(o => o.idevento == id && o.idutilizador == userId);
             if (jaInscrito)
-            {
-                    
-var existente = await _context.organizadoreseventos
-        .FirstOrDefaultAsync(o => o.idevento == id && o.idutilizador == userId);
+           
+             return BadRequest("Já está inscrito.");
 
-    if (existente?.eorganizador == true)
-        return BadRequest("Já é organizador deste evento e não pode inscrever-se como participante.");
-else
-    return BadRequest("Já está inscrito.");
-
-                }
+                
 
             // ✅ Usar a propriedade recebida do JSON
             var ingresso = await _context.ingressos.FindAsync(request.idingresso);
@@ -370,43 +336,25 @@ else
         }
         
         [Authorize]
-        [HttpPost("/api/eventos/{id}/cancelar")]
-        public async Task<IActionResult> CancelarInscricao(int id)
-        {
-            var userIdClaim = User.FindFirst("UserId")?.Value;
-            if (!int.TryParse(userIdClaim, out var userId))
-                return Forbid();
+[HttpPost("/api/eventos/{idevento}/cancelar")]
+public async Task<IActionResult> CancelarInscricao(int idevento)
+{
+    var userIdClaim = User.FindFirst("UserId");
+    if (!int.TryParse(userIdClaim?.Value, out int userId))
+        return Unauthorized();
 
-            var inscricao = await _context.organizadoreseventos
-                .FirstOrDefaultAsync(oe => oe.idevento == id && oe.idutilizador == userId && !oe.eorganizador);
+   var pagamento = await _context.pagamentos
+        .Include(p => p.ingressos)
+        .FirstOrDefaultAsync(p =>p.idutilizador == userId && p.ingressos != null && p.ingressos.idevento == idevento);
 
-            if (inscricao == null)
-                return NotFound("Inscrição não encontrada.");
-            
-            var ingresso = await _context.ingressos
-                .FirstOrDefaultAsync(i => i.idevento == id && i.quantidadeatual < i.quantidadedefinida);
+    if (pagamento == null)
+        return NotFound("Inscrição não encontrada.");
 
-            if (ingresso != null)
-            {
-                ingresso.quantidadeatual++;
-                _context.ingressos.Update(ingresso);
-            }
-            
-            var atividadesIds = await _context.atividades
-                .Where(a => a.idevento == id)
-                .Select(a => a.idatividade)
-                .ToListAsync();
-            
-            var inscricoesAtividades = _context.utilizadoresatividades
-                .Where(ua => atividadesIds.Contains(ua.idatividade) && ua.idutilizador == userId);
-            
-            _context.utilizadoresatividades.RemoveRange(inscricoesAtividades);
-            
-            _context.organizadoreseventos.Remove(inscricao);
-            await _context.SaveChangesAsync();
+    _context.pagamentos.Remove(pagamento);
+    await _context.SaveChangesAsync();
 
-            return Ok("Inscrição cancelada com sucesso.");
-        }
+    return Ok("Inscrição cancelada com sucesso.");
+}
         
         private async Task CriarNotificacoesParaInscritos(int idevento, eventos evento, bool dataAlterada, bool localAlterado, bool nomeAlterado)
         {

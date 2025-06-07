@@ -1,0 +1,36 @@
+@model List<TrabalhoESII.Models.Carrinho>
+
+@{
+    ViewData["Title"] = "Carrinho de Compras";
+}
+
+<h2>Carrinho de Compras</h2>
+
+@if (Model.Count == 0)
+{
+    <p>O carrinho está vazio.</p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nome do Ingresso</th>
+                <th>Preço</th>
+            </tr>
+        </thead>
+        <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@item.NomeIngresso</td>
+                <td>@item.Preco €</td>
+            </tr>
+        }
+        </tbody>
+    </table>
+
+    <form method="post" action="/carrinho/finalizar">
+        <button type="submit" class="btn btn-success">Finalizar Compra</button>
+    </form>
+}

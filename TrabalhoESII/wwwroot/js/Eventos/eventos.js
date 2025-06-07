@@ -65,7 +65,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     carregarCategorias("searchCategoria");
     carregarCategorias("eventCategory");
     carregarCategorias("editEventCategory");
-    carregarTiposIngresso("tipoIngresso");
+    
 });
 
 
@@ -78,7 +78,7 @@ function renderizarEventos(eventos, userId, userType) {
 
     eventos.forEach(evento => {
 
-         console.log("Evento carregado:", evento);
+         
          
         const formattedDate = new Date(evento.data).toLocaleDateString('pt-PT');
         const eventoPassado = new Date(evento.data) < new Date().setHours(0, 0, 0, 0);
@@ -171,13 +171,13 @@ function renderizarEventos(eventos, userId, userType) {
         }
 
         
-        if (userType === 3 && inscritos < evento.capacidade && !eventoPassado && !evento.jaComprouIngresso ) {
+       if (!evento.inscrito && userType === 3 && inscritos < evento.capacidade && !eventoPassado) {
             botoesSecundarios += `
-              <button 
-            class="btn btn-outline-success"
-            onclick="window.location.href='/Ingressos/Comprar/${evento.idevento}'">
-            Comprar Ingressos
-              </button>
+                <button 
+                    class="btn btn-outline-success inscrever-btn"
+                    data-id="${evento.idevento}">
+                    Comprar Ingresso
+                </button>
     `;
         }
 
@@ -276,27 +276,7 @@ async function carregarCategorias(selectId) {
     }
 }
 
-async function carregarTiposIngresso(selectId) {
-    try {
-        const response = await fetch("/api/TiposIngressosApi");
-        if (!response.ok) throw new Error("Erro ao carregar tipos de ingresso");
 
-        const tipos = await response.json();
-        const select = document.getElementById(selectId);
-        if (!select) return;
-
-        select.innerHTML = '<option value="">Selecionar tipo...</option>';
-
-        tipos.forEach(tipo => {
-            const option = document.createElement("option");
-            option.value = tipo.idtipoingresso;
-            option.textContent = tipo.nome;
-            select.appendChild(option);
-        });
-    } catch (err) {
-        console.error("Erro ao carregar tipos de ingresso:", err);
-    }
-}
 
 async function gerarRelatorioEvento(id) {
     try {
@@ -470,7 +450,7 @@ document.getElementById("confirmarIngressoBtn").addEventListener("click", async 
         text: "Deseja inscrever-se com o ingresso selecionado?",
         icon: "question",
         showCancelButton: true,
-        confirmButtonText: "Sim, inscrever-me",
+        confirmButtonText: "Sim, Comprar",
         cancelButtonText: "Cancelar"
     });
 
@@ -492,46 +472,55 @@ document.getElementById("confirmarIngressoBtn").addEventListener("click", async 
     }
 
     try {
-        const response = await fetch(`/api/eventos/${eventoSelecionadoId}/inscrever`, {
-            method: "POST",
-            headers: {
-                "Authorization": `Bearer ${token}`,
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify({ idingresso: ingressoSelecionadoId })
+    const select = document.getElementById("selectIngresso");
+    const selectedOption = select.options[select.selectedIndex];
+    const nomeIngresso = selectedOption.textContent.split(" - ")[0];
+    const precoTexto = selectedOption.textContent.split(" - ")[1].replace("€", "").trim();
+    const preco = parseFloat(precoTexto.replace(",", "."));
+
+    const response = await fetch("/carrinho/adicionar", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            idIngresso: parseInt(ingressoSelecionadoId),
+            nomeIngresso: nomeIngresso,
+            preco: preco
+        })
+    });
+
+    if (response.ok) {
+        await Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'success',
+            title: 'Ingresso adicionado ao carrinho!',
+            timer: 2000,
+            showConfirmButton: false
         });
-
-        if (response.ok) {
-            await Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'success',
-                title: 'Inscrito com sucesso!',
-                timer: 2000,
-                showConfirmButton: false
-            });
-
-            location.reload();
-        } else {
-            const msg = await response.text();
-            await Swal.fire({
-                icon: 'error',
-                title: 'Erro ao inscrever',
-                text: msg,
-                timer: 2000,
-                showConfirmButton: false
-            });
-        }
-    } catch (err) {
-        console.error("Erro ao inscrever:", err);
+    } else {
+        const msg = await response.text();
         await Swal.fire({
             icon: 'error',
-            title: 'Erro de ligação',
-            text: 'Erro ao comunicar com o servidor.',
+            title: 'Erro',
+            text: msg,
             timer: 2000,
             showConfirmButton: false
         });
     }
+} catch (err) {
+    console.error("Erro ao adicionar ao carrinho:", err);
+    await Swal.fire({
+        icon: 'error',
+        title: 'Erro',
+        text: 'Erro ao comunicar com o servidor.',
+        timer: 2000,
+        showConfirmButton: false
+    });
+}
+
+    
 });
 
 document.body.addEventListener("click", async (e) => {

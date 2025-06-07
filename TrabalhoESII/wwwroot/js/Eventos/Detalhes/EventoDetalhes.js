@@ -73,7 +73,7 @@ async function carregarAtividades() {
             if (atividade.inscrito) {
                 botaoHtml = `<button class="btn btn-outline-danger cancelar-inscricao-btn" data-id="${atividade.idatividade}">Cancelar inscrição</button>`;
             } else {
-                botaoHtml = `<button class="btn btn-outline-success inscrever-btn" data-id="${atividade.idatividade}">Inscrever-me</button>`;
+                botaoHtml = `<button class="btn btn-outline-success inscrever-btn" data-id="${atividade.idatividade}">Comprar Ingressos</button>`;
             }
 
             card.innerHTML = `
