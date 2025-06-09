@@ -85,5 +85,45 @@ namespace TrabalhoESII.Controllers
 
             return Json(new { eventos });
         }
+
+        [Authorize]
+        [HttpGet("/eventos/detalhes/{id}")]
+        public async Task<IActionResult> Detalhes(int id)
+        {
+            var evento = await _context.eventos
+                .Include(e => e.categoria)
+                .FirstOrDefaultAsync(e => e.idevento == id);
+
+            if (evento == null)
+                return NotFound();
+
+            ViewBag.EventoId = evento.idevento;
+            ViewBag.EventoNome = evento.nome;
+            ViewBag.Descricao = evento.descricao;
+            ViewBag.Data = evento.data.ToString("yyyy-MM-dd");
+            ViewBag.Hora = evento.hora.ToString(@"hh\:mm");
+            ViewBag.Local = evento.local;
+            ViewBag.Categoria = evento.categoria?.nome ?? "Desconhecida";
+            ViewBag.Capacidade = evento.capacidade;
+
+            // Carregar participantes
+            var participantes = await _context.utilizadoreseventos
+                .Include(ue => ue.utilizador)
+                .Where(ue => ue.idevento == id)
+                .Select(ue => ue.utilizador)
+                .ToListAsync();
+
+            ViewBag.Participantes = participantes;
+
+            // Permitir mostrar botões especiais ao organizador
+            var userId = int.Parse(User.FindFirst("UserId").Value);
+            var organizador = await _context.organizadoreseventos
+                .AnyAsync(o => o.idevento == id && o.idutilizador == userId && o.eorganizador);
+            ViewBag.PodeAdicionarAtividade = organizador;
+
+            return View("Detalhes/Index");
+        }
+
+
     }
 }

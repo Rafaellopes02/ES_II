@@ -1,18 +1,22 @@
 @model List<TrabalhoESII.Models.Mensagem>
-
 @{
     ViewData["Title"] = "Minhas Mensagens";
 }
 
-<h2 class="mb-4">Mensagens Recebidas</h2>
+<h2 class="text-center mt-4">📨 Minhas Mensagens</h2>
 
-@if (Model != null && Model.Count > 0)
+@if (!Model.Any())
 {
-    <table class="table table-bordered table-striped">
+    <div class="alert alert-info text-center">Ainda não recebeste nenhuma mensagem.</div>
+}
+else
+{
+    <table class="table table-bordered mt-4">
         <thead class="thead-dark">
             <tr>
-                <th>De</th>
-                <th>Conteúdo</th>
+                <th>Evento</th>
+                <th>Remetente</th>
+                <th>Mensagem</th>
                 <th>Data</th>
             </tr>
         </thead>
@@ -20,15 +24,18 @@
             @foreach (var msg in Model)
             {
                 <tr>
+                    <td>@msg.Evento?.nome</td>
                     <td>@msg.Remetente?.nome</td>
                     <td>@msg.Conteudo</td>
                     <td>@msg.DataEnvio.ToString("dd/MM/yyyy HH:mm")</td>
                 </tr>
+
+                <div>
+                    <strong>De:</strong> @msg.Remetente.nome <br />
+                    <strong>Mensagem:</strong> @msg.Conteudo <br />
+                    <hr />
+                </div>
             }
         </tbody>
     </table>
-}
-else
-{
-    <p class="text-muted">Não tens mensagens recebidas.</p>
 }

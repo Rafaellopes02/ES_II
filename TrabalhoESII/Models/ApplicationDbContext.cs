@@ -27,7 +27,10 @@ namespace TrabalhoESII.Models
         public DbSet<atividades> atividades { get; set; }
         public DbSet<utilizadoresatividades> utilizadoresatividades { get; set; }
         public DbSet<notificacoes> notificacoes { get; set; }
+        public DbSet<utilizadoreseventos> utilizadoreseventos { get; set; }
         public DbSet<Mensagem> Mensagens { get; set; }
+    
+
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -56,7 +59,10 @@ namespace TrabalhoESII.Models
                 .HasForeignKey(a => a.idevento)
                 .OnDelete(DeleteBehavior.Cascade);
 
-           
+            modelBuilder.Entity<utilizadoreseventos>()
+                .HasKey(ue => new { ue.idutilizador, ue.idevento });
+
+
 
             base.OnModelCreating(modelBuilder);
         }
