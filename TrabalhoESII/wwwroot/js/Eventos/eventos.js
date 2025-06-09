@@ -77,7 +77,8 @@ function renderizarEventos(eventos, userId, userType) {
 
     eventos.forEach(evento => {
         const formattedDate = new Date(evento.data).toLocaleDateString('pt-PT');
-        const eventoPassado = new Date(evento.data) < new Date().setHours(0, 0, 0, 0);
+        const eventoDateTime = new Date(`${evento.data}T${evento.hora}`);
+        const eventoPassado = eventoDateTime < new Date();
         const inscritos = evento.inscritos ?? 0;
         const percentagem = Math.min(100, Math.round((inscritos / evento.capacidade) * 100));
         const corBarra = percentagem === 100 ? "bg-primary" : "bg-info";

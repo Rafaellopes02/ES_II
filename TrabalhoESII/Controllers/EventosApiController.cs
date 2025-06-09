@@ -74,6 +74,8 @@ namespace TrabalhoESII.Controllers
 
             if (evento == null)
                 return NotFound("Evento não encontrado.");
+
+        
             
             var inscritos = await _context.organizadoreseventos
                 .CountAsync(oe => oe.idevento == id && !oe.eorganizador);
@@ -157,6 +159,13 @@ namespace TrabalhoESII.Controllers
         [Authorize]
         public async Task<IActionResult> ObterInscritos(int id)
         {
+
+             var tipoUtilizadorId = User.Claims.FirstOrDefault(c => c.Type == "TipoUtilizadorId")?.Value;
+             if (tipoUtilizadorId == "3")
+         {
+                return Forbid("Acesso negado.");
+        }
+
             var evento = await _context.eventos.FindAsync(id);
             if (evento == null)
                 return NotFound("Evento não encontrado.");
@@ -301,8 +310,11 @@ namespace TrabalhoESII.Controllers
             if (evento == null)
                 return NotFound("Evento não encontrado.");
 
-            if (evento.data.Date < DateTime.UtcNow.Date)
-                return BadRequest("Evento já decorreu.");
+           DateTime dataHoraFimEvento = evento.data.Date + evento.hora;
+if (dataHoraFimEvento < DateTime.UtcNow)
+{
+    return BadRequest("Evento já terminou.");
+}
 
             bool jaInscrito = await _context.organizadoreseventos
                 .AnyAsync(o => o.idevento == id && o.idutilizador == userId);
