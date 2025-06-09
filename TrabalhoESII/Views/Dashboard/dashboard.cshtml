@@ -83,8 +83,16 @@
         </div>
     </section>
 
-<a class="btn btn-outline-secondary" href="/dashboard/eventoscomgraficos">
-    Ver Participação por Evento
+<a @{
+    var tipoId = User?.Claims?.FirstOrDefault(c => c.Type == "TipoUtilizadorId")?.Value;
+}
+
+@if (tipoId == "1" || tipoId == "2") // Admin ou Gestor
+{
+    <a class="btn btn-outline-secondary" href="/dashboard/eventoscomgraficos">
+        Ver Participação por Evento
+    </a>
+}
 </a>
 </main>
 

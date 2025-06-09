@@ -21,19 +21,21 @@ document.addEventListener("DOMContentLoaded", async () => {
     const auth = await getUserIdAndType();
 
     if (!auth.userId || !auth.userType) {
-        window.location.href = "/login";
-        return;
+
+        auth.userId = null;
+        auth.userType = null;
     }
 
     try {
         const response = await fetch("/eventos/stats", {
-            credentials: "include" // Usa cookie HttpOnly
+            credentials: "include"
         });
 
-        if (response.ok) {
-            const data = await response.json();
-            renderizarEventos(data.eventos, auth.userId, auth.userType); // Aqui sim!
-        } else if (response.status === 401) {
+        const data = await response.json();
+
+        if (response.ok || (!auth.userId && !auth.userType)) {
+            renderizarEventos(data.eventos ?? [], auth.userId, auth.userType);
+        } else if (response.status === 401 && auth.userId) {
             await Swal.fire({
                 icon: 'warning',
                 title: 'Sessão Expirada',
@@ -62,6 +64,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
+
     carregarCategorias("searchCategoria");
     carregarCategorias("eventCategory");
     carregarCategorias("editEventCategory");
@@ -77,7 +80,8 @@ function renderizarEventos(eventos, userId, userType) {
 
     eventos.forEach(evento => {
         const formattedDate = new Date(evento.data).toLocaleDateString('pt-PT');
-        const eventoPassado = new Date(evento.data) < new Date().setHours(0, 0, 0, 0);
+        const eventoDateTime = new Date(`${evento.data}T${evento.hora}`);
+        const eventoPassado = eventoDateTime < new Date();
         const inscritos = evento.inscritos ?? 0;
         const percentagem = Math.min(100, Math.round((inscritos / evento.capacidade) * 100));
         const corBarra = percentagem === 100 ? "bg-primary" : "bg-info";
