@@ -36,15 +36,13 @@ namespace TrabalhoESII.Controllers
         [Authorize]
         [HttpGet("/eventos/stats")]
         public async Task<IActionResult> GetEventosStats()
-{
-    var userIdClaim = User.FindFirst("UserId");
-    int.TryParse(userIdClaim?.Value, out int userId);
+        {
+            var userIdClaim = User.FindFirst("UserId");
+            int.TryParse(userIdClaim?.Value, out int userId);
 
-    var eventos = await _context.eventos
-        .Include(e => e.categoria)
-        .Select(e => new
-
-   
+            var eventos = await _context.eventos
+                .Include(e => e.categoria)
+                .Select(e => new
                 {
                     e.idevento,
                     e.nome,
@@ -56,34 +54,36 @@ namespace TrabalhoESII.Controllers
                     e.idcategoria,
                     categoriaNome = e.categoria.nome,
 
-                     // Verifica se o utilizador está inscrito neste evento
+                    // Só conta como inscrito quem está em OrganizadoresEventos com EOrganizador == false
                     inscrito =
-    _context.organizadoreseventos
-        .Any(o => o.idevento == e.idevento && o.idutilizador == userId)
-    ||
-    _context.pagamentos
-        .Include(p => p.ingressos)
-        .Any(p => p.idutilizador == userId && p.ingressos.idevento == e.idevento),
+                        _context.organizadoreseventos
+                            .Any(o => o.idevento == e.idevento 
+                                      && o.idutilizador == userId 
+                                      && !o.eorganizador)
+                        ||
+                        _context.pagamentos
+                            .Include(p => p.ingressos)
+                            .Any(p => p.idutilizador == userId 
+                                      && p.ingressos.idevento == e.idevento),
 
-                    // Verifica se é o organizador (criador)
+                    // Continua a indicar o organizador principal
                     eorganizador = _context.organizadoreseventos
                         .Where(o => o.idevento == e.idevento && o.idutilizador == userId)
                         .Select(o => o.eorganizador)
                         .FirstOrDefault(),
 
-                    // ID do organizador (criador)
                     idutilizador = _context.organizadoreseventos
                         .Where(o => o.idevento == e.idevento && o.eorganizador)
                         .Select(o => o.idutilizador)
                         .FirstOrDefault(),
 
-                    // Contagem de inscritos (excluindo organizador)
                     inscritos = _context.organizadoreseventos
                         .Count(o => o.idevento == e.idevento && !o.eorganizador)
                 })
                 .ToListAsync();
-                    
+
             return Json(new { eventos });
         }
+
     }
 }

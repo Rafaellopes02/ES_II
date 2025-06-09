@@ -19,7 +19,7 @@
 
 document.addEventListener("DOMContentLoaded", async () => {
     const auth = await getUserIdAndType();
-    
+
     if (!auth.userId || !auth.userType) {
         window.location.href = "/login";
         return;
@@ -65,21 +65,17 @@ document.addEventListener("DOMContentLoaded", async () => {
     carregarCategorias("searchCategoria");
     carregarCategorias("eventCategory");
     carregarCategorias("editEventCategory");
-    
+
 });
 
 
 
-
 function renderizarEventos(eventos, userId, userType) {
-    
+
     const eventList = document.getElementById("eventList");
     eventList.innerHTML = "";
 
     eventos.forEach(evento => {
-
-         
-         
         const formattedDate = new Date(evento.data).toLocaleDateString('pt-PT');
         const eventoPassado = new Date(evento.data) < new Date().setHours(0, 0, 0, 0);
         const inscritos = evento.inscritos ?? 0;
@@ -112,8 +108,6 @@ function renderizarEventos(eventos, userId, userType) {
     <div id="detalhes-${evento.idevento}" style="display: none;"></div>
 `;
 
-
-        // Botões de edição para organizadores ou admin
         if ((evento.eorganizador && evento.idutilizador === userId) || userType === 1) {
             botoesPrincipais += `
                 <button 
@@ -135,11 +129,9 @@ function renderizarEventos(eventos, userId, userType) {
                 </button>
             `;
         }
-        
-        // Botões secundários (Entrar, Inscrever, Cancelar) com alinhamento à direita
+
         let botoesSecundarios = "";
 
-        // Entrar: participante inscrito, organizador ou admin
         if (
             (evento.inscrito && userType === 3) ||
             (evento.eorganizador && evento.idutilizador === userId) ||
@@ -154,7 +146,6 @@ function renderizarEventos(eventos, userId, userType) {
             `;
         }
 
-        // Cancelar inscrição: apenas participante inscrito (que não seja organizador)
         if (
             userType === 3 &&
             evento.inscrito &&
@@ -170,8 +161,7 @@ function renderizarEventos(eventos, userId, userType) {
             `;
         }
 
-        
-       if (!evento.inscrito && userType === 3 && inscritos < evento.capacidade && !eventoPassado) {
+        if (!evento.inscrito && userType === 3 && inscritos < evento.capacidade && !eventoPassado) {
             botoesSecundarios += `
                 <button 
                     class="btn btn-outline-success inscrever-btn"
@@ -183,7 +173,11 @@ function renderizarEventos(eventos, userId, userType) {
 
         const card = document.createElement("div");
         card.className = "card mb-3 p-3 event-card";
-        card.dataset.categoria = evento.idcategoria; // ← Adiciona isto
+        card.dataset.categoria = evento.idcategoria;  // existente
+        // Novos data-attributes para filtragem
+        card.dataset.inscrito = evento.inscrito;
+        card.dataset.eorganizador = evento.eorganizador;
+
         card.innerHTML = `
             <h5 class="card-title">${evento.nome}</h5>
             <p class="card-text">${evento.descricao}</p>

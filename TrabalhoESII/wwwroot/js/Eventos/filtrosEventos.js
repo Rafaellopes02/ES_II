@@ -1,6 +1,4 @@
 window.addEventListener("DOMContentLoaded", () => {
-    console.log("✅ DOM carregado");
-
     // Botão de pesquisa
     const btnPesquisar = document.getElementById("btnPesquisar");
     console.log("🔍 Botão:", btnPesquisar);
@@ -54,8 +52,18 @@ window.addEventListener("DOMContentLoaded", () => {
     tabs.forEach(tab => {
         tab.addEventListener("click", (e) => {
             e.preventDefault();
-            const tipo = tab.textContent.trim().toLowerCase();
-            filterEvents(tipo === 'todos' ? 'all' : tipo);
+            const tipoRaw = tab.textContent.trim().toLowerCase();
+            // mapeia texto → tipo interno
+            let tipo;
+            switch (tipoRaw) {
+                case 'todos':     tipo = 'all';       break;
+                case 'futuros':   tipo = 'upcoming';  break;
+                case 'passados':  tipo = 'past';      break;
+                case 'inscritos': tipo = 'subscribed'; break;
+                case 'organizador': tipo = 'organizer'; break;
+                default:          tipo = tipoRaw;     break;
+            }
+            filterEvents(tipo);
         });
     });
 });
@@ -68,25 +76,43 @@ window.filterEvents = function (tipo) {
     document.querySelectorAll('.event-tabs .nav-link').forEach(link => {
         link.classList.remove('active');
     });
-
     const ativo = document.querySelector(`.event-tabs .nav-link[onclick="filterEvents('${tipo}')"]`);
     if (ativo) ativo.classList.add('active');
 
-    // Filtragem
+    // Filtragem de cada cartão
     document.querySelectorAll('.event-card').forEach(card => {
+        // 1) sempre pegamos a data para os filtros de data
         const textInfo = card.querySelector('.text-muted')?.textContent;
-        if (!textInfo) return (card.style.display = 'none');
-
-        const dataTexto = textInfo.split("·")[0]?.trim();
-        const [dia, mes, ano] = dataTexto.split('/');
+        if (!textInfo) {
+            card.style.display = 'none';
+            return;
+        }
+        const [dia, mes, ano] = textInfo.split("·")[0].trim().split('/');
         const dataEvento = new Date(`${ano}-${mes}-${dia}T00:00:00`);
 
         if (tipo === 'all') {
             card.style.display = 'block';
-        } else if (tipo === 'upcoming') {
+        }
+        else if (tipo === 'upcoming') {
             card.style.display = dataEvento >= hoje ? 'block' : 'none';
-        } else if (tipo === 'past') {
+        }
+        else if (tipo === 'past') {
             card.style.display = dataEvento < hoje ? 'block' : 'none';
+        }
+        else if (tipo === 'subscribed') {
+            // pressupõe que renderizarEventos tenha adicionado data-inscrito="true|false"
+            card.style.display = card.getAttribute('data-inscrito') === 'true'
+                ? 'block'
+                : 'none';
+        }
+        else if (tipo === 'organizer') {
+            // pressupõe que renderizarEventos tenha adicionado data-eorganizador="true|false"
+            card.style.display = card.getAttribute('data-eorganizador') === 'true'
+                ? 'block'
+                : 'none';
+        }
+        else {
+            card.style.display = 'none';
         }
     });
 };

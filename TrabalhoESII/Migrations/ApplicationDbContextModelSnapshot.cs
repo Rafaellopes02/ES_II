@@ -22,33 +22,30 @@ namespace TrabalhoESII.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TrabalhoESII.Models.Mensagem", b =>
+            modelBuilder.Entity("TrabalhoESII.Models.mensagem", b =>
                 {
-                    b.Property<int>("Id")
+                    b.Property<int>("id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
 
-                    b.Property<string>("Conteudo")
+                    b.Property<string>("conteudo")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("DataEnvio")
+                    b.Property<DateTime>("dataenvio")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("DestinatarioId")
+                    b.Property<int>("destinatarioid")
                         .HasColumnType("integer");
 
                     b.Property<int>("EventoId")
                         .HasColumnType("integer");
 
-                    b.Property<int>("RemetenteId")
-                        .HasColumnType("integer");
+                    b.HasKey("id");
 
-                    b.HasKey("Id");
-
-                    b.ToTable("Mensagens");
+                    b.ToTable("mensagens");
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.atividades", b =>
