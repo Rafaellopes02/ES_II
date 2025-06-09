@@ -342,6 +342,8 @@ if (dataHoraFimEvento < DateTime.UtcNow)
 
             ingresso.quantidadeatual -= 1;
 
+             _context.Entry(ingresso).Property(i => i.quantidadeatual).IsModified = true;
+
             await _context.SaveChangesAsync();
 
             return Ok("Inscrição realizada com sucesso!");
@@ -405,11 +407,13 @@ public async Task<IActionResult> CancelarInscricao(int idevento)
         public IActionResult GetIngressosPorEvento(int idevento)
         {
             var ingressos = _context.ingressos
-                .Where(i => i.idevento == idevento)
-                .Select(i => new {
+                .Where(i => i.idevento == idevento && i.quantidadeatual > 0)
+                .Select(i => new 
+                {
                     i.idingresso,
                     i.nomeingresso,
-                    i.preco
+                    i.preco,
+                    i.quantidadeatual
                 })
                 .ToList();
 

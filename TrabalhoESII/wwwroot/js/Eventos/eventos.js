@@ -403,8 +403,17 @@ document.body.addEventListener("click", async (e) => {
             const ingressos = await response.json();
             const select = document.getElementById("selectIngresso");
             select.innerHTML = "";
-
+if (!ingressos || ingressos.length === 0) {
+    await Swal.fire({
+        icon: 'info',
+        title: 'Ingressos Esgotados',
+        text: 'Não há ingressos disponíveis para este evento.',
+        confirmButtonText: 'Ok'
+    });
+    return;
+}
             ingressos.forEach(ing => {
+                
                 const option = document.createElement("option");
                 option.value = ing.idingresso;
                 option.textContent = `${ing.nomeingresso} - ${ing.preco.toFixed(2)} €`;
