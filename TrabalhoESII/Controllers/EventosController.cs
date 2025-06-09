@@ -33,12 +33,18 @@ namespace TrabalhoESII.Controllers
             return View();
         }
 
-        [Authorize]
+        [AllowAnonymous]
         [HttpGet("/eventos/stats")]
         public async Task<IActionResult> GetEventosStats()
         {
-            var userIdClaim = User.FindFirst("UserId");
-            int.TryParse(userIdClaim?.Value, out int userId);
+            int? userId = null;
+
+            if (User.Identity != null && User.Identity.IsAuthenticated)
+            {
+                var userIdClaim = User.FindFirst("UserId")?.Value;
+                if (int.TryParse(userIdClaim, out var uid))
+                    userId = uid;
+            }
 
             var eventos = await _context.eventos
                 .Include(e => e.categoria)
@@ -54,23 +60,18 @@ namespace TrabalhoESII.Controllers
                     e.idcategoria,
                     categoriaNome = e.categoria.nome,
 
-                    // Só conta como inscrito quem está em OrganizadoresEventos com EOrganizador == false
-                    inscrito =
-                        _context.organizadoreseventos
-                            .Any(o => o.idevento == e.idevento 
-                                      && o.idutilizador == userId 
-                                      && !o.eorganizador)
-                        ||
-                        _context.pagamentos
-                            .Include(p => p.ingressos)
-                            .Any(p => p.idutilizador == userId 
-                                      && p.ingressos.idevento == e.idevento),
+                    inscrito = userId != null &&
+                        (
+                            _context.organizadoreseventos.Any(o => o.idevento == e.idevento && o.idutilizador == userId)
+                            ||
+                            _context.pagamentos
+                                .Include(p => p.ingressos)
+                                .Any(p => p.idutilizador == userId && p.ingressos.idevento == e.idevento)
+                        ),
 
-                    // Continua a indicar o organizador principal
-                    eorganizador = _context.organizadoreseventos
-                        .Where(o => o.idevento == e.idevento && o.idutilizador == userId)
-                        .Select(o => o.eorganizador)
-                        .FirstOrDefault(),
+                    eorganizador = userId != null &&
+                        _context.organizadoreseventos
+                            .Any(o => o.idevento == e.idevento && o.idutilizador == userId && o.eorganizador),
 
                     idutilizador = _context.organizadoreseventos
                         .Where(o => o.idevento == e.idevento && o.eorganizador)
@@ -84,6 +85,5 @@ namespace TrabalhoESII.Controllers
 
             return Json(new { eventos });
         }
-
     }
 }
