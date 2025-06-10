@@ -83,7 +83,7 @@
         </div>
     </section>
 
-@{
+<a @{
     var tipoId = User?.Claims?.FirstOrDefault(c => c.Type == "TipoUtilizadorId")?.Value;
 }
 
@@ -93,6 +93,7 @@
         Ver Participação por Evento
     </a>
 }
+</a>
 </main>
 
     <script>
@@ -122,7 +123,7 @@
         if (!userInfo || !userInfo.userId || !userInfo.tipoUtilizador) {
         window.location.href = "/login";
         return;
-        }
+    }
 
         // Carregar dados da dashboard
         try {
