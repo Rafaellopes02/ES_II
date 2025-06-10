@@ -146,8 +146,8 @@
             return;
         }
 
-        if (isNaN(idade) || idade <= 0) {
-            mostrarAlerta("Idade inválida.");
+        if (isNaN(idade) || idade < 18) {
+            mostrarAlerta("Não é permitido o registo a menores de idade.");
             return;
         }
 
