@@ -3,105 +3,166 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<!-- Animação Fade-In com Bootstrap e CSS -->
 <style>
     main {
         background-color: #f8f9fa;
-        padding: 2rem;
+        padding: 3rem 1rem;
+        
+    }
+
+    .fade-in {
+        opacity: 0;
+        transform: translateY(20px);
+        animation: fadeInUp 1s ease forwards;
+    }
+
+    @@keyframes fadeInUp {
+        to {
+            opacity: 1;
+            transform: none;
+        }
     }
 
     .hero-header {
-        background: linear-gradient(135deg, #8505fd, #2a4798);
-        color: #fff;
-        padding: 2.5rem 1rem;
-        border-radius: 0.5rem;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 1rem;
         text-align: center;
-        margin-bottom: 2rem;
+        box-shadow: 0 0 15px rgba(0,0,0,0.05);
+        margin-bottom: 3rem;
+        animation-delay: 0.2s;
+    }
+
+    .hero-header h1 {
+        font-weight: 700;
+        font-size: 2.75rem;
+        color: #212529;
+    }
+
+    .hero-header p {
+        color: #6c757d;
+        font-size: 1.15rem;
     }
 
     .summary-card {
         border: none;
-        border-radius: 0.5rem;
-        transition: transform 0.2s, box-shadow 0.2s;
+        border-radius: 1rem;
+        background: #ffffff;
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        text-align: center;
+        padding: 2rem 1rem;
+        animation-delay: 0.4s;
     }
 
     .summary-card:hover {
-        transform: translateY(-4px);
-        box-shadow: 0 4px 8px rgba(0,0,0,0.15);
+        transform: translateY(-8px);
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.08);
     }
 
-    .summary-card .card-body {
-        padding: 1.5rem;
-        background: linear-gradient(135deg, #8505fd, #2a4798);
-        color: white;
-        text-align: center;
-    }
-
-    .summary-card .card-title {
-        font-size: 1.25rem;
-        margin-bottom: 0.5rem;
+    .summary-card h5 {
+        font-size: 1.2rem;
+        color: #6c757d;
+        margin-bottom: 0.75rem;
     }
 
     .summary-card .display-4 {
-        font-size: 2.5rem;
+        font-size: 2.75rem;
+        font-weight: bold;
+        color: #0d6efd;
     }
+
+    .cta-button {
+        display: flex;
+        justify-content: center;
+        margin-top: 2rem;
+        animation-delay: 0.6s;
+    }
+
+    .btn-pill {
+        padding: 0.6rem 2rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        font-weight: 500;
+        box-shadow: 0 4px 10px rgba(13, 110, 253, 0.2);
+        transition: all 0.3s ease;
+    }
+
+    .btn-pill:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 20px rgba(13, 110, 253, 0.3);
+    }
+
+.dashboard-wrapper {
+    background-color: #f8f9fa;
+    padding: 4rem 1rem;
+    display: flex;
+    justify-content: center;
+}
+
+.dashboard-card {
+    background-color: #ffffff;
+    border-radius: 1rem;
+    box-shadow: 0 0 20px rgba(0,0,0,0.05);
+    padding: 2rem;
+    max-width: 1200px;
+    width: 100%;
+}
+
+
 </style>
 
-<main class="container-fluid">
-    <header class="hero-header">
+<div class="dashboard-wrapper">
+    <main class="dashboard-card">
+    <header class="hero-header fade-in">
         <h1>Gestão de eventos</h1>
         <p>Acompanhe os indicadores principais do seu sistema de eventos</p>
     </header>
-    
-    
 
-    <section class="mb-4">
-        <div class="row">
-            <div class="col-md-4 mb-3">
-                <div class="card summary-card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Eventos</h5>
-                        <p class="card-text display-4" id="totalEventos">...</p>
-                    </div>
-                </div>
+    <section class="row text-center justify-content-center fade-in">
+        <div class="col-md-4 mb-4">
+            <div class="summary-card fade-in">
+                <h5>Eventos</h5>
+                <div class="display-4" id="totalEventos">...</div>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="card summary-card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Participantes</h5>
-                        <p class="card-text display-4" id="totalParticipantes">...</p>
-                    </div>
-                </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="summary-card fade-in">
+                <h5>Participantes</h5>
+                <div class="display-4" id="totalParticipantes">...</div>
             </div>
-            <div class="col-md-4 mb-3">
-                <div class="card summary-card h-100">
-                    <div class="card-body">
-                        <h5 class="card-title">Categorias</h5>
-                        <p class="card-text display-4" id="totalCategorias">...</p>
-                    </div>
-                </div>
+        </div>
+        <div class="col-md-4 mb-4">
+            <div class="summary-card fade-in">
+                <h5>Categorias</h5>
+                <div class="display-4" id="totalCategorias">...</div>
             </div>
         </div>
     </section>
 
- @{
-    var tipoId = User?.Claims?.FirstOrDefault(c => c.Type == "TipoUtilizadorId")?.Value;
-}
+    @{
+        var tipoId = User?.Claims?.FirstOrDefault(c => c.Type == "TipoUtilizadorId")?.Value;
+    }
 
-@if (tipoId == "1" || tipoId == "2") // Admin ou Gestor
-{
-    <a class="btn btn-outline-secondary" href="/dashboard/eventoscomgraficos">
-        Ver Participação por Evento
-    </a>
-}
-</main>
+    @if (tipoId == "1" || tipoId == "2") // Admin ou Gestor
+    {
+        <div class="cta-button fade-in">
+            <a class="btn btn-outline-primary btn-pill" href="/dashboard/eventoscomgraficos">
+                📊 Ver Participação por Evento
+            </a>
+        </div>
+    }
+    </main>
+</div>
 
-    <script>
-        document.addEventListener("DOMContentLoaded", async () => {
-        // Função para obter dados do utilizador autenticado
+
+<script>
+    document.addEventListener("DOMContentLoaded", async () => {
         async function getUserInfo() {
             try {
                 const response = await fetch("/api/auth/me", {
-                    credentials: "include" // envia o cookie jwtToken
+                    credentials: "include"
                 });
 
                 if (!response.ok) throw new Error("Token inválido");
@@ -117,35 +178,31 @@
             }
         }
 
-        // Verificar autenticação
         const userInfo = await getUserInfo();
         if (!userInfo || !userInfo.userId || !userInfo.tipoUtilizador) {
-        window.location.href = "/login";
-        return;
-    }
+            window.location.href = "/login";
+            return;
+        }
 
-        // Carregar dados da dashboard
         try {
-        const response = await fetch("/dashboard/stats", {
-        credentials: "include"
-    });
+            const response = await fetch("/dashboard/stats", {
+                credentials: "include"
+            });
 
-        if (response.ok) {
-        const data = await response.json();
-        document.getElementById("totalEventos").textContent = data.totalEventos;
-        document.getElementById("totalParticipantes").textContent = data.totalParticipantes;
-        document.getElementById("totalCategorias").textContent = data.totalCategorias;
-    } else if (response.status === 401) {
-        alert("Não autorizado. Faça login novamente.");
-        window.location.href = "/login";
-    } else {
-        alert("Erro ao buscar dados da dashboard.");
-    }
-    } catch (error) {
-        console.error("Erro de comunicação com o servidor:", error);
-        alert("Erro de comunicação com o servidor.");
-    }
+            if (response.ok) {
+                const data = await response.json();
+                document.getElementById("totalEventos").textContent = data.totalEventos;
+                document.getElementById("totalParticipantes").textContent = data.totalParticipantes;
+                document.getElementById("totalCategorias").textContent = data.totalCategorias;
+            } else if (response.status === 401) {
+                alert("Não autorizado. Faça login novamente.");
+                window.location.href = "/login";
+            } else {
+                alert("Erro ao buscar dados da dashboard.");
+            }
+        } catch (error) {
+            console.error("Erro de comunicação com o servidor:", error);
+            alert("Erro de comunicação com o servidor.");
+        }
     });
 </script>
-
-

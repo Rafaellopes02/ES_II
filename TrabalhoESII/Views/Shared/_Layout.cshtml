@@ -30,7 +30,10 @@
                     <li class="nav-item d-none" id="painelUtilizadores">
                         <a class="nav-link text-dark" href="/Admin/Painel">Painel Admin</a>
                     </li>
-                    
+                    <li class="nav-item d-none" id="painelManager">
+                        <a class="nav-link text-dark" href="/Manager/Painel">Painel Manager</a>
+                    </li>
+
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown d-none me-2" id="notificacoesDropdown">
@@ -48,7 +51,7 @@
                     @if (User.Identity.IsAuthenticated)
                     {
                         <li class="nav-item">
-                            <a class="nav-link" asp-controller="Mensagens" asp-action="MinhasMensagens">Minhas Mensagens</a>
+                            <a class="nav-link" asp-controller="Mensagens" asp-action="MinhasMensagens">📩 Minhas Mensagens</a>
                         </li>
                     }
 
@@ -191,10 +194,12 @@
 
                 // Mostra menus se estiver autenticado
                 document.getElementById("navHome")?.classList.remove("d-none");
-                document.getElementById("navEventos")?.classList.remove("d-none")
+                document.getElementById("navEventos")?.classList.remove("d-none");
 
                 if (data.tipoUtilizador === "1") {
                     document.getElementById("painelUtilizadores")?.classList.remove("d-none");
+                } else if (data.tipoUtilizador === "2") {
+                    document.getElementById("painelManager")?.classList.remove("d-none");
                 }
             })
 

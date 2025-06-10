@@ -20,12 +20,6 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const auth = await getUserIdAndType();
 
-    if (!auth.userId || !auth.userType) {
-
-        auth.userId = null;
-        auth.userType = null;
-    }
-
     try {
         const response = await fetch("/eventos/stats", {
             credentials: "include"
@@ -33,7 +27,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
         const data = await response.json();
 
-        if (response.ok || (!auth.userId && !auth.userType)) {
+        if (response.ok) {
             renderizarEventos(data.eventos ?? [], auth.userId, auth.userType);
         } else if (response.status === 401 && auth.userId) {
             await Swal.fire({
@@ -64,12 +58,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-
     carregarCategorias("searchCategoria");
     carregarCategorias("eventCategory");
     carregarCategorias("editEventCategory");
-
 });
+
 
 
 

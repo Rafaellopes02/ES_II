@@ -43,7 +43,9 @@ public class Program
         builder.Services.AddAuthorization(options =>
         {
             options.AddPolicy("AdminOnly", policy =>
-                policy.RequireClaim("TipoUtilizadorId", "1"));
+                policy.RequireClaim("TipoUtilizadorId", "1")); // "1" = Admin
+            options.AddPolicy("ManagerOnly", policy =>
+                policy.RequireClaim("TipoUtilizadorId", "2")); // "1" = Admin
         });
 
 

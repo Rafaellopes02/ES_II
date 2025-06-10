@@ -4,37 +4,90 @@
     ViewData["Title"] = "Carrinho de Compras";
 }
 
-<h2>Carrinho de Compras</h2>
+<link rel="stylesheet" href="~/css/eventos.css" />
 
-@if (Model.Count == 0)
-{
-    <p>O carrinho está vazio.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nome do Ingresso</th>
-                <th>Preço</th>
-            </tr>
-        </thead>
-        <tbody>
+<style>
+    .carrinho-container {
+        max-width: 900px;
+        margin: 3rem auto;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .carrinho-container h2 {
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 1.5rem;
+    }
+
+    .carrinho-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        border: 1px solid #e0e0e0;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+        background-color: #f8f9fa;
+    }
+
+    .carrinho-card .nome {
+        font-weight: 600;
+        font-size: 1.1rem;
+    }
+
+    .carrinho-card .preco {
+        font-size: 1rem;
+        color: #198754;
+    }
+
+    .finalizar-btn {
+        display: block;
+        width: 100%;
+        max-width: 250px;
+        margin: 2rem auto 0;
+        background-color: #198754;
+        color: #fff;
+        border: none;
+        border-radius: 30px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        font-size: 1rem;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;
+    }
+
+    .finalizar-btn:hover {
+        background-color: #157347;
+    }
+</style>
+
+<div class="carrinho-container">
+    <h2 class="text-center">Carrinho de Compras</h2>
+
+    @if (Model.Count == 0)
+    {
+        <p class="text-center text-muted">O carrinho está vazio.</p>
+    }
+    else
+    {
         @foreach (var item in Model)
         {
-            <tr>
-                <td>@item.NomeIngresso</td>
-                <td>@item.Preco €</td>
-            </tr>
+            <div class="carrinho-card">
+                <div class="nome">@item.NomeIngresso</div>
+                <div class="preco">@item.Preco €</div>
+            </div>
         }
-        </tbody>
-    </table>
 
-    <form method="post" action="/carrinho/finalizar">
-        <button type="submit" class="btn btn-success">Finalizar Compra</button>
-    </form>
-}
+        <form method="post" action="/carrinho/finalizar">
+            <button type="submit" class="finalizar-btn">Finalizar Compra</button>
+        </form>
+    }
+</div>
 
 @section Scripts {
     <script src="~/js/auth-guard.js"></script>
 }
+
