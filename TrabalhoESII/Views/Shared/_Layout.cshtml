@@ -21,12 +21,17 @@
 
             <div class="collapse navbar-collapse">
                 <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-                    <li class="nav-item">
+                    <li class="nav-item d-none" id="navHome">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Dashboard" asp-action="">Home</a>
                     </li>
-                    <li class="nav-item">
+                    <li class="nav-item d-none" id="navEventos">
                         <a class="nav-link text-dark" asp-area="" asp-controller="Eventos" asp-action="">Eventos</a>
                     </li>
+                    <li class="nav-item d-none" id="painelUtilizadores">
+                        <a class="nav-link text-dark" href="/Utilizadores/Gerir">Painel Admin</a>
+                    </li>
+
+
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown d-none me-2" id="notificacoesDropdown">
@@ -104,6 +109,8 @@
         }
     });
 
+    
+    
     function adicionarNotificacao(notificacao) {
         const menu = document.getElementById('notificacoesMenu');
         const semNotif = document.getElementById('semNotificacoesItem');
@@ -173,6 +180,30 @@
             console.error('Erro:', error);
         }
     }
+
+    document.addEventListener("DOMContentLoaded", () => {
+        fetch('/api/auth/me', {
+            method: 'GET',
+            credentials: 'include' // muito importante para enviar o cookie
+        })
+            .then(res => res.ok ? res.json() : Promise.reject("Não autenticado"))
+            .then(data => {
+                console.log("Resposta do /api/auth/me:", data);
+
+                // Mostra menus se estiver autenticado
+                document.getElementById("navHome")?.classList.remove("d-none");
+                document.getElementById("navEventos")?.classList.remove("d-none")
+
+                if (data.tipoUtilizador === "1") {
+                    document.getElementById("painelUtilizadores")?.classList.remove("d-none");
+                }
+            })
+
+            .catch(err => {
+                console.warn("Erro ao verificar tipo de utilizador:", err);
+            });
+    });
+
 
 </script>
 

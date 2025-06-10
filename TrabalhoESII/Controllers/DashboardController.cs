@@ -1,3 +1,4 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -38,8 +39,19 @@ namespace TrabalhoESII.Controllers
         [HttpGet("/dashboard")]
         public IActionResult Index()
         {
+            var identity = HttpContext.User.Identity as ClaimsIdentity;
+            if (identity != null)
+            {
+                var tipoClaim = identity.FindFirst("TipoUtilizadorId")?.Value;
+                if (int.TryParse(tipoClaim, out int tipoUtilizador))
+                {
+                    ViewBag.TipoUtilizador = tipoUtilizador;
+                }
+            }
+
             return View("Dashboard");
         }
+
 
         // ✅ Protegido com JWT — só acessível se tiver token válido
         [Authorize]

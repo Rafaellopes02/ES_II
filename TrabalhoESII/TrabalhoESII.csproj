@@ -33,4 +33,8 @@
     <ItemGroup>
       <_ContentIncludedByDefault Remove="Views\EventoDetalhes\Index.cshtml" />
     </ItemGroup>
+
+    <ItemGroup>
+      <None Include="wwwroot\css\endpoint.css" />
+    </ItemGroup>
 </Project>

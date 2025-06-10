@@ -4,6 +4,7 @@ using TrabalhoESII.Models;
 
 namespace TrabalhoESII.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/ingressos")]
     public class IngressosApiController : ControllerBase

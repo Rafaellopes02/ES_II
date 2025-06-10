@@ -6,7 +6,9 @@ using System.Security.Claims;
 using TrabalhoESII.Models;
 
 namespace TrabalhoESII.Controllers
+
 {
+    [Authorize]
     [ApiController]
     [Route("api/eventos")]
     public class EventosApiController : ControllerBase

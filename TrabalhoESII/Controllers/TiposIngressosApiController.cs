@@ -1,9 +1,11 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using System.Linq;
+using Microsoft.AspNetCore.Authorization;
 using TrabalhoESII.Models;
 
 namespace TrabalhoESII.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/[controller]")]
     public class TiposIngressosApiController : ControllerBase

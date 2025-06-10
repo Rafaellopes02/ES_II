@@ -14,6 +14,7 @@ public class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+        
         // Configuração do JWT
         var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

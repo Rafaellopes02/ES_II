@@ -14,7 +14,7 @@ namespace TrabalhoESII.Controllers
             _context = context;
         }
 
-        //[AllowAnonymous]
+        [Authorize]
         [HttpGet("/Eventos/{id}")]
         public async Task<IActionResult> Detalhes(int id)
         {
