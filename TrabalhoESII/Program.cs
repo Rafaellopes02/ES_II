@@ -43,7 +43,12 @@ public class Program
             });
 
         // Configuração da autorização
-        builder.Services.AddAuthorization();
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminOnly", policy =>
+                policy.RequireClaim("TipoUtilizadorId", "1")); // "1" = Admin
+        });
+
 
         builder.Services.AddControllersWithViews();
 

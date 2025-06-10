@@ -36,5 +36,6 @@
 
     <ItemGroup>
       <None Include="wwwroot\css\endpoint.css" />
+      <None Include="wwwroot\css\painel.css" />
     </ItemGroup>
 </Project>

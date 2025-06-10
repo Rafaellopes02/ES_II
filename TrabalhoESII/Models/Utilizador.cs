@@ -1,6 +1,6 @@
 ﻿namespace TrabalhoESII.Models
 {
-    public class LoginRegisterModel
+    public class Utilizador
     {
         public string Nome { get; set; }
         public string Email { get; set; }

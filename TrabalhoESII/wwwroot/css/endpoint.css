@@ -34,9 +34,6 @@ th, td {
     border-bottom: 1px solid #ddd;
 }
 
-tr:hover {
-    background-color: #f1f1f1;
-}
 
 .badge {
     padding: 5px 12px;
