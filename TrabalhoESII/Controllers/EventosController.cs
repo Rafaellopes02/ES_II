@@ -37,7 +37,7 @@ namespace TrabalhoESII.Controllers
         [HttpGet("/eventos/stats")]
         public async Task<IActionResult> GetEventosStats()
         {
-<<<<<<< HEAD
+
             int? userId = null;
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
@@ -50,7 +50,7 @@ namespace TrabalhoESII.Controllers
             var eventos = await _context.eventos
                 .Include(e => e.categoria)
                 .Select(e => new
-=======
+
             int userId = 0;
             var userIdClaim = User.FindFirst("UserId");
             if (userIdClaim != null) int.TryParse(userIdClaim.Value, out userId);
@@ -79,7 +79,7 @@ namespace TrabalhoESII.Controllers
                     .CountAsync(o => o.idevento == e.idevento && !o.eorganizador);
 
                 eventos.Add(new
->>>>>>> 53941121e5fbf09b0cf9829908b7146c9652dc58
+
                 {
                     e.idevento,
                     e.nome,
@@ -127,8 +127,7 @@ namespace TrabalhoESII.Controllers
             }
 
             return Ok(new { eventos });
->>>>>>> 53941121e5fbf09b0cf9829908b7146c9652dc58
-        }
+>>>>>>> 53941121e5fbf09b0cf9829908b7146c9652dc58        }
 
         [Authorize]
         [HttpGet("/eventos/detalhes/{id}")]
