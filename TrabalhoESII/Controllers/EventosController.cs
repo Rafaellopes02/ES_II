@@ -37,6 +37,7 @@ namespace TrabalhoESII.Controllers
         [HttpGet("/eventos/stats")]
         public async Task<IActionResult> GetEventosStats()
         {
+
             int? userId = null;
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
@@ -49,6 +50,36 @@ namespace TrabalhoESII.Controllers
             var eventos = await _context.eventos
                 .Include(e => e.categoria)
                 .Select(e => new
+
+            int userId = 0;
+            var userIdClaim = User.FindFirst("UserId");
+            if (userIdClaim != null) int.TryParse(userIdClaim.Value, out userId);
+
+            var eventosRaw = await _context.eventos
+                .Include(e => e.categoria)
+                .ToListAsync();
+
+            var organizadores = userId > 0
+                ? await _context.organizadoreseventos
+                    .Where(o => o.idutilizador == userId)
+                    .ToListAsync()
+                : new List<organizadoreseventos>();
+
+            var confirmados = userId > 0
+                ? await _context.utilizadoreseventos
+                    .Where(u => u.idutilizador == userId && u.estado == "Confirmado")
+                    .ToListAsync()
+                : new List<utilizadoreseventos>();
+
+            var eventos = new List<object>();
+
+            foreach (var e in eventosRaw)
+            {
+                var inscritos = await _context.organizadoreseventos
+                    .CountAsync(o => o.idevento == e.idevento && !o.eorganizador);
+
+                eventos.Add(new
+
                 {
                     e.idevento,
                     e.nome,
@@ -58,6 +89,7 @@ namespace TrabalhoESII.Controllers
                     e.descricao,
                     e.capacidade,
                     e.idcategoria,
+<<<<<<< HEAD
                     categoriaNome = e.categoria.nome,
 
                     inscrito = userId != null &&
@@ -84,6 +116,57 @@ namespace TrabalhoESII.Controllers
                 .ToListAsync();
 
             return Json(new { eventos });
+=======
+                    categoriaNome = e.categoria?.nome ?? "",
+                    inscritos,
+                    eorganizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento)?.eorganizador ?? false,
+                    idutilizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento && o.eorganizador)?.idutilizador ?? 0,
+                    inscrito = confirmados.Any(c => c.idevento == e.idevento),
+                    jaComprou = confirmados.Any(c => c.idevento == e.idevento)
+                });
+            }
+
+            return Ok(new { eventos });
+>>>>>>> 53941121e5fbf09b0cf9829908b7146c9652dc58        }
+
+        [Authorize]
+        [HttpGet("/eventos/detalhes/{id}")]
+        public async Task<IActionResult> Detalhes(int id)
+        {
+            var evento = await _context.eventos
+                .Include(e => e.categoria)
+                .FirstOrDefaultAsync(e => e.idevento == id);
+
+            if (evento == null)
+                return NotFound();
+
+            ViewBag.EventoId = evento.idevento;
+            ViewBag.EventoNome = evento.nome;
+            ViewBag.Descricao = evento.descricao;
+            ViewBag.Data = evento.data.ToString("yyyy-MM-dd");
+            ViewBag.Hora = evento.hora.ToString(@"hh\:mm");
+            ViewBag.Local = evento.local;
+            ViewBag.Categoria = evento.categoria?.nome ?? "Desconhecida";
+            ViewBag.Capacidade = evento.capacidade;
+
+            // Carregar participantes
+            var participantes = await _context.utilizadoreseventos
+                .Include(ue => ue.utilizador)
+                .Where(ue => ue.idevento == id)
+                .Select(ue => ue.utilizador)
+                .ToListAsync();
+
+            ViewBag.Participantes = participantes;
+
+            // Permitir mostrar botões especiais ao organizador
+            var userId = int.Parse(User.FindFirst("UserId").Value);
+            var organizador = await _context.organizadoreseventos
+                .AnyAsync(o => o.idevento == id && o.idutilizador == userId && o.eorganizador);
+            ViewBag.PodeAdicionarAtividade = organizador;
+
+            return View("Detalhes/Index");
         }
+
+
     }
 }

@@ -15,16 +15,18 @@ namespace TrabalhoESII.Models
         [Required]
         public int EventoId { get; set; }
 
+        [ForeignKey("EventoId")]
+        public eventos Evento { get; set; } // <- Adiciona esta linha
+
         [Required]
         public int DestinatarioId { get; set; }
 
         [Required]
         public int RemetenteId { get; set; }
 
-        public DateTime DataEnvio { get; set; } = DateTime.Now; 
-        
+        public DateTime DataEnvio { get; set; } = DateTime.UtcNow;
+
         [ForeignKey("RemetenteId")]
         public utilizadores Remetente { get; set; }
-        
     }
 }

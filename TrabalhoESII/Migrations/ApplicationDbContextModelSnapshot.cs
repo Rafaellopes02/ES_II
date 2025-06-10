@@ -22,30 +22,37 @@ namespace TrabalhoESII.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("TrabalhoESII.Models.mensagem", b =>
+            modelBuilder.Entity("TrabalhoESII.Models.Mensagem", b =>
                 {
-                    b.Property<int>("id")
+                    b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
 
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("id"));
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("conteudo")
+                    b.Property<string>("Conteudo")
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<DateTime>("dataenvio")
+                    b.Property<DateTime>("DataEnvio")
                         .HasColumnType("timestamp with time zone");
 
-                    b.Property<int>("destinatarioid")
+                    b.Property<int>("DestinatarioId")
                         .HasColumnType("integer");
 
                     b.Property<int>("EventoId")
                         .HasColumnType("integer");
 
-                    b.HasKey("id");
+                    b.Property<int>("RemetenteId")
+                        .HasColumnType("integer");
 
-                    b.ToTable("mensagens");
+                    b.HasKey("Id");
+
+                    b.HasIndex("EventoId");
+
+                    b.HasIndex("RemetenteId");
+
+                    b.ToTable("Mensagens");
                 });
 
             modelBuilder.Entity("TrabalhoESII.Models.atividades", b =>
@@ -434,7 +441,49 @@ namespace TrabalhoESII.Migrations
                     b.ToTable("utilizadoresatividades");
                 });
 
-           
+            modelBuilder.Entity("TrabalhoESII.Models.utilizadoreseventos", b =>
+                {
+                    b.Property<int>("idutilizador")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("idevento")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime?>("datainscricao")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<string>("estado")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int?>("idingresso")
+                        .HasColumnType("integer");
+
+                    b.HasKey("idutilizador", "idevento");
+
+                    b.HasIndex("idevento");
+
+                    b.ToTable("utilizadoreseventos");
+                });
+
+            modelBuilder.Entity("TrabalhoESII.Models.Mensagem", b =>
+                {
+                    b.HasOne("TrabalhoESII.Models.eventos", "Evento")
+                        .WithMany()
+                        .HasForeignKey("EventoId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TrabalhoESII.Models.utilizadores", "Remetente")
+                        .WithMany()
+                        .HasForeignKey("RemetenteId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Evento");
+
+                    b.Navigation("Remetente");
+                });
 
             modelBuilder.Entity("TrabalhoESII.Models.atividades", b =>
                 {
@@ -597,6 +646,25 @@ namespace TrabalhoESII.Migrations
                     b.Navigation("eventos");
 
                     b.Navigation("utilizadores");
+                });
+
+            modelBuilder.Entity("TrabalhoESII.Models.utilizadoreseventos", b =>
+                {
+                    b.HasOne("TrabalhoESII.Models.eventos", "evento")
+                        .WithMany()
+                        .HasForeignKey("idevento")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("TrabalhoESII.Models.utilizadores", "utilizador")
+                        .WithMany()
+                        .HasForeignKey("idutilizador")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("evento");
+
+                    b.Navigation("utilizador");
                 });
 #pragma warning restore 612, 618
         }
