@@ -47,6 +47,8 @@ namespace TrabalhoESII.Controllers
                 .Select(i => new {
                     i.idingresso,
                     i.nomeingresso,
+                    i.quantidadeatual,
+                    i.quantidadedefinida,
                     i.preco
                 })
                 .ToList();
