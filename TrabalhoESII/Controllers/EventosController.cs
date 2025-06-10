@@ -58,36 +58,35 @@ namespace TrabalhoESII.Controllers
                     e.descricao,
                     e.capacidade,
                     e.idcategoria,
-                    categoriaNome = e.categoria != null ? e.categoria.nome : "",
+                    categoriaNome = e.categoria.nome,
 
-                   inscrito =
-    _context.organizadoreseventos
-        .Any(o => o.idevento == e.idevento && o.idutilizador == userId)
-    ||
-    _context.pagamentos
-        .Include(p => p.ingressos)
-        .Any(p => p.idutilizador == userId && p.ingressos.idevento == e.idevento),
+                    inscrito = userId != null &&
+                        (
+                            _context.organizadoreseventos.Any(o => o.idevento == e.idevento && o.idutilizador == userId)
+                            ||
+                            _context.pagamentos
+                                .Include(p => p.ingressos)
+                                .Any(p => p.idutilizador == userId && p.ingressos.idevento == e.idevento)
+                        ),
 
-                    // Verifica se é o organizador (criador)
-                    eorganizador = _context.organizadoreseventos
-                        .Where(o => o.idevento == e.idevento && o.idutilizador == userId)
-                        .Select(o => o.eorganizador)
-                        .FirstOrDefault(),
+                    eorganizador = userId != null &&
+                        _context.organizadoreseventos
+                            .Any(o => o.idevento == e.idevento && o.idutilizador == userId && o.eorganizador),
 
-                    // ID do organizador (criador)
                     idutilizador = _context.organizadoreseventos
                         .Where(o => o.idevento == e.idevento && o.eorganizador)
                         .Select(o => o.idutilizador)
                         .FirstOrDefault(),
 
-                    // Contagem de inscritos (excluindo organizador)
                     inscritos = _context.organizadoreseventos
                         .Count(o => o.idevento == e.idevento && !o.eorganizador)
                 })
                 .ToListAsync();
-                    
+
             return Json(new { eventos });
         }
+    
+
     
 
 
