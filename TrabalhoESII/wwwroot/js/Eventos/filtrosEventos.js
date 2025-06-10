@@ -117,8 +117,8 @@ window.filterEvents = function (tipo) {
             case 'all':     show = true; break;
             case 'upcoming':show = dataEvento >= hoje; break;
             case 'past':    show = dataEvento < hoje; break;
-            case 'inscritos':    show = card.dataset.inscrito === 'true'; break;
-            case 'organizador':  show = card.dataset.eorganizador === 'true'; break;
+            case 'subscribed':    show = card.dataset.inscrito === 'true'; break;
+            case 'organizer':  show = card.dataset.eorganizador === 'true'; break;
         }
         card.style.display = show ? 'block' : 'none';
     });
