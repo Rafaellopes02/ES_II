@@ -46,30 +46,9 @@ namespace TrabalhoESII.Controllers
                     userId = uid;
             }
 
-            var eventosRaw = await _context.eventos
-                .Include(e => e.categoria)
-                .ToListAsync();
-
-            var organizadores = userId.HasValue
-                ? await _context.organizadoreseventos
-                    .Where(o => o.idutilizador == userId)
-                    .ToListAsync()
-                : new List<organizadoreseventos>();
-
-            var confirmados = userId.HasValue
-                ? await _context.utilizadoreseventos
-                    .Where(u => u.idutilizador == userId && u.estado == "Confirmado")
-                    .ToListAsync()
-                : new List<utilizadoreseventos>();
-
-            var eventos = new List<object>();
-
-            foreach (var e in eventosRaw)
-            {
-                var inscritos = await _context.organizadoreseventos
-                    .CountAsync(o => o.idevento == e.idevento && !o.eorganizador);
-
-                eventos.Add(new
+            var eventos = await _context.eventos
+        .Include(e => e.categoria)
+        .Select(e => new
                 {
                     e.idevento,
                     e.nome,
@@ -79,18 +58,37 @@ namespace TrabalhoESII.Controllers
                     e.descricao,
                     e.capacidade,
                     e.idcategoria,
-                    categoriaNome = e.categoria?.nome ?? "",
+                    categoriaNome = e.categoria != null ? e.categoria.nome : "",
 
-                    inscritos,
-                    eorganizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento)?.eorganizador ?? false,
-                    idutilizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento && o.eorganizador)?.idutilizador ?? 0,
-                    inscrito = confirmados.Any(c => c.idevento == e.idevento),
-                    jaComprou = confirmados.Any(c => c.idevento == e.idevento)
-                });
-            }
+                   inscrito =
+    _context.organizadoreseventos
+        .Any(o => o.idevento == e.idevento && o.idutilizador == userId)
+    ||
+    _context.pagamentos
+        .Include(p => p.ingressos)
+        .Any(p => p.idutilizador == userId && p.ingressos.idevento == e.idevento),
 
-            return Ok(new { eventos });
+                    // Verifica se é o organizador (criador)
+                    eorganizador = _context.organizadoreseventos
+                        .Where(o => o.idevento == e.idevento && o.idutilizador == userId)
+                        .Select(o => o.eorganizador)
+                        .FirstOrDefault(),
+
+                    // ID do organizador (criador)
+                    idutilizador = _context.organizadoreseventos
+                        .Where(o => o.idevento == e.idevento && o.eorganizador)
+                        .Select(o => o.idutilizador)
+                        .FirstOrDefault(),
+
+                    // Contagem de inscritos (excluindo organizador)
+                    inscritos = _context.organizadoreseventos
+                        .Count(o => o.idevento == e.idevento && !o.eorganizador)
+                })
+                .ToListAsync();
+                    
+            return Json(new { eventos });
         }
+    
 
 
         [Authorize]
