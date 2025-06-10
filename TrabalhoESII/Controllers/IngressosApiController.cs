@@ -4,6 +4,7 @@ using TrabalhoESII.Models;
 
 namespace TrabalhoESII.Controllers
 {
+    [Authorize]
     [ApiController]
     [Route("api/ingressos")]
     public class IngressosApiController : ControllerBase
@@ -46,6 +47,8 @@ namespace TrabalhoESII.Controllers
                 .Select(i => new {
                     i.idingresso,
                     i.nomeingresso,
+                    i.quantidadeatual,
+                    i.quantidadedefinida,
                     i.preco
                 })
                 .ToList();

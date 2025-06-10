@@ -33,7 +33,7 @@ namespace TrabalhoESII.Controllers
             return View();
         }
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpGet("/eventos/stats")]
         public async Task<IActionResult> GetEventosStats()
         {

@@ -1,0 +1,30 @@
+﻿@model List<TrabalhoESII.ViewModels.EndpointViewModel>
+
+@{
+    ViewData["Title"] = "Lista de Endpoints";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<link rel="stylesheet" href="~/css/endpoint.css" />
+
+<div class="endpoint-container">
+    <h2>Lista de Endpoints</h2>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Rota</th>
+            <th>Método</th>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach (var endpoint in Model)
+        {
+            <tr>
+                <td>@endpoint.Route</td>
+                <td><span class="badge @endpoint.Method.ToUpper()">@endpoint.Method.ToUpper()</span></td>
+            </tr>
+        }
+        </tbody>
+    </table>
+</div>

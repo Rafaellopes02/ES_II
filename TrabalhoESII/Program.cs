@@ -14,6 +14,7 @@ public class Program
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+        
         // Configuração do JWT
         var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
@@ -42,7 +43,12 @@ public class Program
             });
 
         // Configuração da autorização
-        builder.Services.AddAuthorization();
+        builder.Services.AddAuthorization(options =>
+        {
+            options.AddPolicy("AdminOnly", policy =>
+                policy.RequireClaim("TipoUtilizadorId", "1")); // "1" = Admin
+        });
+
 
         builder.Services.AddControllersWithViews();
 

@@ -16,6 +16,12 @@ namespace TrabalhoESII.Controllers
         [HttpPost("/carrinho/adicionar")]
         public IActionResult AdicionarAoCarrinho([FromBody] Carrinho item)
         {
+            var ingresso = _context.ingressos.FirstOrDefault(i => i.idingresso == item.IdIngresso);
+              if (ingresso == null || ingresso.quantidadeatual <= 0)
+             {
+                return BadRequest("Ingresso inválido ou esgotado."); // 👈 Vai para o frontend
+                 }
+           
             var carrinho = HttpContext.Session.GetObjectFromJson<List<Carrinho>>("Carrinho") ?? new List<Carrinho>();
             carrinho.Add(item);
             HttpContext.Session.SetObjectAsJson("Carrinho", carrinho);
@@ -44,19 +50,33 @@ namespace TrabalhoESII.Controllers
 
             foreach (var item in carrinho)
             {
+                var ingresso = await _context.ingressos.FindAsync(item.IdIngresso);
+
+                if (ingresso == null)
+                    continue;
+
+
+                if (ingresso.quantidadeatual <= 0)
+                    continue;
+
+
                 var pagamento = new pagamentos
-{
-    idutilizador = userId,
-    idingresso = item.IdIngresso,
-    idtipopagamento = 1, // assume um tipo padrão (por exemplo: "online")
-    idestado = 1, // assume "pendente" ou "pago" conforme tua lógica
-    datahora = DateTime.UtcNow,
-    descricao = $"Compra do ingresso: {item.NomeIngresso}"
-};
+                {
+                    idutilizador = userId,
+                    idingresso = item.IdIngresso,
+                    idtipopagamento = 1,
+                    idestado = 1,
+                    datahora = DateTime.UtcNow,
+                    descricao = $"Compra do ingresso: {item.NomeIngresso}"
+                };
 
-_context.pagamentos.Add(pagamento);
+                _context.pagamentos.Add(pagamento);
 
+                // Atualizar stock
+                ingresso.quantidadeatual -= 1;
+                _context.Entry(ingresso).Property(i => i.quantidadeatual).IsModified = true;
             }
+
 
             await _context.SaveChangesAsync();
             HttpContext.Session.Remove("Carrinho");

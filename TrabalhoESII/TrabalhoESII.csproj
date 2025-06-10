@@ -34,5 +34,4 @@
       <_ContentIncludedByDefault Remove="Views\EventoDetalhes\Index.cshtml" />
     </ItemGroup>
 
-
 </Project>

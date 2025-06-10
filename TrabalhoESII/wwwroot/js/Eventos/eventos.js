@@ -114,12 +114,11 @@ function renderizarEventos(eventos, userId, userType) {
 
         if ((evento.eorganizador && evento.idutilizador === userId) || userType === 1) {
             botoesPrincipais += `
-        <button class="btn btn-outline-secondary">
+        <button class="btn btn-outline-secondary" onclick="gerarRelatorioEvento(${evento.idevento})">
             Gerar Relatório
         </button>
     `;
         }
-
         botoesPrincipais += `
     <div id="detalhes-${evento.idevento}" style="display: none;"></div>
 `;
@@ -285,13 +284,11 @@ async function carregarCategorias(selectId) {
         console.error("Erro ao carregar categorias:", err);
     }
 }
-
-
-
 async function gerarRelatorioEvento(id) {
     try {
         const token = localStorage.getItem("jwtToken");
 
+        // Buscar dados do evento
         const responseEvento = await fetch(`/api/eventos/detalhes/${id}`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -299,43 +296,66 @@ async function gerarRelatorioEvento(id) {
         if (!responseEvento.ok) throw new Error("Erro ao buscar detalhes do evento.");
         const data = await responseEvento.json();
 
+        // Buscar atividades
         const responseAtividades = await fetch(`/api/atividades/search-atividades?idevento=${id}`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
 
         const atividades = responseAtividades.ok ? await responseAtividades.json() : [];
 
+        // Buscar ingressos para cálculo de receita
+        const responseIngressos = await fetch(`/api/ingressos/por-evento/${id}`, {
+            headers: { "Authorization": `Bearer ${token}` }
+        });
+
+        const ingressos = responseIngressos.ok ? await responseIngressos.json() : [];
+
+        let receitaTotal = 0;
+        let vendidos = 0;
+
+        // Cálculo da receita com validações
+        ingressos.forEach(ing => {
+            const definidas = parseInt(ing.quantidadedefinida);
+            const atuais = parseInt(ing.quantidadeatual);
+            const preco = parseFloat(ing.preco);
+
+            if (!isNaN(definidas) && !isNaN(atuais) && !isNaN(preco)) {
+                vendidos = definidas - atuais;
+                const receita = vendidos * preco;
+                receitaTotal += receita;
+            }
+        });
+
+        // Gerar PDF com jsPDF
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
-
         let y = 20;
 
-        // Cabeçalho com fundo
-        doc.setFillColor(33, 150, 243); // Azul
-        doc.rect(0, 0, 210, 20, "F"); // Fundo retângulo no topo
-
+        // Cabeçalho
+        doc.setFillColor(33, 150, 243);
+        doc.rect(0, 0, 210, 20, "F");
         doc.setFontSize(16);
         doc.setTextColor(255, 255, 255);
         doc.text("Relatório do Evento", 105, 13, null, null, "center");
 
-        doc.setTextColor(0, 0, 0); // voltar ao texto preto
+        doc.setTextColor(0, 0, 0);
         doc.setFontSize(12);
         y = 30;
 
-        // Dados do evento
+        // Informações do evento
         doc.setFont(undefined, "bold");
         doc.text("Informações do Evento:", 14, y); y += 8;
         doc.setFont(undefined, "normal");
 
         const info = [
-            [`Nome`, data.nome],
-            [`Descrição`, data.descricao],
-            [`Data`, data.data.split("T")[0]],
-            [`Hora`, data.hora],
-            [`Local`, data.local],
-            [`Categoria`, data.categoriaNome],
-            [`Capacidade`, data.capacidade.toString()],
-            [`Inscritos`, (data.inscritos ?? "N/A").toString()]
+            ["Nome", data.nome],
+            ["Descrição", data.descricao],
+            ["Data", data.data.split("T")[0]],
+            ["Hora", data.hora],
+            ["Local", data.local],
+            ["Categoria", data.categoriaNome],
+            ["Capacidade", String(data.capacidade)],
+            ["Inscritos", String(vendidos ?? "N/A")]
         ];
 
         info.forEach(([label, valor]) => {
@@ -346,12 +366,18 @@ async function gerarRelatorioEvento(id) {
 
         y += 5;
 
+        // Receita total
+        doc.setFont(undefined, "bold");
+        doc.text("Receita Total:", 14, y); y += 8;
+        doc.setFont(undefined, "normal");
+        doc.text(`€ ${receitaTotal.toFixed(2)}`, 20, y); y += 10;
+
         // Separador
         doc.setDrawColor(200, 200, 200);
         doc.line(20, y, 190, y);
         y += 10;
 
-        // Título da secção de atividades
+        // Atividades
         doc.setFont(undefined, "bold");
         doc.setFontSize(13);
         doc.text("Atividades do Evento", 14, y);
@@ -395,6 +421,7 @@ async function gerarRelatorioEvento(id) {
     }
 }
 
+
 let ingressoSelecionadoId = null;
 let eventoSelecionadoId = null;
 
@@ -415,8 +442,17 @@ document.body.addEventListener("click", async (e) => {
             const ingressos = await response.json();
             const select = document.getElementById("selectIngresso");
             select.innerHTML = "";
-
+            if (!ingressos || ingressos.length === 0) {
+                await Swal.fire({
+                    icon: 'info',
+                    title: 'Ingressos Esgotados',
+                    text: 'Não há ingressos disponíveis para este evento.',
+                    confirmButtonText: 'Ok'
+                });
+                return;
+            }
             ingressos.forEach(ing => {
+
                 const option = document.createElement("option");
                 option.value = ing.idingresso;
                 option.textContent = `${ing.nomeingresso} - ${ing.preco.toFixed(2)} €`;
@@ -482,57 +518,54 @@ document.getElementById("confirmarIngressoBtn").addEventListener("click", async 
     }
 
     try {
-    const select = document.getElementById("selectIngresso");
-    const selectedOption = select.options[select.selectedIndex];
-    const nomeIngresso = selectedOption.textContent.split(" - ")[0];
-    const precoTexto = selectedOption.textContent.split(" - ")[1].replace("€", "").trim();
-    const preco = parseFloat(precoTexto.replace(",", "."));
+        const select = document.getElementById("selectIngresso");
+        const selectedOption = select.options[select.selectedIndex];
+        const nomeIngresso = selectedOption.textContent.split(" - ")[0];
+        const precoTexto = selectedOption.textContent.split(" - ")[1].replace("€", "").trim();
+        const preco = parseFloat(precoTexto.replace(",", "."));
 
-    const response = await fetch("/carrinho/adicionar", {
-        method: "POST",
-        headers: {
-            "Content-Type": "application/json"
-        },
-        body: JSON.stringify({
-            idIngresso: parseInt(ingressoSelecionadoId),
-            nomeIngresso: nomeIngresso,
-            preco: preco
-        })
-    });
-
-    if (response.ok) {
-        await Swal.fire({
-            toast: true,
-            position: 'top-end',
-            icon: 'success',
-            title: 'Ingresso adicionado ao carrinho!',
-            timer: 2000,
-            showConfirmButton: false
+        const response = await fetch("/carrinho/adicionar", {
+            method: "POST",
+            headers: {
+                "Content-Type": "application/json"
+            },
+            body: JSON.stringify({
+                idIngresso: parseInt(ingressoSelecionadoId),
+                nomeIngresso: nomeIngresso,
+                preco: preco
+            })
         });
-    } else {
-        const msg = await response.text();
+
+        if (response.ok) {
+            await Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'success',
+                title: 'Ingresso adicionado ao carrinho!',
+                timer: 2000,
+                showConfirmButton: false
+            });
+        } else {
+            const msg = await response.text();
+            await Swal.fire({
+                icon: 'error',
+                title: 'Erro',
+                text: msg,
+                timer: 2000,
+                showConfirmButton: false
+            });
+        }
+    } catch (err) {
+        console.error("Erro ao adicionar ao carrinho:", err);
         await Swal.fire({
             icon: 'error',
             title: 'Erro',
-            text: msg,
+            text: 'Erro ao comunicar com o servidor.',
             timer: 2000,
             showConfirmButton: false
         });
     }
-} catch (err) {
-    console.error("Erro ao adicionar ao carrinho:", err);
-    await Swal.fire({
-        icon: 'error',
-        title: 'Erro',
-        text: 'Erro ao comunicar com o servidor.',
-        timer: 2000,
-        showConfirmButton: false
-    });
-}
-
-    
 });
-
 document.body.addEventListener("click", async (e) => {
     if (e.target.classList.contains("cancelar-btn")) {
         const id = e.target.dataset.id;
@@ -586,7 +619,4 @@ document.body.addEventListener("click", async (e) => {
             });
         }
     }
-    
-    
 });
-

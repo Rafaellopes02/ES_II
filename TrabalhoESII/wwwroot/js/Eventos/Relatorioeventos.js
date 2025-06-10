@@ -42,7 +42,6 @@
             for (const categoria in eventosPorCategoria) {
                 const eventosDaCategoria = eventosPorCategoria[categoria];
 
-                // Nova página para cada categoria (opcional, mas mantém organizado)
                 if (y + 20 > 270) {
                     doc.addPage();
                     pageNumber++;
@@ -66,6 +65,42 @@
                         y += 10;
                     }
 
+                    // Buscar e calcular inscritos
+                    let inscritos = "N/A";
+                    try {
+                        const ingressosResponse = await fetch(`/api/ingressos/por-evento/${evento.idevento}`, {
+                            headers: { "Authorization": `Bearer ${token}` }
+                        });
+
+                        if (ingressosResponse.ok) {
+                            const ingressos = await ingressosResponse.json();
+                            let totalVendidos = 0;
+
+                            console.log("total vendidos:", totalVendidos);
+
+                            ingressos.forEach(ing => {
+                                const definidas = Number(ing.quantidadedefinida);
+                                console.log("definidas:", definidas);
+                                
+                                const atuais = Number(ing.quantidadeatual);
+                                console.log("atuais:", atuais);
+                                
+                                if (!isNaN(definidas) && !isNaN(atuais)) {
+                                    totalVendidos += definidas - atuais;
+                                }
+                            });
+
+                            inscritos = totalVendidos.toString();
+                            console.log("inscritos:", inscritos);
+                            
+                        }
+                    } catch (e) {
+                        console.warn(`Erro ao buscar ingressos para evento ${evento.idevento}`, e);
+                    }
+
+                    console.log("Evento:", evento.nome, " | Inscritos calculados:", inscritos);
+
+
                     doc.setFontSize(13);
                     doc.setFont(undefined, "bold");
                     doc.text(evento.nome, 14, y); y += 7;
@@ -79,7 +114,7 @@
                         [`Hora`, evento.hora],
                         [`Local`, evento.local],
                         [`Capacidade`, evento.capacidade],
-                        [`Inscritos`, evento.inscritos ?? "N/A"]
+                        [`Inscritos`, inscritos]
                     ];
 
                     info.forEach(([label, val]) => {
@@ -87,7 +122,7 @@
                         doc.text(String(val), 50, y);
                         y += 6;
                     });
-
+                    
                     // Atividades do evento
                     const atividadesResponse = await fetch(`/api/atividades/search-atividades?idevento=${evento.idevento}`, {
                         headers: { "Authorization": `Bearer ${token}` }
