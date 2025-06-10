@@ -11,7 +11,6 @@ namespace TrabalhoESII.Models
             : base(options)
         {
         }
-
         
         public DbSet<tiposutilizadores> tiposutilizadores { get; set; }
         public DbSet<tipospagamentos> tipospagamentos { get; set; }
@@ -55,14 +54,17 @@ namespace TrabalhoESII.Models
                 .WithMany()
                 .HasForeignKey(a => a.idevento)
                 .OnDelete(DeleteBehavior.Cascade);
-
-           
-
+            
             base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.Entity<tiposutilizadores>().HasData(
+                new tiposutilizadores() { idtipoutilizador = 1, nome = "Admin" },
+                new tiposutilizadores() { idtipoutilizador = 2, nome = "UserManager" },
+                new tiposutilizadores() { idtipoutilizador = 3, nome = "User" }
+            );
         }
     }
 
-    // modelo para a tabela utilizadoreseventos
     public class tiposutilizadores
     {
         [Key]

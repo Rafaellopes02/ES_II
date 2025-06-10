@@ -18,60 +18,62 @@
     padding: 3rem 1rem;
     display: flex;
     justify-content: center;
-}
+    }
 
-}
+    .login-card {
+        background-color: #ffffff;
+        border-radius: 1.25rem;
+        padding: 3rem 2rem;
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+        max-width: 500px;
+        width: 100%;
+    }
 
-        }
+    .login-card h2 {
+        font-size: 2rem;
+        font-weight: 700;
+        text-align: center;
+        margin-bottom: 2rem;
+    }
 
-        .login-card {
-            background-color: #ffffff;
-            border-radius: 1.25rem;
-            padding: 3rem 2rem;
-            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
-            max-width: 500px;
-            width: 100%;
-        }
+    .form-control {
+        border-radius: 0.5rem;
+        padding: 0.75rem;
+        font-size: 1rem;
+    }
 
-        .login-card h2 {
-            font-size: 2rem;
-            font-weight: 700;
-            text-align: center;
-            margin-bottom: 2rem;
-        }
+    .btn-login {
+        background-color: #0d6efd;
+        color: #fff;
+        padding: 0.6rem 2rem;
+        font-size: 1rem;
+        font-weight: 500;
+        border: none;
+        border-radius: 50px;
+        margin-top: 1rem;
+        width: 100%;
+        transition: 0.3s ease all;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
 
-        .form-control {
-            border-radius: 0.5rem;
-            padding: 0.75rem;
-            font-size: 1rem;
-        }
-
-        .btn-login {
-            background-color: #0d6efd;
-            color: #fff;
-            padding: 0.6rem 2rem;
-            font-size: 1rem;
-            font-weight: 500;
-            border: none;
-            border-radius: 50px;
-            margin-top: 1rem;
-            width: 100%;
-            transition: 0.3s ease all;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-        }
-
-        .btn-login:hover {
-            background-color: #0b5ed7;
-            transform: translateY(-1px);
-        }
-    </style>
+    .btn-login:hover {
+        background-color: #0b5ed7;
+        transform: translateY(-1px);
+    }
+</style>
 </head>
 <body>
+<div class="mt-3">
+    <a asp-controller="Home"
+       asp-action="Index"
+       class="btn btn-secondary">
+        ← Voltar à Página Inicial
+    </a>
+</div>
 <div class="login-wrapper">
     <div class="login-card">
         <h2>Login</h2>
         <div id="alertBox" class="alert alert-danger d-none"></div>
-
         <form id="loginForm">
             <div class="mb-3">
                 <label for="nomeUtilizador" class="form-label">Nome de Utilizador</label>

@@ -41,7 +41,7 @@ namespace TrabalhoESII.Controllers
                 nacionalidade = model.Nacionalidade,
                 idade = model.Idade,
                 telefone = model.Telefone,
-                idtipoutilizador = model.IdTipoUtilizador
+                idtipoutilizador = 3
             };
 
             _context.utilizadores.Add(user);

@@ -30,9 +30,7 @@
                     <li class="nav-item d-none" id="painelUtilizadores">
                         <a class="nav-link text-dark" href="/Admin/Painel">Painel Admin</a>
                     </li>
-
-
-
+                    
                 </ul>
                 <ul class="navbar-nav ms-auto">
                     <li class="nav-item dropdown d-none me-2" id="notificacoesDropdown">
@@ -185,7 +183,7 @@
     document.addEventListener("DOMContentLoaded", () => {
         fetch('/api/auth/me', {
             method: 'GET',
-            credentials: 'include' // muito importante para enviar o cookie
+            credentials: 'include'
         })
             .then(res => res.ok ? res.json() : Promise.reject("Não autenticado"))
             .then(data => {
