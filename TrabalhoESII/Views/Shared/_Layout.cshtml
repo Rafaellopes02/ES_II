@@ -30,6 +30,10 @@
                     <li class="nav-item d-none" id="painelUtilizadores">
                         <a class="nav-link text-dark" href="/Admin/Painel">Painel Admin</a>
                     </li>
+                    <li class="nav-item d-none" id="painelManager">
+                        <a class="nav-link text-dark" href="/Manager/Painel">Painel Manager</a>
+                    </li>
+
 
 
 
@@ -193,17 +197,19 @@
 
                 // Mostra menus se estiver autenticado
                 document.getElementById("navHome")?.classList.remove("d-none");
-                document.getElementById("navEventos")?.classList.remove("d-none")
+                document.getElementById("navEventos")?.classList.remove("d-none");
 
                 if (data.tipoUtilizador === "1") {
                     document.getElementById("painelUtilizadores")?.classList.remove("d-none");
+                } else if (data.tipoUtilizador === "2") {
+                    document.getElementById("painelManager")?.classList.remove("d-none");
                 }
             })
-
             .catch(err => {
                 console.warn("Erro ao verificar tipo de utilizador:", err);
             });
     });
+
 
 
 </script>

@@ -3,16 +3,15 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using TrabalhoESII.Models;
-using BCrypt.Net;
 
 [ApiController]
-[Route("api/utilizadores")]
-[Authorize(Policy = "AdminOnly")] // Apenas administradores
-public class UtilizadoresApiController : ControllerBase
+[Route("api/manager")]
+[Authorize(Policy = "ManagerOnly")] // Apenas UserManagers autenticados
+public class ManagerApiController : ControllerBase
 {
     private readonly ApplicationDbContext _context;
 
-    public UtilizadoresApiController(ApplicationDbContext context)
+    public ManagerApiController(ApplicationDbContext context)
     {
         _context = context;
     }
@@ -21,6 +20,7 @@ public class UtilizadoresApiController : ControllerBase
     public async Task<IActionResult> GetAll()
     {
         var utilizadores = await _context.utilizadores
+            .Where(u => u.idtipoutilizador != 1) // 👈 Oculta administradores da lista
             .Select(u => new {
                 u.idutilizador,
                 u.nome,
@@ -38,6 +38,9 @@ public class UtilizadoresApiController : ControllerBase
     {
         var user = await _context.utilizadores.FindAsync(id);
         if (user == null) return NotFound("Utilizador não encontrado.");
+
+        if (user.idtipoutilizador == 1)
+            return Forbid("Não é permitido editar utilizadores do tipo Administrador.");
 
         if (dados.TryGetProperty("nome", out var nome))
             user.nome = nome.GetString();
@@ -58,7 +61,6 @@ public class UtilizadoresApiController : ControllerBase
         return Ok("Utilizador atualizado parcialmente.");
     }
 
-
     [HttpDelete("{id}")]
     public async Task<IActionResult> DeleteUser(int id)
     {
@@ -66,17 +68,15 @@ public class UtilizadoresApiController : ControllerBase
         if (user == null)
             return NotFound("Utilizador não encontrado.");
 
-        //  Verifica se está a tentar apagar a si mesmo
+        if (user.idtipoutilizador == 1)
+            return Forbid("Não é permitido apagar utilizadores do tipo Administrador.");
+
         var idAtual = int.TryParse(User.FindFirst("UserId")?.Value, out var uid) ? uid : 0;
         if (id == idAtual)
             return BadRequest("Não pode eliminar a sua própria conta.");
 
-        // Remove relações na tabela organizadoreseventos
-        var relacoes = _context.organizadoreseventos
-            .Where(o => o.idutilizador == id);
+        var relacoes = _context.organizadoreseventos.Where(o => o.idutilizador == id);
         _context.organizadoreseventos.RemoveRange(relacoes);
-
-        //  Se tiver outras dependências (ex: pagamentos), remover também
 
         _context.utilizadores.Remove(user);
         await _context.SaveChangesAsync();
@@ -84,15 +84,15 @@ public class UtilizadoresApiController : ControllerBase
         return Ok("Utilizador eliminado com sucesso.");
     }
 
-
-
     [HttpPatch("{id}/redefinir-senha")]
     public async Task<IActionResult> RedefinirSenha(int id, [FromBody] RedefinirSenhaRequest request)
     {
         var user = await _context.utilizadores.FindAsync(id);
         if (user == null) return NotFound();
-        
-        
+
+        if (user.idtipoutilizador == 1)
+            return Forbid("Não é permitido redefinir senha de administradores.");
+
         user.senha = BCrypt.Net.BCrypt.HashPassword(request.novaSenha);
         await _context.SaveChangesAsync();
         return Ok("Senha atualizada");
@@ -102,13 +102,15 @@ public class UtilizadoresApiController : ControllerBase
     {
         public string novaSenha { get; set; }
     }
-    
-    
+
     [HttpPost]
     public async Task<IActionResult> Criar([FromBody] Utilizador novo)
     {
         try
         {
+            if (novo.IdTipoUtilizador == 1)
+                return Forbid("Não é permitido criar novos utilizadores do tipo Administrador.");
+
             var utilizador = new utilizadores
             {
                 nome = novo.Nome,
@@ -131,7 +133,4 @@ public class UtilizadoresApiController : ControllerBase
             return BadRequest("Erro ao criar utilizador: " + ex.Message);
         }
     }
-
-
-
 }
