@@ -10,12 +10,10 @@ public class Program
     {
         var builder = WebApplication.CreateBuilder(args);
         builder.Services.AddSession();
-        // Configurar o DbContext com PostgreSQL
         builder.Services.AddDbContext<ApplicationDbContext>(options =>
             options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
         
-        // Configuração do JWT
         var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
         builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             .AddJwtBearer(options =>
@@ -41,8 +39,7 @@ public class Program
                     }
                 };
             });
-
-        // Configuração da autorização
+        
         builder.Services.AddAuthorization(options =>
         {
             options.AddPolicy("AdminOnly", policy =>
@@ -55,15 +52,46 @@ public class Program
         builder.Services.AddControllersWithViews();
 
         var app = builder.Build();
+        
+        using (var scope = app.Services.CreateScope())
+        {
+            var ctx = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            
+            if (!ctx.tiposutilizadores.Any())
+            {
+                ctx.tiposutilizadores.AddRange(
+                    new tiposutilizadores { idtipoutilizador = 1, nome = "Admin" },
+                    new tiposutilizadores { idtipoutilizador = 2, nome = "UserManager" },
+                    new tiposutilizadores { idtipoutilizador = 3, nome = "User" }
+                );
+                ctx.SaveChanges();
+            }
+
+            if (!ctx.utilizadores.Any(u => u.idtipoutilizador == 1))
+            {
+                ctx.utilizadores.Add(new utilizadores
+                {
+                    nome = "Admin",
+                    nomeutilizador = "admin",
+                    senha = BCrypt.Net.BCrypt.HashPassword("admin"),
+                    email = "admin@moderation.com",
+                    nacionalidade = "Portugal",
+                    idade = 30,
+                    telefone = "000000000",
+                    idtipoutilizador = 1
+                });
+                ctx.SaveChanges();
+            }
+        }
+        
         app.UseSession();
 
         app.UseRouting();
         
 
-        app.UseStaticFiles();       // ✅ Primeiro os ficheiros estáticos
-        app.UseAuthentication();    // ✅ Depois autenticação
+        app.UseStaticFiles();
+        app.UseAuthentication();
         app.UseAuthorization();   
-        // Definir a rota padrão
         app.MapControllerRoute(
             name: "default",
             pattern: "{controller=Home}/{action=Index}/{id?}");

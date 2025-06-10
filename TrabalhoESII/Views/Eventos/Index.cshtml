@@ -3,6 +3,7 @@
 }
 
 <link rel="stylesheet" href="~/css/eventos.css" />
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 
 <style>
     body {
@@ -125,7 +126,6 @@
 
 <main class="container-fluid">
     <section>
-        <!-- Filtros por tipo -->
         <div class="event-tabs d-flex justify-content-between align-items-center flex-wrap">
             <ul class="nav nav-tabs mb-2">
                 <li class="nav-item">
@@ -151,22 +151,28 @@
             </div>
         </div>
 
-        <!-- Modais -->
         @Html.Partial("_ModalNovoEvento")
         @Html.Partial("_ModalEditarEvento")
 
-        <!-- Filtros -->
         <div class="row my-3">
             <div class="col-md-2">
-                <input type="text" id="searchNome" class="form-control" placeholder="Nome do Evento" />
+                <label>Nome do Evento</label>
+                <input type="text" id="searchNome" class="form-control" placeholder="Nome do Evento"/>
             </div>
             <div class="col-md-2">
-                <input type="date" id="searchData" class="form-control" />
+                <label for="startDate">Desde</label>
+                <input type="date" id="startDate" class="form-control" />
             </div>
             <div class="col-md-2">
-                <input type="text" id="searchLocal" class="form-control" placeholder="Local" />
+                <label for="endDate">Até</label>
+                <input type="date" id="endDate" class="form-control" disabled />
             </div>
             <div class="col-md-2">
+                <label>Local</label>
+                <input type="text" id="searchLocal" class="form-control" placeholder="Local"/>
+            </div>
+            <div class="col-md-2">
+                <label>Categoria</label>
                 <select id="searchCategoria" class="form-control">
                     <option value="">Todas as Categorias</option>
                 </select>
@@ -174,14 +180,15 @@
             <div class="col-md-2">
                 <button id="btnPesquisar" class="btn btn-outline-muted btn-custom">Pesquisar</button>
             </div>
+            <div class="col-md-2">
+                <button id="btnLimpar" class="btn btn-outline-muted btn-custom">Limpar Filtros</button>
+            </div>
         </div>
 
-        <!-- Lista de eventos -->
         <div id="eventList" class="row">
             <!-- Renderizado via JS -->
         </div>
 
-        <!-- Modal de Ingressos -->
         <div class="modal fade" id="modalIngressos" tabindex="-1" role="dialog" aria-labelledby="modalIngressosLabel" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
@@ -204,16 +211,10 @@
     </section>
 </main>
 
-<!-- Scripts Bootstrap e jQuery -->
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.5.2/dist/js/bootstrap.bundle.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
-
-<!-- SweetAlert2 -->
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/sweetalert2@11/dist/sweetalert2.min.css">
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-
-<!-- ✅ Scripts do projeto (após HTML estar pronto) -->
 <script src="~/js/Eventos/eventos.js?v=1.0.5"></script>
 <script src="~/js/Eventos/eventosModal.js?v=1.0.5"></script>
 <script src="~/js/Eventos/Relatorioeventos.js?v=1.0.5"></script>

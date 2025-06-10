@@ -169,8 +169,8 @@ function renderizarEventos(eventos, userId, userType) {
 
         const card = document.createElement("div");
         card.className = "card mb-3 p-3 event-card";
-        card.dataset.categoria = evento.idcategoria;  // existente
-        // Novos data-attributes para filtragem
+        card.dataset.categoria = evento.idcategoria;
+        card.dataset.date = evento.data;
         card.dataset.inscrito = evento.inscrito;
         card.dataset.eorganizador = evento.eorganizador;
 
@@ -269,7 +269,6 @@ async function gerarRelatorioEvento(id) {
     try {
         const token = localStorage.getItem("jwtToken");
 
-        // Buscar dados do evento
         const responseEvento = await fetch(`/api/eventos/detalhes/${id}`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -277,14 +276,12 @@ async function gerarRelatorioEvento(id) {
         if (!responseEvento.ok) throw new Error("Erro ao buscar detalhes do evento.");
         const data = await responseEvento.json();
 
-        // Buscar atividades
         const responseAtividades = await fetch(`/api/atividades/search-atividades?idevento=${id}`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
 
         const atividades = responseAtividades.ok ? await responseAtividades.json() : [];
 
-        // Buscar ingressos para cálculo de receita
         const responseIngressos = await fetch(`/api/ingressos/por-evento/${id}`, {
             headers: { "Authorization": `Bearer ${token}` }
         });
@@ -294,7 +291,6 @@ async function gerarRelatorioEvento(id) {
         let receitaTotal = 0;
         let vendidos = 0;
 
-        // Cálculo da receita com validações
         ingressos.forEach(ing => {
             const definidas = parseInt(ing.quantidadedefinida);
             const atuais = parseInt(ing.quantidadeatual);
@@ -307,12 +303,10 @@ async function gerarRelatorioEvento(id) {
             }
         });
 
-        // Gerar PDF com jsPDF
         const { jsPDF } = window.jspdf;
         const doc = new jsPDF();
         let y = 20;
 
-        // Cabeçalho
         doc.setFillColor(33, 150, 243);
         doc.rect(0, 0, 210, 20, "F");
         doc.setFontSize(16);
@@ -323,7 +317,6 @@ async function gerarRelatorioEvento(id) {
         doc.setFontSize(12);
         y = 30;
 
-        // Informações do evento
         doc.setFont(undefined, "bold");
         doc.text("Informações do Evento:", 14, y); y += 8;
         doc.setFont(undefined, "normal");
@@ -347,18 +340,15 @@ async function gerarRelatorioEvento(id) {
 
         y += 5;
 
-        // Receita total
         doc.setFont(undefined, "bold");
         doc.text("Receita Total:", 14, y); y += 8;
         doc.setFont(undefined, "normal");
         doc.text(`€ ${receitaTotal.toFixed(2)}`, 20, y); y += 10;
 
-        // Separador
         doc.setDrawColor(200, 200, 200);
         doc.line(20, y, 190, y);
         y += 10;
 
-        // Atividades
         doc.setFont(undefined, "bold");
         doc.setFontSize(13);
         doc.text("Atividades do Evento", 14, y);
@@ -406,7 +396,6 @@ async function gerarRelatorioEvento(id) {
 let ingressoSelecionadoId = null;
 let eventoSelecionadoId = null;
 
-// Ao clicar no botão "Inscrever-me"
 document.body.addEventListener("click", async (e) => {
     if (e.target.classList.contains("inscrever-btn")) {
         eventoSelecionadoId = e.target.dataset.id;
@@ -455,7 +444,6 @@ document.body.addEventListener("click", async (e) => {
     }
 });
 
-// Ao confirmar escolha de ingresso no modal
 document.getElementById("confirmarIngressoBtn").addEventListener("click", async () => {
     ingressoSelecionadoId = document.getElementById("selectIngresso").value;
 

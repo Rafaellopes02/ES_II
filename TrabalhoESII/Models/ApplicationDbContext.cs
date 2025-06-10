@@ -11,7 +11,6 @@ namespace TrabalhoESII.Models
             : base(options)
         {
         }
-
         
         public DbSet<tiposutilizadores> tiposutilizadores { get; set; }
         public DbSet<tipospagamentos> tipospagamentos { get; set; }
@@ -29,8 +28,6 @@ namespace TrabalhoESII.Models
         public DbSet<notificacoes> notificacoes { get; set; }
         public DbSet<utilizadoreseventos> utilizadoreseventos { get; set; }
         public DbSet<Mensagem> Mensagens { get; set; }
-    
-
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -61,14 +58,17 @@ namespace TrabalhoESII.Models
 
             modelBuilder.Entity<utilizadoreseventos>()
                 .HasKey(ue => new { ue.idutilizador, ue.idevento });
-
-
-
+            
             base.OnModelCreating(modelBuilder);
+            
+            modelBuilder.Entity<tiposutilizadores>().HasData(
+                new tiposutilizadores() { idtipoutilizador = 1, nome = "Admin" },
+                new tiposutilizadores() { idtipoutilizador = 2, nome = "UserManager" },
+                new tiposutilizadores() { idtipoutilizador = 3, nome = "User" }
+            );
         }
     }
 
-    // modelo para a tabela utilizadoreseventos
     public class tiposutilizadores
     {
         [Key]

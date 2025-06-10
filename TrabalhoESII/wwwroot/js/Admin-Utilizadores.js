@@ -28,7 +28,7 @@ async function carregarUtilizadores() {
                 </select>
             </td>
             <td>
-                <button class="btn btn-success btn-sm" onclick="atualizar(${u.idutilizador}, this)">Salvar</button>
+                <button class="btn btn-success btn-sm" onclick="atualizar(${u.idutilizador}, this)">Guardar</button>
                 <button class="btn btn-danger btn-sm" onclick="apagar(${u.idutilizador})">Eliminar</button>
             </td>
         `;
