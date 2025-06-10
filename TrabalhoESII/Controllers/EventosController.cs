@@ -37,7 +37,6 @@ namespace TrabalhoESII.Controllers
         [HttpGet("/eventos/stats")]
         public async Task<IActionResult> GetEventosStats()
         {
-
             int? userId = null;
 
             if (User.Identity != null && User.Identity.IsAuthenticated)
@@ -47,25 +46,17 @@ namespace TrabalhoESII.Controllers
                     userId = uid;
             }
 
-            var eventos = await _context.eventos
-                .Include(e => e.categoria)
-                .Select(e => new
-
-            int userId = 0;
-            var userIdClaim = User.FindFirst("UserId");
-            if (userIdClaim != null) int.TryParse(userIdClaim.Value, out userId);
-
             var eventosRaw = await _context.eventos
                 .Include(e => e.categoria)
                 .ToListAsync();
 
-            var organizadores = userId > 0
+            var organizadores = userId.HasValue
                 ? await _context.organizadoreseventos
                     .Where(o => o.idutilizador == userId)
                     .ToListAsync()
                 : new List<organizadoreseventos>();
 
-            var confirmados = userId > 0
+            var confirmados = userId.HasValue
                 ? await _context.utilizadoreseventos
                     .Where(u => u.idutilizador == userId && u.estado == "Confirmado")
                     .ToListAsync()
@@ -79,7 +70,6 @@ namespace TrabalhoESII.Controllers
                     .CountAsync(o => o.idevento == e.idevento && !o.eorganizador);
 
                 eventos.Add(new
-
                 {
                     e.idevento,
                     e.nome,
@@ -89,35 +79,8 @@ namespace TrabalhoESII.Controllers
                     e.descricao,
                     e.capacidade,
                     e.idcategoria,
-<<<<<<< HEAD
-                    categoriaNome = e.categoria.nome,
-
-                    inscrito = userId != null &&
-                        (
-                            _context.organizadoreseventos.Any(o => o.idevento == e.idevento && o.idutilizador == userId)
-                            ||
-                            _context.pagamentos
-                                .Include(p => p.ingressos)
-                                .Any(p => p.idutilizador == userId && p.ingressos.idevento == e.idevento)
-                        ),
-
-                    eorganizador = userId != null &&
-                        _context.organizadoreseventos
-                            .Any(o => o.idevento == e.idevento && o.idutilizador == userId && o.eorganizador),
-
-                    idutilizador = _context.organizadoreseventos
-                        .Where(o => o.idevento == e.idevento && o.eorganizador)
-                        .Select(o => o.idutilizador)
-                        .FirstOrDefault(),
-
-                    inscritos = _context.organizadoreseventos
-                        .Count(o => o.idevento == e.idevento && !o.eorganizador)
-                })
-                .ToListAsync();
-
-            return Json(new { eventos });
-=======
                     categoriaNome = e.categoria?.nome ?? "",
+
                     inscritos,
                     eorganizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento)?.eorganizador ?? false,
                     idutilizador = organizadores.FirstOrDefault(o => o.idevento == e.idevento && o.eorganizador)?.idutilizador ?? 0,
@@ -127,7 +90,8 @@ namespace TrabalhoESII.Controllers
             }
 
             return Ok(new { eventos });
->>>>>>> 53941121e5fbf09b0cf9829908b7146c9652dc58        }
+        }
+
 
         [Authorize]
         [HttpGet("/eventos/detalhes/{id}")]

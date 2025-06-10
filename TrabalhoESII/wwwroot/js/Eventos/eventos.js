@@ -20,24 +20,14 @@
 document.addEventListener("DOMContentLoaded", async () => {
     const auth = await getUserIdAndType();
 
-    if (!auth.userId || !auth.userType) {
-<<<<<<< HEAD
-
-=======
->>>>>>> 53941121e5fbf09b0cf9829908b7146c9652dc58
-        auth.userId = null;
-        auth.userType = null;
-    }
-
     try {
         const response = await fetch("/eventos/stats", {
             credentials: "include"
         });
 
-<<<<<<< HEAD
         const data = await response.json();
 
-        if (response.ok || (!auth.userId && !auth.userType)) {
+        if (response.ok) {
             renderizarEventos(data.eventos ?? [], auth.userId, auth.userType);
         } else if (response.status === 401 && auth.userId) {
             await Swal.fire({
@@ -48,14 +38,6 @@ document.addEventListener("DOMContentLoaded", async () => {
                 showConfirmButton: false
             });
             window.location.href = "/login";
-=======
-        if (response.ok) {
-            const data = await response.json();
-            renderizarEventos(data.eventos, auth.userId, auth.userType); // Aqui sim!
-        } else if (response.status === 401) {
-                const data = await response.json();
-                renderizarEventos(data.eventos ?? [], null, null);
->>>>>>> 53941121e5fbf09b0cf9829908b7146c9652dc58
         } else {
             await Swal.fire({
                 icon: 'error',
@@ -76,12 +58,11 @@ document.addEventListener("DOMContentLoaded", async () => {
         });
     }
 
-
     carregarCategorias("searchCategoria");
     carregarCategorias("eventCategory");
     carregarCategorias("editEventCategory");
-
 });
+
 
 
 
