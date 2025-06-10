@@ -4,33 +4,82 @@
     ViewData["Title"] = "Carrinho de Compras";
 }
 
-<h2>Carrinho de Compras</h2>
+<link rel="stylesheet" href="~/css/eventos.css" />
 
-@if (Model.Count == 0)
-{
-    <p>O carrinho está vazio.</p>
-}
-else
-{
-    <table class="table">
-        <thead>
-            <tr>
-                <th>Nome do Ingresso</th>
-                <th>Preço</th>
-            </tr>
-        </thead>
-        <tbody>
-        @foreach (var item in Model)
-        {
-            <tr>
-                <td>@item.NomeIngresso</td>
-                <td>@item.Preco €</td>
-            </tr>
-        }
-        </tbody>
-    </table>
+<style>
+    .cart-container {
+        max-width: 800px;
+        margin: 3rem auto;
+        background-color: #ffffff;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+    }
 
-    <form method="post" action="/carrinho/finalizar">
-        <button type="submit" class="btn btn-success">Finalizar Compra</button>
-    </form>
-}
+    .cart-container h2 {
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .table th, .table td {
+        vertical-align: middle;
+        padding: 1rem;
+    }
+
+    .table th {
+        background-color: #f8f9fa;
+        font-weight: 600;
+        border-top: none;
+    }
+
+    .btn-finalizar {
+        background-color: #198754;
+        border: none;
+        color: white;
+        border-radius: 50px;
+        padding: 0.6rem 1.8rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+    }
+
+    .btn-finalizar:hover {
+        background-color: #157347;
+    }
+</style>
+
+<div class="cart-container">
+    <h2 class="text-center">Carrinho de Compras</h2>
+
+    @if (Model.Count == 0)
+    {
+        <p class="text-center text-muted">O carrinho está vazio.</p>
+    }
+    else
+    {
+        <table class="table table-bordered">
+            <thead>
+                <tr>
+                    <th>Nome do Ingresso</th>
+                    <th>Preço</th>
+                </tr>
+            </thead>
+            <tbody>
+            @foreach (var item in Model)
+            {
+                <tr>
+                    <td>@item.NomeIngresso</td>
+                    <td>@item.Preco €</td>
+                </tr>
+            }
+            </tbody>
+        </table>
+
+        <div class="text-center mt-4">
+            <form method="post" action="/carrinho/finalizar">
+                <button type="submit" class="btn btn-finalizar">Finalizar Compra</button>
+            </form>
+        </div>
+    }
+</div>

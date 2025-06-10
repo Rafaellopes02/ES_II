@@ -4,28 +4,81 @@
     ViewData["Title"] = "Eventos e Gráficos";
 }
 
-<h2>Eventos Disponíveis</h2>
+<link rel="stylesheet" href="~/css/eventos.css" />
 
-<table class="table table-bordered">
-    <thead>
-        <tr>
-            <th>Nome</th>
-            <th>Data</th>
-            <th>Ações</th>
-        </tr>
-    </thead>
-    <tbody>
-        @foreach (var evento in Model)
-        {
-            <tr>
-                <td>@evento.nome</td>
-                <td>@evento.data.ToShortDateString()</td>
-                <td>
-                    <a class="btn btn-sm btn-outline-primary" href="/dashboard/analiseparticipacao?idevento=@evento.idevento">
-                        Ver Gráfico de Participação
-                    </a>
-                </td>
-            </tr>
-        }
-    </tbody>
-</table>
+<style>
+    .eventos-container {
+        max-width: 1000px;
+        margin: 3rem auto;
+        background-color: #fff;
+        padding: 2rem;
+        border-radius: 1rem;
+        box-shadow: 0 12px 24px rgba(0, 0, 0, 0.05);
+    }
+
+    .eventos-container h2 {
+        font-weight: 700;
+        font-size: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .evento-card {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 1rem 1.5rem;
+        margin-bottom: 1rem;
+        background-color: #f9f9f9;
+        border: 1px solid #e0e0e0;
+        border-radius: 0.75rem;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.04);
+    }
+
+    .evento-info {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .evento-nome {
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .evento-data {
+        font-size: 0.95rem;
+        color: #666;
+    }
+
+    .btn-grafico {
+        background-color: #0d6efd;
+        color: #fff;
+        border: none;
+        border-radius: 30px;
+        padding: 0.4rem 1.2rem;
+        font-weight: 500;
+        font-size: 0.95rem;
+        box-shadow: 0 6px 12px rgba(0, 0, 0, 0.1);
+        transition: background-color 0.3s ease;
+    }
+
+    .btn-grafico:hover {
+        background-color: #0b5ed7;
+    }
+</style>
+
+<div class="eventos-container">
+    <h2 class="text-center">Eventos Disponíveis</h2>
+
+    @foreach (var evento in Model)
+    {
+        <div class="evento-card">
+            <div class="evento-info">
+                <span class="evento-nome">@evento.nome</span>
+                <span class="evento-data">@evento.data.ToShortDateString()</span>
+            </div>
+            <a class="btn btn-grafico" href="/dashboard/analiseparticipacao?idevento=@evento.idevento">
+                Ver Gráfico de Participação
+            </a>
+        </div>
+    }
+</div>
