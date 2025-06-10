@@ -2,7 +2,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
 using TrabalhoESII.Models;
-using Microsoft.EntityFrameworkCore;
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
@@ -31,6 +30,9 @@ namespace TrabalhoESII.Controllers
 
             if (_context.utilizadores.Any(u => u.nomeutilizador.ToLower() == model.NomeUtilizador.ToLower()))
                 return BadRequest("Nome de utilizador já está em uso.");
+            
+            if (model.Idade < 18)
+                return BadRequest("Não é permitido o registo a menores de idade.");
 
             var user = new utilizadores
             {
@@ -41,7 +43,7 @@ namespace TrabalhoESII.Controllers
                 nacionalidade = model.Nacionalidade,
                 idade = model.Idade,
                 telefone = model.Telefone,
-                idtipoutilizador = model.IdTipoUtilizador
+                idtipoutilizador = 3
             };
 
             _context.utilizadores.Add(user);
@@ -122,7 +124,6 @@ namespace TrabalhoESII.Controllers
         
     }
 
-    // === Token Builder para gerar JWT ===
     public class JwtTokenBuilder
     {
         private readonly JwtSecurityTokenHandler _tokenHandler;

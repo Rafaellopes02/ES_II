@@ -4,7 +4,7 @@
 });
 
 async function carregarUtilizadores() {
-    const res = await fetch("/api/utilizadores", { credentials: "include" });
+    const res = await fetch("/api/manager", { credentials: "include" });
     const utilizadores = await res.json();
     const tbody = document.querySelector("#tabelaUtilizadores tbody");
     tbody.innerHTML = "";
@@ -22,13 +22,12 @@ async function carregarUtilizadores() {
             <td><input class="form-control" value="${u.telefone}" /></td>
             <td>
                 <select class="form-control">
-                    <option value="1" ${u.idtipoutilizador == 1 ? "selected" : ""}>Administrador</option>
                     <option value="2" ${u.idtipoutilizador == 2 ? "selected" : ""}>UserManager</option>
                     <option value="3" ${u.idtipoutilizador == 3 ? "selected" : ""}>Participante</option>
                 </select>
             </td>
             <td>
-                <button class="btn btn-success btn-sm" onclick="atualizar(${u.idutilizador}, this)">Guardar</button>
+                <button class="btn btn-success btn-sm" onclick="atualizar(${u.idutilizador}, this)">Salvar</button>
                 <button class="btn btn-danger btn-sm" onclick="apagar(${u.idutilizador})">Eliminar</button>
             </td>
         `;
@@ -145,7 +144,7 @@ async function criarUtilizador() {
             carregarUtilizadores(); // ou adicionar só o novo utilizador manualmente
         });
 
-} else {
+    } else {
         const erro = await res.json();
         const msg = erro?.errors?.Nacionalidade?.[0] || "Erro ao criar utilizador.";
         Swal.fire("Erro", msg, "error");

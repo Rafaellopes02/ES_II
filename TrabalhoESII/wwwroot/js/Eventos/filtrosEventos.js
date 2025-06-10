@@ -1,118 +1,125 @@
 window.addEventListener("DOMContentLoaded", () => {
-    // Botão de pesquisa
     const btnPesquisar = document.getElementById("btnPesquisar");
-    console.log("🔍 Botão:", btnPesquisar);
+    const btnLimpar    = document.getElementById("btnLimpar");
+    const startDate    = document.getElementById("startDate");
+    const endDate      = document.getElementById("endDate");
+    const tabs         = document.querySelectorAll(".event-tabs .nav-link");
 
-    if (!btnPesquisar) {
-        console.warn("❌ Botão de pesquisa não encontrado!");
+    if (!btnPesquisar || !btnLimpar) {
         return;
     }
 
-    btnPesquisar.addEventListener("click", async () => {
-        console.log("🔎 Clicado no botão de pesquisa");
+    startDate.addEventListener("change", () => {
+        if (startDate.value) {
+            endDate.disabled = false;
+            endDate.min = startDate.value;
+            if (endDate.value && endDate.value < startDate.value) {
+                endDate.value = "";
+            }
+        } else {
+            endDate.disabled = true;
+            endDate.value = "";
+        }
+    });
 
-        const nome = document.getElementById("searchNome")?.value;
-        const data = document.getElementById("searchData")?.value;
-        const local = document.getElementById("searchLocal")?.value;
+    btnLimpar.addEventListener("click", (e) => {
+        e.preventDefault();
+        document.getElementById("searchNome").value = "";
+        document.getElementById("searchLocal").value = "";
+        document.getElementById("searchCategoria").value = "";
+        startDate.value = "";
+        endDate.value   = "";
+        endDate.disabled = true;
+        endDate.min      = "";
+        tabs.forEach(t => t.classList.remove("active"));
+        const abaTodos = document.querySelector(".event-tabs .nav-link[onclick=\"filterEvents('all')\"]");
+        if (abaTodos) abaTodos.classList.add("active");
+        btnPesquisar.click();
+    });
+
+    btnPesquisar.addEventListener("click", async (e) => {
+        e.preventDefault();
+        const nome        = document.getElementById("searchNome")?.value;
+        const local       = document.getElementById("searchLocal")?.value;
         const idCategoria = document.getElementById("searchCategoria")?.value;
+        const dataInicio  = startDate.value;
+        const dataFim     = endDate.value;
 
         const params = new URLSearchParams();
-        if (nome) params.append("nome", nome);
-        if (data) params.append("data", data);
-        if (local) params.append("local", local);
+        if (nome)        params.append("nome", nome);
+        if (local)       params.append("local", local);
         if (idCategoria) params.append("idCategoria", idCategoria);
 
         try {
-            const response = await fetch(`/api/eventos/search?${params.toString()}`, {
-                headers: {
-                    "Authorization": `Bearer ${localStorage.getItem("jwtToken")}`
+            const response = await fetch(
+                `/api/eventos/search?${params.toString()}`,
+                {
+                    credentials: "include"
                 }
-            });
+            );
+            
+            if (!response.ok) throw new Error("Erro ao pesquisar eventos");
 
-            if (!response.ok) throw new Error("Erro ao buscar eventos.");
+            const result = await response.json();
+            const auth = await getUserIdAndType();
+            renderizarEventos(result, auth.userId, auth.userType);
 
-            const eventos = await response.json();
-            const auth = await getUserIdAndType(); // Função já existente no projeto
-            renderizarEventos(eventos, auth.userId, auth.userType); // Função já existente
+            const activeTab = document.querySelector(".event-tabs .nav-link.active");
+            const tipoRaw = activeTab?.textContent.trim().toLowerCase();
+            let tipo;
+            switch (tipoRaw) {
+                case 'todos':      tipo = 'all';        break;
+                case 'futuros':    tipo = 'upcoming';   break;
+                case 'passados':   tipo = 'past';       break;
+                case 'inscritos':  tipo = 'subscribed';  break;
+                case 'organizador':tipo = 'organizer';break;
+                default:           tipo = 'all';
+            }
+            filterEvents(tipo);
+
+            if (dataInicio && dataFim) {
+                const ini = new Date(dataInicio).getTime();
+                const fim = new Date(dataFim).getTime();
+                document.querySelectorAll(".event-card").forEach(card => {
+                    const dt = new Date(card.dataset.date).getTime();
+                    if (dt < ini || dt > fim) {
+                        card.style.display = "none";
+                    }
+                });
+            }
         } catch (err) {
-            console.error("❌ Erro ao filtrar eventos:", err);
+            console.error("Erro ao filtrar eventos:", err);
             Swal.fire({
                 icon: 'error',
                 title: 'Erro',
-                text: 'Erro ao pesquisar eventos.',
+                text: 'Não foi possível realizar a pesquisa.'
             });
         }
     });
 
-    // Filtro inicial
-    filterEvents('all');
-
-    // Eventos para os botões "Todos", "Futuros", "Passados"
-    const tabs = document.querySelectorAll('.event-tabs .nav-link');
-    tabs.forEach(tab => {
-        tab.addEventListener("click", (e) => {
-            e.preventDefault();
-            const tipoRaw = tab.textContent.trim().toLowerCase();
-            // mapeia texto → tipo interno
-            let tipo;
-            switch (tipoRaw) {
-                case 'todos':     tipo = 'all';       break;
-                case 'futuros':   tipo = 'upcoming';  break;
-                case 'passados':  tipo = 'past';      break;
-                case 'inscritos': tipo = 'subscribed'; break;
-                case 'organizador': tipo = 'organizer'; break;
-                default:          tipo = tipoRaw;     break;
-            }
-            filterEvents(tipo);
-        });
-    });
+    btnPesquisar.click();
 });
 
-// Função global para filtrar por data
 window.filterEvents = function (tipo) {
-    const hoje = new Date();
-
-    // Ativar aba correta
-    document.querySelectorAll('.event-tabs .nav-link').forEach(link => {
-        link.classList.remove('active');
-    });
+    const hoje = new Date().setHours(0, 0, 0, 0);
+    document.querySelectorAll('.event-tabs .nav-link').forEach(link => link.classList.remove('active'));
     const ativo = document.querySelector(`.event-tabs .nav-link[onclick="filterEvents('${tipo}')"]`);
     if (ativo) ativo.classList.add('active');
 
-    // Filtragem de cada cartão
     document.querySelectorAll('.event-card').forEach(card => {
-        // 1) sempre pegamos a data para os filtros de data
         const textInfo = card.querySelector('.text-muted')?.textContent;
-        if (!textInfo) {
-            card.style.display = 'none';
-            return;
-        }
-        const [dia, mes, ano] = textInfo.split("·")[0].trim().split('/');
+        if (!textInfo) { card.style.display = 'none'; return; }
+        const [dia, mes, ano] = textInfo.split('·')[0].trim().split('/');
         const dataEvento = new Date(`${ano}-${mes}-${dia}T00:00:00`);
 
-        if (tipo === 'all') {
-            card.style.display = 'block';
+        let show = false;
+        switch (tipo) {
+            case 'all':     show = true; break;
+            case 'upcoming':show = dataEvento >= hoje; break;
+            case 'past':    show = dataEvento < hoje; break;
+            case 'inscritos':    show = card.dataset.inscrito === 'true'; break;
+            case 'organizador':  show = card.dataset.eorganizador === 'true'; break;
         }
-        else if (tipo === 'upcoming') {
-            card.style.display = dataEvento >= hoje ? 'block' : 'none';
-        }
-        else if (tipo === 'past') {
-            card.style.display = dataEvento < hoje ? 'block' : 'none';
-        }
-        else if (tipo === 'subscribed') {
-            // pressupõe que renderizarEventos tenha adicionado data-inscrito="true|false"
-            card.style.display = card.getAttribute('data-inscrito') === 'true'
-                ? 'block'
-                : 'none';
-        }
-        else if (tipo === 'organizer') {
-            // pressupõe que renderizarEventos tenha adicionado data-eorganizador="true|false"
-            card.style.display = card.getAttribute('data-eorganizador') === 'true'
-                ? 'block'
-                : 'none';
-        }
-        else {
-            card.style.display = 'none';
-        }
+        card.style.display = show ? 'block' : 'none';
     });
 };
