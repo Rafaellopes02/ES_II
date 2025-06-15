@@ -1,73 +1,69 @@
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using TrabalhoESII.Models;
-using Microsoft.EntityFrameworkCore;
 
-public class Program
-{
-    public static void Main(string[] args)
+var builder = WebApplication.CreateBuilder(args);
+
+// ───── Serviços ────────────────────────────────────────────────
+
+// Sessões
+builder.Services.AddSession();
+
+// DbContext (PostgreSQL)
+builder.Services.AddDbContext<ApplicationDbContext>(options =>
+    options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
+
+// JWT
+var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
+builder.Services
+    .AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
+    .AddJwtBearer(options =>
     {
-        var builder = WebApplication.CreateBuilder(args);
-        builder.Services.AddSession();
-        // Configurar o DbContext com PostgreSQL
-        builder.Services.AddDbContext<ApplicationDbContext>(options =>
-            options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
-
-        
-        // Configuração do JWT
-        var key = Encoding.UTF8.GetBytes(builder.Configuration["Jwt:Key"]);
-        builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-            .AddJwtBearer(options =>
-            {
-                options.RequireHttpsMetadata = false;
-                options.SaveToken = true;
-                options.TokenValidationParameters = new TokenValidationParameters
-                {
-                    ValidateIssuerSigningKey = true,
-                    IssuerSigningKey = new SymmetricSecurityKey(key),
-                    ValidateIssuer = false,
-                    ValidateAudience = false
-                };
-                options.Events = new JwtBearerEvents
-                {
-                    OnMessageReceived = context =>
-                    {
-                        if (context.Request.Cookies.ContainsKey("jwtToken"))
-                        {
-                            context.Token = context.Request.Cookies["jwtToken"];
-                        }
-                        return Task.CompletedTask;
-                    }
-                };
-            });
-
-        // Configuração da autorização
-        builder.Services.AddAuthorization(options =>
+        options.RequireHttpsMetadata = false;
+        options.SaveToken = true;
+        options.TokenValidationParameters = new TokenValidationParameters
         {
-            options.AddPolicy("AdminOnly", policy =>
-                policy.RequireClaim("TipoUtilizadorId", "1")); // "1" = Admin
-            options.AddPolicy("ManagerOnly", policy =>
-                policy.RequireClaim("TipoUtilizadorId", "2")); // "1" = Admin
-        });
+            ValidateIssuerSigningKey = true,
+            IssuerSigningKey     = new SymmetricSecurityKey(key),
+            ValidateIssuer       = false,
+            ValidateAudience     = false
+        };
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = ctx =>
+            {
+                if (ctx.Request.Cookies.ContainsKey("jwtToken"))
+                    ctx.Token = ctx.Request.Cookies["jwtToken"];
+                return Task.CompletedTask;
+            }
+        };
+    });
 
+// Políticas de autorização
+builder.Services.AddAuthorization(opts =>
+{
+    opts.AddPolicy("AdminOnly",   p => p.RequireClaim("TipoUtilizadorId", "1"));
+    opts.AddPolicy("ManagerOnly", p => p.RequireClaim("TipoUtilizadorId", "2"));
+});
 
-        builder.Services.AddControllersWithViews();
+// MVC + Razor
+builder.Services.AddControllersWithViews();
 
-        var app = builder.Build();
-        app.UseSession();
+var app = builder.Build();
 
-        app.UseRouting();
-        
+// ───── Pipeline ────────────────────────────────────────────────
 
-        app.UseStaticFiles();       // ✅ Primeiro os ficheiros estáticos
-        app.UseAuthentication();    // ✅ Depois autenticação
-        app.UseAuthorization();   
-        // Definir a rota padrão
-        app.MapControllerRoute(
-            name: "default",
-            pattern: "{controller=Home}/{action=Index}/{id?}");
+app.UseSession();
 
-        app.Run();
-    }
-}
+app.UseRouting();
+app.UseStaticFiles();
+app.UseAuthentication();
+app.UseAuthorization();
+
+app.MapControllerRoute(
+    name: "default",
+    pattern: "{controller=Home}/{action=Index}/{id?}");
+
+app.Run();
